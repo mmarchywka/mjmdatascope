@@ -1,0 +1,166 @@
+mjm_dscope_freefem.o: mjm_dscope_freefem.cpp mjm_dscope_ff_iface.h \
+ ../../mjm/hlib/mjm_globals.h ../datascope/mjm_dscope_interface.h \
+ ../../mjm/hlib/mjm_thread_util.h ../../mjm/hlib/mjm_block_matrix.h \
+ ../../mjm/hlib/mjm_globals.h ../../mjm/hlib/mjm_generic_iterators.h \
+ ../../mjm/hlib/mjm_instruments.h ../../mjm/hlib/mjm_read_buffer.h \
+ ../../mjm/hlib/mjm_thread_util.h ../../mjm/hlib/mjm_format_text.h \
+ ../../mjm/hlib/mjm_read_buffer.h ../../mjm/hlib/mjm_misc_parse.h \
+ ../../mjm/hlib/mjm_instruments.h ../../mjm/hlib/mjm_strings.h \
+ ../../mjm/hlib/mjm_string_kvp.h ../../mjm/hlib/mjm_collections.h \
+ ../../mjm/hlib/mjm_string_tokenizer.h \
+ ../../mjm/hlib/mjm_data_model_error_log.h \
+ ../../mjm/hlib/mjm_block_matrix.h ../../mjm/hlib/mjm_logic_base.h \
+ ../../mjm/hlib/mjm_strings.h mjm_worm_blob.h \
+ ../../mjm/hlib/mjm_collections.h ../../mjm/hlib/mjm_canned_methods.h \
+ ../../mjm/hlib/mjm_char_mat.h ../../mjm/num/mjm_rational.h \
+ ../../mjm/hlib/mjm_cli_ui.h ../../mjm/hlib/mjm_fasta_ii.h \
+ ../../mjm/hlib/mjm_text_data.h ../../mjm/hlib/mjm_solvers.h \
+ ../../mjm/hlib/mjm_templates.h ../../mjm/hlib/mjm_io.h \
+ ../../mjm/hlib/mjm_interchanges.h ../../mjm/hlib/mjm_jdftx_base.h \
+ ../../mjm/hlib/mjm_dft_collection_data.h ../../mjm/hlib/mjm_csv_ops.h \
+ ../../mjm/hlib/mjm_svg_writer.h ../../mjm/hlib/mjm_taxonomy_stuff.h \
+ ../../mjm/hlib/mjm_gen_viz.h ../../mjm/hlib/mjm_part_iterators.h \
+ ../../mjm/hlib/mjm_iterator_base.h ../datascope/mjm_dscope_sender.h \
+ ../datascope/datascope.h ../../mjm/hlib/mjm_data_model_error_log.h \
+ ../../mjm/hlib/mjm_logic_base.h ../datascope/mjm_dscope_pktfifo.h \
+ ../datascope/mjm_pthread_que.h mjm_so_loader.h \
+ ../datascope/mjm_dscope_serial.h ../datascope/mjm_dscope_dgram.h \
+ ../datascope/mjm_buffer_alloc.h ../datascope/mjm_dscope_rawfifo.h \
+ ../../mjm/hlib/mjm_cli_ui.h ../../mjm/hlib/mjm_tokenized_collections.h \
+ ../../mjm/hlib/mjm_pawnoff.h ../../mjm/hlib/mjm_blob.h \
+ ../../mjm/hlib/mjm_generic_iterators.h \
+ /home/ubuntu/dev/freefem/FreeFem-sources-4.12/src/fflib/ff++.hpp \
+ /home/ubuntu/dev/freefem/FreeFem-sources-4.12/src/fflib/error.hpp \
+ /home/ubuntu/dev/freefem/FreeFem-sources-4.12/src/fflib/throwassert.hpp \
+ /home/ubuntu/dev/freefem/FreeFem-sources-4.12/src/fflib/AFunction.hpp \
+ /home/ubuntu/dev/freefem/FreeFem-sources-4.12/src/fflib/showverb.hpp \
+ /home/ubuntu/dev/freefem/FreeFem-sources-4.12/src/fflib/InitFunct.hpp \
+ /home/ubuntu/dev/freefem/FreeFem-sources-4.12/src/fflib/ffapi.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/RNM.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/RNM_tpl.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/RNM.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/RNM_op.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/RNM_opc.hpp \
+ /home/ubuntu/dev/freefem/FreeFem-sources-4.12/src/fflib/CodeAlloc.hpp \
+ /home/ubuntu/dev/freefem/FreeFem-sources-4.12/src/fflib/ffstack.hpp \
+ /home/ubuntu/dev/freefem/FreeFem-sources-4.12/src/fflib/AnyType.hpp \
+ /home/ubuntu/dev/freefem/FreeFem-sources-4.12/src/fflib/String.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/ufunction.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/rgraph.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/config.h \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/fem.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/RefCounter.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/showverb.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/error.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/Serialize.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/endian.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/ufunction.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/R1.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/R2.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/R3.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/Label.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/FQuadTree.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/FESpacen.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/MeshLn.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/GenericMesh.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/assertion.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/GQuadTree.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/DataFindBoundary.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/HashTable.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/MeshSn.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/Mesh3dn.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/Mesh2dn.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/Mesh1dn.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/QuadratureFormular.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/FESpace.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/FESpacen.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/HashMatrix.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/VirtualMatrix.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/MatriceElementaire.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/rgraph.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/fem.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/FESpace.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/SparseLinearSolver.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/AFunction.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/MatriceCreuse.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/DOperator.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/HashMatrix.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/MatriceCreuse_tpl.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/VirtualSolverCG.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/CG.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/VirtualSolver.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/VirtualSolverSparseSuite.hpp \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/umfpack.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/SuiteSparse_config.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/umfpack_symbolic.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/umfpack_numeric.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/umfpack_solve.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/umfpack_free_symbolic.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/umfpack_free_numeric.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/umfpack_defaults.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/umfpack_qsymbolic.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/umfpack_wsolve.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/umfpack_triplet_to_col.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/umfpack_col_to_triplet.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/umfpack_transpose.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/umfpack_scale.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/umfpack_get_lunz.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/umfpack_get_numeric.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/umfpack_get_symbolic.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/umfpack_save_numeric.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/umfpack_load_numeric.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/umfpack_save_symbolic.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/umfpack_load_symbolic.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/umfpack_get_determinant.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/umfpack_report_status.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/umfpack_report_info.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/umfpack_report_control.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/umfpack_report_matrix.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/umfpack_report_triplet.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/umfpack_report_vector.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/umfpack_report_symbolic.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/umfpack_report_numeric.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/umfpack_report_perm.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/umfpack_timer.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/umfpack_tictoc.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/amd.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/umfpack_global.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/cholmod.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/cholmod_io64.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/cholmod_config.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/cholmod_core.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/cholmod_check.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/cholmod_cholesky.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/cholmod_partition.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/cholmod_camd.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/cholmod_supernodal.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/cholmod_matrixops.h \
+ /home/ubuntu/dev/freefem/install/ff-petsc/r/include/cholmod_modify.h \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/VirtualSolverSkyLine.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/SkyLineSolver.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/ffstack.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/MatriceCreuse_tpl.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/MatriceCreuse.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/VirtualSolverCG.hpp \
+ /home/ubuntu/dev/freefem/FreeFem-sources-4.12/src/fflib/lgsolver.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/gmres.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/MeshPoint.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/Mesh2dn.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/Mesh3dn.hpp \
+ /home/ubuntu/dev/freefem/FreeFem-sources-4.12/src/fflib/Operator.hpp \
+ /home/ubuntu/dev/freefem/FreeFem-sources-4.12/src/fflib/lex.hpp \
+ /home/ubuntu/dev/freefem/FreeFem-sources-4.12/src/fflib/environment.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/libmeshb7.h \
+ /home/ubuntu/dev/freefem/FreeFem-sources-4.12/src/fflib/lgfem.hpp \
+ /home/ubuntu/dev/freefem/FreeFem-sources-4.12/src/fflib/array_resize.hpp \
+ /home/ubuntu/dev/freefem/FreeFem-sources-4.12/src/fflib/lgmesh3.hpp \
+ /home/ubuntu/dev/freefem/FreeFem-sources-4.12/src/fflib/problem.hpp \
+ /home/ubuntu/dev/freefem/FreeFem-sources-4.12/src/fflib/P1IsoValue.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/R3.hpp \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/Mesh2.h \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/meshtype.h \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/R2.h \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/Metric.h \
+ /home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/BamgFreeFem.hpp \
+ /home/ubuntu/dev/freefem/FreeFem-sources-4.12/src/fflib/AFunction_ext.hpp \
+ /home/ubuntu/dev/freefem/FreeFem-sources-4.12/src/fflib/lgmesh.hpp

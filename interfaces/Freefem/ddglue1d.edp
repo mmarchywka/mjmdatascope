@@ -1,0 +1,325 @@
+// a new attempt to lok at 2-part gelling systems
+// as model for self-limiting coagulation
+// with varying parameters
+
+// ddglue1d.edp - 
+
+//load "PETSc"
+//load "MUMPS_mpi"
+load "medit"
+load "msh3"
+load "mshmet"
+ macro dimension()2// EOM
+include "macro_ddm.idp"
+include "cube.idp"
+load "mjm_dscope_freefem"
+//load "tetgen"
+//load "isoline"
+//load "Curvature"
+//include "MeshSurface.idp"
+//include "../mysness.idp"
+// needed for mysness.idp
+//include "../myboxes.idp"
+include "../surfaces.idp"
+include "../mjmio.idp"
+//load "PETSc"
+//include "macro_ddm.idp"
+
+macro Grad(u) [dx(u),dy(u)] // EOM
+macro Grad2(u) ( Grad(u)'*Grad(u))   // EOM
+macro Grad22(c)  [dx(c)*dx(c),dy(c)*dy(c)] // EOM
+// u is unknown  concentration
+// dtomu needs to produce mobility for flux not q and j lol 
+macro VDIFFA(D,u,w,dtomu,vx)(D*(Grad(w)'*Grad(u)+ (dtomu)*u*Grad(w)'*Grad(vx) )) // EOM
+real t1=clock();
+macro myinterval(foo) { real t2=clock(); cout<<foo<<" "<<(t2-t1)<<endl;cout.flush;t1=clock(); } // EOM
+
+
+// try for smooth 
+// P2 appears to ring on resample
+func Pk = P1;                    // Finite-element space
+macro UVAR(TY,V,PR,DEF) 
+TY V   = getARGV(PR , DEF) ; 
+{ string xp=PR;  xp=xp(1:xp.length);
+cout <<" "<<xp<<"=" <<V; } 
+// EOM
+/*
+add_reaction f1a f1 ; TF , 1.0e-1 -> f1a
+add_reaction f2a f2 ; f1a , 1.0e-1 -> f2a
+add_reaction fb fgn ; f2a , 1.0e-0 -> fb
+*/
+UVAR(int,nx,"-nx",1000); 
+//UVAR(int,ny,"-ny",20); 
+/*
+run n=0;dt=.01;sleep=0;itermod=100;geldof=fb;ef=2
+
+*/
+
+UVAR(real,dt,"-dt",.01);
+UVAR(,szx,"-szx",1.0);
+//UVAR(,szy,"-szy",100.0);
+UVAR(int,itermax,"-itermax",10000);
+UVAR(real,kdiff,"-kdiff",2.0);
+UVAR(real,knox,"-knox",.001);
+UVAR(real,f,"-f",.2);
+UVAR(real,kt1,"-kt1",.1);
+UVAR(real,k12,"-k12",.1);
+UVAR(real,k2f,"-k2f",1.0);
+UVAR(string,fnbase,"-fnbase","ddglue");
+UVAR(int,pwait,"-pwait",0);
+
+cout<<endl; cout.flush; cout.flush;
+
+func real  fTf(real xx)
+{
+//real f=.1;
+real xz=xx/szx; // (xx-szx*.5)/(1.0*szx);
+if ( xz>.6 ) return 0;
+if ( xz< .3  ) return 0;
+return 1;
+} // fTf 
+
+// can't make here, need to have the boundary layer... 
+//int[int] lbl=[1,2,3,4];
+//mesh Th = square(nx,ny,[szx*(x-.5),szy*(y-.5)],label=lbl);
+//buildouter
+//buildinnerbox(tfbox,(f*szx),(f*szy),10,0)
+//buildinnerbox(tfibox,(f*szx*.5),(f*szy*.5),20,0)
+//int fs=4;
+//Th = buildmesh(left(-ny)+top(-nx)+right(-ny)+bottom(-nx)
+//+tfboxleft(-ny)+tfboxtop(-nx)+tfboxright(-ny)+tfboxbottom(-nx)
+//+tfiboxleft(-ny/fs)+tfiboxtop(-nx/fs)+tfiboxright(-ny/fs)+tfiboxbottom(-nx/fs));
+//medit("Th",Th);
+int[int] lbl=[1,2];
+meshL Th= Sline(nx,[szx*x], label=lbl);
+
+
+fespace Vh(Th,Pk);
+fespace Wh(Th,[Pk,Pk,Pk,Pk,Pk,Pk,Pk]);
+//Vh Tf=Th(x,y).region; //   fTf(x,y);
+Vh Tf= fTf(x);
+string fnTf=fnbase+"-Tf";
+//medit("Th",Th,Tf);
+macro SPECIES(X,X0,D0,PR,DZ,DCZ)
+real  X#z  = getARGV(PR, X0) ;  
+real  Dz#X  = getARGV(DZ , D0) ;  
+real  k#X#diff  = getARGV(DCZ , 1.0) ;  
+string fn#X=fnbase+PR;
+Vh<real>  X=X#z,v#X,w#X=X#z, D#X=Dz#X;
+cout<<" specpis "<<PR<<"= "<<X#z<<" ; "<<DZ<<" = "<<Dz#X<<" ; "<<DCZ<<" = "<<k#X#diff<<endl; cout.flush;
+// EOM
+//macro DIFCOEF(X,Y,k) D#X= Dz#X/(1+k*Y); // 
+macro DIFCOEF(X,Y,k) D#X= Dz#X/(1+exp(k*kdiff*Y)); // 
+
+//plot(cmm="nox",nox,wait=0,value=1,fill=1);
+//plot(cmm="fb t="+t,fb,wait=0,value=1,fill=1);
+
+//macro THEPLOTS(a,b) { plot(cmm=a,b,wait=pwait,value=1,fill=1);  } // EOM 
+//macro THEPLOT(a,b) { plot(cmm=a,b,wait=pwait,value=1,fill=1);  } // EOM 
+
+
+// this needs to make each separate need to be abale to
+// use vector fespace
+macro SEEPLOT(t)
+{
+Vh tf=Tf; /* fTf(x); */
+Vh vf1=f1;
+Vh vf1a=f1a;
+Vh vf2=f2;
+Vh vf2a=f2a;
+Vh vfgn=fgn;
+Vh vfb=fb;
+cout<<" XXXX  fb min max "<<vfb[].max<<" "<<vfb[].min<<endl; cout.flush;
+mjmdscopeL(Th,"names tf f1 f1a f2 f2a fgn fb nox t="+t,tf,vf1,vf1a,vf2,vf2a,vfgn,vfb,"id=ddglue1d");  
+
+} // EOM SEEPLOT 
+
+/*
+macro SEEPLOT(t)
+int pn=0;
+{ ifstream ifs("ioctl.txt"); ifs>> pn; } 
+if( pn==0) { THEPLOT("f1 t="+t,f1)  } 
+else if( pn==1) {THEPLOT("f1a t="+t,f1a); } 
+else if( pn==2) {THEPLOT("f2 t="+t,f2); } 
+else if( pn==3) {THEPLOT("f2a t="+t,f2a); } 
+else if( pn==4) {THEPLOT("fgn t="+t,fgn); } 
+else if( pn==5) {THEPLOT("fb t="+t,fb); } 
+else { cout<<" plot skipped "<<pn<<endl; cout.flush; } 
+// EOM
+*/
+
+
+macro SPECIESTOT(X,XQ)
+{ real total=int1d(Th)(X); cout<<" tota "<<XQ<<" =  "<<total<<endl; cout.flush;  }  // EOM
+
+/*
+cat ../../sime1d.txt 
+add_point n=1000;d=.001
+check
+#kvp.get(m_nz,"nz"); kvp.get(m_ii,"nzed"); kvp.get(m_if,"nend");
+#kvp.get(m_dz,"dz"); kvp.get(m_q,"q"); kvp.get(m_mu,"mu");
+add_species TF nz=0;dz=0;q=0;mu=10;br0=.29999;bv0=0;br1=.3;bv1=1;br2=.6;bv2=1
+add_species f1 nz=1;dz=.0100;q=0;mu=0
+add_species f1a nz=0;dz=.05;q=0;mu=0
+add_species f2 nz=1;dz=.05;q=0;mu=0
+add_species f2a nz=0;dz=.01;q=0;mu=0
+add_species fgn nz=1;dz=.1;q=0;mu=0
+add_species fb nz=0;dz=.0001;q=0;mu=0
+*/
+
+SPECIES(f1,1.0,0.00001,"-f1z","-Dzf1","-Dcf1")
+SPECIES(f1a,0.0,.00005,"-f1az","-Dzf1a","-Dcfaa")
+SPECIES(f2,1.0,.00005,"-f2z","-Dzf2","-Dcf2")
+SPECIES(f2a,0.0,0.000001,"-f2az","-Dzf2a","-Dcf2a")
+SPECIES(fgn,1.0,.0001,"-fgnz","-Dzfgn","-Dcfgn")
+SPECIES(fb,0.0,.0000001,"-fbz","-Dzfb","-Dcfb")
+SPECIES(nox,0.0,20.0,"-noxz","-Dznox","-Dcnox")
+//Vh nox=Tf; // an oozing noxious substance. 
+nox=Tf;
+// does not seem to allow blank macro def 
+macro OPENBOUNDARY
++on(1,2,4,0,3,f1=f1z,f2=f2z,fgn=fgnz)
+// right now the zero flux at walls should be a natrual
+// BC on normal derivative derivative  but hope to add charges etc
+// flux is negative, divergence then is positive , int by parts negative 
+//macro DIFFS(X) (-D#X*Grad(X)'*Grad(v#X) ) // 
+// TODO FIXME what is the sign convention for rhs? 
+macro DIFFS(X) int1d(Th)(X*v#X+dt*D#X*Grad(X)'*Grad(v#X))+int1d(Th)(w#X*v#X) // 
+macro DIFB(X) (X*v#X+dt*D#X*Grad(X)'*Grad(v#X)) // 
+macro DIFL(X) (w#X*v#X) // 
+// convert f1 to f2 enzymatic with fc at rate k first order 
+//macro CONVERT(f1,f2,fc,k) int2d(Th)(dt*fc*k*w#f1*v#f2) +int2d(Th)(-dt*k*w#f1*fc*v#f1) // 
+macro CONVERT(f1,f2,fc,k) int1d(Th)(dt*fc*k*w#f1*v#f2) -int1d(Th)(dt*k*w#f1*fc*v#f1) // 
+
+for(int iter=0; iter<itermax; ++iter)
+{
+// no way to quote the label in macro ?
+//cout<<"f1z= "<<f1z<<endl; cout.flush;
+// breaking this up appears to slow matrix extraction...
+myinterval("start");
+varf ddf([f1,f1a,f2,f2a,fgn,fb,nox], [vf1,vf1a,vf2,vf2a,vfgn,vfb,vnox]) 
+// this increases speed by about 2x of this step 
+// which was originally comparable to  actual  solve time 
+// solve 2.5 this was 1.8 now .9
+//=DIFFS(f1) +DIFFS(f2) +DIFFS(f1a) +DIFFS(f2a) +DIFFS(fgn) +DIFFS(fb)
+=int1d(Th)(DIFB(f1) +DIFB(f2) +DIFB(f1a) +DIFB(f2a) +DIFB(fgn) +DIFB(fb)+DIFB(nox))
++int1d(Th)(DIFL(f1) +DIFL(f2) +DIFL(f1a) +DIFL(f2a) +DIFL(fgn) +DIFL(fb)+DIFL(nox))
+//+int1d(Th)(dt*k12*wf1*wf2*vf1) +int2d(Th)(-dt*k12*wf1*wf2*vf2)
++CONVERT(f1,f1a,Tf,kt1)
++CONVERT(f2,f2a,wf1a,k12)
++CONVERT(fgn,fb,wf2a,k2f)
+-int1d(Th)(knox*Tf*(nox)*vnox)+int1d(Th)(knox*Tf*(vnox))
+OPENBOUNDARY
+;
+
+matrix a=ddf(Wh,Wh);
+real[int] b=ddf(0,Wh);
+myinterval("start solve");
+set(a,solver=sparsesolver);
+//set(a,solver=CG);
+
+real[int] sol=a^-1 * b; 
+myinterval("done solve");
+real mins=sol.min;
+real maxs=sol.max;
+cout<<" min and max = "<<mins<<" "<<maxs<<endl; cout.flush;
+
+// WTF [f1[],f2[]] =sol;
+int nxvh=f1[].n;
+int stride=sol.n/nxvh; // 6;
+cout<<" stride = "<<stride<<endl; cout.flush;
+int si=0;
+for(int i=0; i<nxvh; ++i)
+{
+int ddn=si;
+f1[][i]=sol[ddn]; ++ddn;
+f1a[][i]=sol[ddn]; ++ddn;
+f2[][i]=sol[ddn]; ++ddn;
+f2a[][i]=sol[ddn]; ++ddn;
+fgn[][i]=sol[ddn]; ++ddn;
+fb[][i]=sol[ddn]; ++ddn;
+nox[][i]=sol[ddn]; ++ddn;
+si+=stride;
+} // i 
+
+wf1=f1; wf1a=f1a;
+wf2=f2; wf2a=f2a;
+wfgn=fgn;
+wfb=fb;
+DIFCOEF(f1,fb,kf1diff);
+DIFCOEF(f1a,fb,kf1adiff);
+DIFCOEF(f2,fb,kf2diff);
+DIFCOEF(f2a,fb,kf2adiff);
+DIFCOEF(fgn,fb,kfgndiff);
+DIFCOEF(fb,fb,kfbdiff);
+DIFCOEF(nox,nox,knoxdiff);
+//plot(f1,cmm=" f1 "+iter,wait=0, fill=1,value=1);
+//plot(fb,cmm=" fb "+iter,wait=0, fill=1,value=1);
+real bad=int1d(Th)(nox*(1-Tf));
+real t=dt*iter;
+real tt=int1d(Th)(fb);
+real fu=nox[].max;
+cout<<" iter "<<iter<<" t "<<t<<" fb "<<tt<<" bad "<<bad<< "max nox "<<fu<<endl; cout.flush;
+//medit("nox",Th,nox);
+//plot(cmm="nox",nox,wait=0,value=1,fill=1);
+//plot(cmm="fb t="+t,fb,wait=0,value=1,fill=1);
+int itermod=10;
+if ((iter%itermod)==0)
+{
+SEEPLOT(t)
+}
+
+//plot(cmm="fgn t="+t,fgn,wait=0,value=1,fill=1);
+} // iter
+
+//macro mmsave(fn,u,Xh)
+bool bsavemesh=false;
+bool bsavegrid=!false;
+if (bsavemesh)
+{
+mmsave(fnf1,f1,Vh);
+mmsave(fnf1a,f1a,Vh);
+mmsave(fnf2,f2,Vh);
+mmsave(fnf2a,f2a,Vh);
+mmsave(fnfgn,fgn,Vh);
+mmsave(fnfb,fb,Vh);
+mmsave(fnTf,Tf,Vh);
+}
+
+/*
+// macro mmsavegrid(fn,u,Xh,xz,yz,dx,dy,npx,npy)
+if (bsavegrid)
+{
+int npx=20;
+int npy=20;
+real gdx=szx/npx;
+real gdy=szy/npy;
+real xz=-gdx*npx*.5;
+real yz=-gdy*npy*.5;
+mmsavegrid(fnf1,f1,Vh,xz,yz,gdx,gdy,npx,npy)
+mmsavegrid(fnf1a,f1a,Vh,xz,yz,gdx,gdy,npx,npy)
+mmsavegrid(fnf2,f2,Vh,xz,yz,gdx,gdy,npx,npy)
+mmsavegrid(fnf2a,f2a,Vh,xz,yz,gdx,gdy,npx,npy)
+mmsavegrid(fnfgn,fgn,Vh,xz,yz,gdx,gdy,npx,npy)
+mmsavegrid(fnfb,fb,Vh,xz,yz,gdx,gdy,npx,npy)
+}
+*/
+//Vh fd=f1+f2;
+SPECIESTOT(f1,"f1")
+SPECIESTOT(f2,"f2")
+
+//SPECIESTOT(fd,"fd")
+/*
+medit("Tf",Th,Tf);
+medit("f1",Th,f1);
+medit("f1a",Th,f1a);
+medit("f2",Th,f2);
+medit("f2a",Th,f2a);
+medit("fgn",Th,fgn);
+
+//Vh f=f1-f2;
+//medit("f",Th,f);
+ medit("fb",Th,fb);
+*/
+
+

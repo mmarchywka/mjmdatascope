@@ -1,0 +1,126 @@
+
+#!/bin/bash
+
+SELF="$0"
+SRC=datascope.h
+DEST=datascope.out
+MAINDEF="TEST_datascope__"
+
+. cpp_proj_defines
+
+# g++  -Wall -std=gnu++11  -DTEST_MJM_GLUT_SCOPE -I. -I../../mjm/hlib -I../../mjm/num   -I/usr/include/GL -gdwarf-3 -O0  -x c++ mjm_glut_scope.h  -o mjm_glut_scope.out -lpthread -lreadline -lGL -lglut -lGLU
+
+#  g++  -std=gnu++11 -DTEST_MJM_GLUT_SAVER -I. -I../../mjm/hlib -I../../mjm/num  -gdwarf-3 -O0  -x c++ mjm_glut_saver.h  -o mjm_glut_saver.out -lpthread -lreadline  -lGL -lGLU -lglut -lpng -lavcodec -lswscale -lavutil 
+
+
+LINK="$MMCD_LINK -lpthread -lGL -lglut -lGLU -lglut -lpng -lavcodec -lswscale -lavutil "
+COMPILER="$MMCD_COMPILER"
+# string_kvp etc still there 
+INCDIR=" -MMD -MF datascope.deps $MMCD_INCDIR -I../freefem  -I/usr/include/GL "  # " -I.. " 
+
+# just move it local for now 
+#SRC=$MMCD_SRCDIR/$SRC
+SRC=./$SRC
+
+WARNS=$MMCD_WARNS
+
+DEBUG="$MMCD_DEBUG" # " -gdwarf-3 -O0 "
+OPT="$MMCD_OPT" # " -O3 "
+PROFILE="$MMCD_PROFILE" # " -O3 -gdwarf-3 -pg "
+# ffmpeg 4 has a couple of deprecations. 
+FLAGS="  -Wno-deprecated-declarations   $DEBUG"
+
+RUN_DATA="datascope.txt"
+compile()
+{
+mmcd_h_compile
+}
+run()
+{
+"./$DEST" -source "$RUN_DATA" -quit  
+}
+
+list_files()
+{
+cpp -M  -std=gnu++11 -DTEST_datascope__   -x c++  | sed -e 's/ /\n/g' | grep -v "^/usr" | grep "[A-Za-z0-9]"
+
+}  # list_files 
+
+
+
+
+
+help()
+{
+echo Usage $0 
+cat "$0" | grep "=="  | grep -v grep | sed -e 's/.*==//' | sed -e 's/"[^"]*$//' 
+}
+while [ "$*" != "" ]
+do
+start="$*"
+if [ "$1" == "-help" ]
+then
+help
+shift
+fi
+
+if [ "$1" == "-compile" ]
+then
+compile
+shift
+fi
+
+if [ "$1" == "-install" ]
+then
+x=$devinstalldir
+if [ "$x" != "" ]
+then
+echo cp "$DEST" "$x/$DEST"
+cp "$x/$DEST" "$x/$DEST."2023-03-16-1678965868
+cp "$DEST" "$x/$DEST"
+else
+echo no install dir $devinstalldir
+fi
+
+shift
+fi
+
+
+if [ "$1" == "-noglut" ]
+then
+echo removing graphics support 
+NO_GR=1
+FLAGS="$FLAGS -DNO_DSCOPE_GRAPHICS"
+shift
+fi
+
+
+
+if [ "$1" == "-opt" ]
+then
+FLAGS=$OPT
+shift
+fi
+
+if [ "$1" == "-run" ]
+then
+shift
+#run  $*
+run 
+#shift
+fi
+
+if [ "datascope" == "-list" ]
+then
+shift
+list_files
+fi
+
+
+if [ "$*" == "$start" ]
+then
+help
+exit -1
+fi
+done
+

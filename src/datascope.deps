@@ -1,0 +1,54 @@
+datascope.out: datascope.h /home/documents/cpp/mjm/hlib/mjm_globals.h \
+ /home/documents/cpp/mjm/hlib/mjm_thread_util.h mjm_glut_scope_ii.h \
+ mjm_glut_saver.h /home/documents/cpp/mjm/hlib/mjm_string_kvp.h \
+ /home/documents/cpp/mjm/hlib/mjm_globals.h \
+ /home/documents/cpp/mjm/hlib/mjm_thread_util.h \
+ /home/documents/cpp/mjm/hlib/mjm_collections.h \
+ /home/documents/cpp/mjm/hlib/mjm_string_tokenizer.h \
+ /home/documents/cpp/mjm/hlib/mjm_generic_iterators.h \
+ /home/documents/cpp/mjm/hlib/mjm_instruments.h \
+ /home/documents/cpp/mjm/hlib/mjm_read_buffer.h \
+ /home/documents/cpp/mjm/hlib/mjm_format_text.h \
+ /home/documents/cpp/mjm/hlib/mjm_read_buffer.h \
+ /home/documents/cpp/mjm/hlib/mjm_misc_parse.h \
+ /home/documents/cpp/mjm/hlib/mjm_data_model_error_log.h \
+ /home/documents/cpp/mjm/hlib/mjm_block_matrix.h \
+ /home/documents/cpp/mjm/hlib/mjm_logic_base.h \
+ /home/documents/cpp/mjm/hlib/mjm_strings.h mjm_glut_helpers.h \
+ mjm_hot_zones.h /home/documents/cpp/mjm/hlib/mjm_instruments.h \
+ /home/documents/cpp/mjm/hlib/mjm_strings.h ../freefem/mjm_worm_blob.h \
+ /home/documents/cpp/mjm/hlib/mjm_collections.h \
+ /home/documents/cpp/mjm/hlib/mjm_canned_methods.h \
+ /home/documents/cpp/mjm/hlib/mjm_char_mat.h \
+ /home/documents/cpp/mjm/num/mjm_rational.h \
+ /home/documents/cpp/mjm/hlib/mjm_cli_ui.h \
+ /home/documents/cpp/mjm/hlib/mjm_fasta_ii.h \
+ /home/documents/cpp/mjm/hlib/mjm_text_data.h \
+ /home/documents/cpp/mjm/hlib/mjm_solvers.h \
+ /home/documents/cpp/mjm/hlib/mjm_templates.h \
+ /home/documents/cpp/mjm/hlib/mjm_io.h \
+ /home/documents/cpp/mjm/hlib/mjm_interchanges.h \
+ /home/documents/cpp/mjm/hlib/mjm_jdftx_base.h \
+ /home/documents/cpp/mjm/hlib/mjm_dft_collection_data.h \
+ /home/documents/cpp/mjm/hlib/mjm_csv_ops.h \
+ /home/documents/cpp/mjm/hlib/mjm_svg_writer.h \
+ /home/documents/cpp/mjm/hlib/mjm_taxonomy_stuff.h \
+ /home/documents/cpp/mjm/hlib/mjm_gen_viz.h \
+ /home/documents/cpp/mjm/hlib/mjm_part_iterators.h \
+ /home/documents/cpp/mjm/hlib/mjm_iterator_base.h \
+ /home/documents/cpp/mjm/hlib/mjm_pawnoff.h \
+ /home/documents/cpp/mjm/hlib/mjm_blob.h \
+ /home/documents/cpp/mjm/hlib/mjm_generic_iterators.h \
+ ../freefem/mjm_affine_mesh_hood.h \
+ /home/documents/cpp/mjm/hlib/mjm_tokenized_collections.h \
+ ../freefem/mjm_worm_blob.h ../freefem/mjm_geo_contains.h \
+ /usr/include/GL/freeglut.h mjm_glut_elements.h \
+ ../freefem/mjm_so_loader.h mjm_glut_rags.h ../freefem/mjm_ff_mesh.h \
+ /home/documents/cpp/mjm/hlib/mjm_block_matrix.h \
+ ../freefem/mjm_ff_objects.h ../freefem/mjm_worm_blob.h \
+ ../freefem/mjm_affine_mesh_hood.h \
+ /home/documents/cpp/mjm/hlib/mjm_cli_ui.h /usr/include/GL/glut.h \
+ /home/documents/cpp/mjm/hlib/mjm_data_model_error_log.h \
+ /home/documents/cpp/mjm/hlib/mjm_logic_base.h mjm_dscope_pktfifo.h \
+ mjm_pthread_que.h mjm_dscope_serial.h mjm_dscope_dgram.h \
+ mjm_buffer_alloc.h mjm_dscope_rawfifo.h

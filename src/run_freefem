@@ -1,0 +1,110 @@
+
+#!/bin/bash
+
+SELF="$0"
+SRC=freefem.h
+DEST=freefem.out
+MAINDEF="TEST_freefem__"
+
+. cpp_proj_defines
+
+LINK="  -ldl $MMCD_LINK"
+COMPILER="$MMCD_COMPILER"
+INCDIR=$MMCD_INCDIR # " -I.. " 
+
+# just move it local for now 
+#SRC=$MMCD_SRCDIR/$SRC
+SRC=./$SRC
+
+WARNS=$MMCD_WARNS
+
+DEBUG="$MMCD_DEBUG" # " -gdwarf-3 -O0 "
+OPT="$MMCD_OPT" # " -O3 "
+PROFILE="$MMCD_PROFILE" # " -O3 -gdwarf-3 -pg "
+FLAGS="$DEBUG"
+
+RUN_DATA="freefem.txt"
+compile()
+{
+mmcd_h_compile
+}
+run()
+{
+"./$DEST" -source "$RUN_DATA" -quit  
+}
+
+list_files()
+{
+cpp -M  -std=gnu++11 -DTEST_freefem__   -x c++  | sed -e 's/ /\n/g' | grep -v "^/usr" | grep "[A-Za-z0-9]"
+
+}  # list_files 
+
+
+
+
+
+help()
+{
+echo Usage $0 
+cat "$0" | grep "=="  | grep -v grep | sed -e 's/.*==//' | sed -e 's/"[^"]*$//' 
+}
+while [ "$*" != "" ]
+do
+start="$*"
+if [ "$1" == "-help" ]
+then
+help
+shift
+fi
+
+if [ "$1" == "-compile" ]
+then
+compile
+shift
+fi
+
+if [ "$1" == "-install" ]
+then
+x=$devinstalldir
+if [ "$x" != "" ]
+then
+echo cp "$DEST" "$x/$DEST"
+cp "$x/$DEST" "$x/$DEST."2023-01-10-1673354316
+cp "$DEST" "$x/$DEST"
+else
+echo no install dir $devinstalldir
+fi
+
+shift
+fi
+
+
+
+if [ "$1" == "-opt" ]
+then
+FLAGS=$OPT
+shift
+fi
+
+if [ "$1" == "-run" ]
+then
+shift
+#run  $*
+run 
+#shift
+fi
+
+if [ "freefem" == "-list" ]
+then
+shift
+list_files
+fi
+
+
+if [ "$*" == "$start" ]
+then
+help
+exit -1
+fi
+done
+

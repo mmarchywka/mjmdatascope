@@ -1,0 +1,27 @@
+# correct for factor of 2/d_sigma or avg pt distance ( 1000 lol) 
+add_point n=1000;d=.001
+check
+#kvp.get(m_nz,"nz"); kvp.get(m_ii,"nzed"); kvp.get(m_if,"nend");
+#kvp.get(m_dz,"dz"); kvp.get(m_q,"q"); kvp.get(m_mu,"mu");
+add_species TF nz=0;dz=0;q=0;mu=10;br0=.29999;bv0=0;br1=.3;bv1=1;br2=.6;bv2=1
+add_species f1 nz=1;dz=.0000100;q=0;mu=0
+add_species f1a nz=0;dz=.00005;q=0;mu=0
+add_species f2 nz=1;dz=.00005;q=0;mu=0
+add_species f2a nz=0;dz=.000001;q=0;mu=0
+#add_species f3 nz=1;dz=.00005;q=0;mu=0
+#add_species f3a nz=0;dz=.00001;q=0;mu=0
+#add_species f4 nz=1;dz=.05;q=0;mu=0
+#add_species f4a nz=0;dz=.01;q=0;mu=0
+add_species fgn nz=1;dz=.0001;q=0;mu=0
+add_species fb nz=0;dz=.0000001;q=0;mu=0
+add_reaction f1a f1 ; TF , 1.0e-1 -> f1a
+add_reaction f2a f2 ; f1a , 1.0e-1 -> f2a
+#add_reaction f3a f3 ; f2a , 1.0e-1 -> f3a
+#add_reaction f4a f4 ; f3a , 1.0e-1 -> f4a
+#add_reaction fb fgn ; f1a , 1.0e-0 -> fb
+add_reaction fb fgn ; f2a , 1.0e-0 -> fb
+dscope "rawfifo launch  2"
+list 
+setup
+# run n=0;dt=.01;sleep=0;itermod=100;geldof=fb;ef=20
+run n=0;dt=.01;sleep=0;itermod=100;geldof=fb;ef=2

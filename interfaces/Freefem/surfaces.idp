@@ -1,0 +1,108 @@
+
+real szx,szy;
+
+// solution above solid below 
+// try combo of sign waves or random numbers 
+func real onehump(real xx, real yy) {
+real base=-.2*szy;
+//real base=-.4*szy;
+if (xx>(-.1*szx)) if (xx< .1*szx) if ((yy-base)*(yy-base)<((.1*szx)^2-xx*xx)) return 1;
+ return (yy<base)?1:0;
+
+}
+
+
+// a structure to hold an isoline curve info 
+macro ISOSTRUCT(a)  
+real[int,int] iso#a(3, 1); 
+int[int] isopt#a(1);  // EOM
+
+//int i0=etchfrontbe[2*c], i1=etchfrontbe[2*c+1]-1;
+// P=Curve(etchfront, i0, i1, t); //Curve 1
+//int i0=etchfrontbe[2], i1=etchfrontbe[2+1]-1;
+//plot(Curve(etchfront, i0, i1, t),wait=1);; //Curve 1
+// isoline size can get huge need to be able to subsample or limit 
+// accuracy 
+macro buildisomesh(Thold,Th,a,c,lvl)
+{int nbce = isoline(Thold, c, iso#a, close=0, iso=lvl, beginend=isopt#a, smoothing=0.1);
+int cui=0; 
+int del=0;
+int i0=isopt#a[2*cui];
+int i1=isopt#a[2*cui+1]-1;
+real cf=.45;
+while (1==1)
+{
+if ( iso#a(0,del)< -cf*szx)  { ++del; continue; } 
+if ( iso#a(0,del)> cf*szx)  { ++del; continue; } 
+if ( iso#a(1,del)< -cf*szy)  { ++del; continue; } 
+if ( iso#a(1,del)> cf*szy)  { ++del; continue; } 
+break;
+} 
+real base=iso#a(2,del);
+for(int jj=i0+del; jj<=(i1-del); ++jj) iso#a(2,jj)-=base;
+int npts=i1-i0+1;
+cout<<" npts "<<npts<<" del "<<del<<endl; cout.flush;
+if (false) cout<<" del "<<iso#a(0,(i0+del):(i1-del))<<endl; cout.flush;
+border Curve0(t=0, 1){
+P=Curve(iso#a, i0+del, i1-del, t); 
+label=5;
+}
+
+border left(t=0, 1){x=-szx/2; y=szy*(t-.5);label=1; }
+border top(t=0, 1){x=szx*(t-.5);y=szy/2; label=2; }
+border right(t=0, 1){x=szx/2; y=-szy*(t-.5);label=3; }
+border bottom(t=0, 1){x=-szx*(t-.5);y=-szy/2; label=4; }
+if (false) 
+	Th = buildmesh(left(-ny)+top(-nx)+right(-nx)+bottom(-ny)+Curve0(npts));
+Th = buildmesh(left(-ny)+top(-nx)+right(-nx)+bottom(-ny)+Curve0(100+(npts/2)));
+fespace Xx(Th,P2);
+Xx xx=region;
+if (false) plot(xx,cmm="isoed mesh ",wait=1,fill=1);
+} // EOM 
+// using npts in Curve0 leads to more and more reso on each
+// adapt 
+
+//Th = buildmesh(left(-ny)+top(-nx)+right(-nx)+bottom(-ny));
+//plot(buildmesh(Curve0(100)),cmm="iso curve ",wait=1,fill=1);
+// left=1, top=2, right=3, boyt=4, surf=5
+
+//
+macro buildisopart(Thold,Th,a,c,lvl,lbl)
+int nbce#a = isoline(Thold, c, iso#a, close=0, iso=lvl, beginend=isopt#a, smoothing=0.1);
+int cui#a=0; 
+int del#a=0;
+int i0#a=isopt#a[2*cui#a];
+int i1#a=isopt#a[2*cui#a+1]-1;
+real cf#a=.45;
+while (1==1)
+{
+if ( iso#a(0,del#a)< -cf#a*szx)  { ++del#a; continue; } 
+if ( iso#a(0,del#a)> cf#a*szx)  { ++del#a; continue; } 
+if ( iso#a(1,del#a)< -cf#a*szy)  { ++del#a; continue; } 
+if ( iso#a(1,del#a)> cf#a*szy)  { ++del#a; continue; } 
+break;
+} 
+real base#a=iso#a(2,del#a);
+for(int jj=i0#a+del#a; jj<=(i1#a-del#a); ++jj) iso#a(2,jj)-=base#a;
+int npts#a=i1#a-i0#a+1;
+cout<<" npts "<<npts#a<<" del "<<del#a<<endl; cout.flush;
+border Curvex#lbl(t=0, 1){
+P=Curve(iso#a, i0#a+del#a, i1#a-del#a, t); 
+label=lbl;
+}// EOM
+
+macro buildouter()
+border left(t=0, 1){x=-szx/2; y=szy*(t-.5);label=1; }
+border top(t=0, 1){x=szx*(t-.5);y=szy/2; label=2; }
+border right(t=0, 1){x=szx/2; y=-szy*(t-.5);label=3; }
+border bottom(t=0, 1){x=-szx*(t-.5);y=-szy/2; label=4; }
+ // EOM 
+
+
+macro buildinnerbox(p,szx,szy,lblz,lbld)
+border p#left(t=0, 1){x=-szx/2; y=szy*(t-.5);label=lblz; }
+border p#top(t=0, 1){x=szx*(t-.5);y=szy/2; label=lblz+lbld; }
+border p#right(t=0, 1){x=szx/2; y=-szy*(t-.5);label=lblz+2*lbld; }
+border p#bottom(t=0, 1){x=-szx*(t-.5);y=-szy/2; label=lblz+3*lbld; }
+ // EOM 
+

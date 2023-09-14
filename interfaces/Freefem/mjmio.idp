@@ -1,0 +1,65 @@
+ 
+macro mmload(u,Xh,fn,nthings,nentry)
+{
+mesh Th =triangulate(fn); 
+fespace Vhxxx(Th,P1) ;
+Vhxxx data;
+real[int] mdata(Th.nv);
+try{
+ifstream ifs(fn);
+real xass;
+for (int i=0; i<Th.nv; ++i)
+{
+for (int j=0; j<nthings; ++j)
+{ if (j==nentry) ifs>> mdata[i];
+else ifs>> xass;
+}
+}
+} catch (...) { cout<<" throw during load of "<<fn<<endl; cout.flush;  }
+data[]=mdata;
+if (false) medit(" fueker ",Th,data); 
+if (false) { for (int i=0; i<Th.nv; ++i){cout<<" "<<i<<" "<<mdata[i]<<endl;}} 
+Xh fulx=x;
+Xh fuky=y;
+for (int i=0; i<u[].n; ++i){ u[][i]=data(fulx[][i],fuky[][i]);  } 
+} // EOM
+//matrix m=interpolate(Xh,Vhxxx);
+//real[int] ldd=m*mdata;
+//u[]=ldd;
+
+// possible bug/ feature - last element of last dropped
+// sometimes with the ofs.flush 
+macro mmsave(fn,u,Xh)
+{
+try{
+ofstream ofs(fn);
+Xh xx=x;
+Xh yy=y;
+int n=u[].n;
+for(int i=0; i<n; ++i)
+{ ofs<<xx[][i]<<" "<<yy[][i]<<" "<<u[][i]<<endl;} 
+ofs.flush;  
+} catch (...) { cout<<" throw during save to   "<<fn<<endl; cout.flush;  }
+} // EOM
+
+macro mmsavegrid(fn,u,Xh,xz,yz,dx,dy,npx,npy)
+{
+try{
+ofstream ofs(fn);
+real yy=yz;
+for(int i=0; i<npy; ++i)
+{
+real xx=xz;
+for(int j=0; j<npx; ++j)
+{
+{ ofs<<j<<" "<<i<<" "<<xx<<" "<<yy<<" "<<u(xx,yy)<<endl; }
+xx+=dx; 
+}
+yy+=dy;
+}
+ofs.flush;  
+} catch (...) { cout<<" throw during save to   "<<fn<<endl; cout.flush;  }
+} // EOM
+
+
+ 

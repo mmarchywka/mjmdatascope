@@ -1,0 +1,895 @@
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Sample template for MIT Junior Lab Student Written Summaries
+% Available from http://web.mit.edu/8.13/www/Samplepaper/sample-paper.tex
+% Last Updated April 12, 2007
+% Adapted from the American Physical Societies REVTeK-4 Pages
+% at http://publish.aps.org
+
+\setlength{\paperheight}{11in}
+% http://tex.stackexchange.com/questions/74636/mla-package-and-thumbpdf
+\makeatletter
+\@namedef{ver@thumbpdf.sty}{}
+\makeatother
+\documentclass[aps,secnumarabic,balancelastpage,amsmath,amssymb,nofootinbib]{revtex4}
+
+\input{myskeletonpackages.tex}
+
+\newcolumntype{.}[1]{D{.}{.}{#1}}
+%\usepackage[maxfloats=30]{morefloats}   %mjm   saving up figs for the end   
+% no param on old version stuck at 36
+\usepackage{morefloats}        %mjm   saving up figs for the end   
+\usepackage{graphicx}        %mjm   saving up figs for the end   
+
+% will need modificaitons 
+\input{recent_template.tex}
+
+
+
+% https://tex.stackexchange.com/questions/121601/automatically-wrap-the-text-in-verbatim
+\usepackage{listings}
+\lstset{
+basicstyle=\small\ttfamily,
+columns=flexible,
+breaklines=true
+}
+
+% none of this fking fking works for a f F 
+\newcommand{\mjmverbatim}{lstlisting}
+\newcommand{\mjmbeginverbatim}{\begin{lstlisting}}
+\newcommand{\mjmendverbatim}{\end{lstlisting}}
+
+\newcommand{\mjmmangle}[1]{keep/#1}
+
+
+
+%# CHANGE VERSION AND STATUS MANUALLY 
+% need a draft/notes/release flag
+
+% https://tex.stackexchange.com/questions/5894/latex-conditional-expression
+%At the command-line, you can do \def\MYFLAG{} and then test if \MYFLAG is defined in your document (or an included style file) with \ifdefined\MYFLAG ... \else ... \fi.
+% needs trailing space for the sample bibtex doh
+% leading spaces mess up the entry thought 
+\def\xxmjmrelease{0.10 }
+\ifdefined\mjmrelease
+\newcommand{\mjmstatus}{ PUBLIC NOTES }
+\newcommand{\mjmversion}{\mjmrelease} %%%%%%%%%%%%%
+\newcommand{\mjmtrno}{MJM-2023-007}
+\newcommand{\mjmbib}{\mjmtrno-\mjmversion}
+\newcommand{\mjmstatuswarn}{{\bf{  }}   }
+% 2021-09-29 wanted version wth for brownie
+%\newcommand{\mjmbib}{\mjmtrno-\mjmversion-\mjmrelease}
+%\newcommand{\mjmbib}{\mjmtrno}
+\else
+\newcommand{\mjmstatus}{ NOT public NOTES }
+\newcommand{\mjmversion}{0.00} %%%%%%%%%%%%%
+\newcommand{\mjmtrno}{MJM-2023-007}
+%\newcommand{\mjmbib}{\mjmtrno-\mjmversion}
+\newcommand{\mjmbib}{\mjmtrno}
+%\newcommand{\mjmstatuswarn}{  }
+\newcommand{\mjmstatuswarn}{{\bf{This document is a non-public DRAFT and contents may be speculative or undocumented or simple musings and should be read as such.  }}   }
+\fi
+
+%\newcommand{\mjmstatus}{ NOT public NOTES }
+
+
+
+\newcommand{\mjmtitle}{MJMDatascope : A viewer for streamed numerical data}
+\begin{comment}
+\newcommand{\mjmmakedate}{2023-09-14 }
+\newcommand{\mjmauthor}{Mike J Marchywka }
+\newcommand{\mjmbasename}{\jobname}
+\newcommand{\mjmaddbio}{mjm_tr,releases}
+\newcommand{\mjmversion}{ 0.00 }
+\newcommand{\mjmtrno}{MJM-2023-007}
+\newcommand{\mjmbibday}{14}
+\newcommand{\mjmbibmo}{09}
+\newcommand{\mjmbibyear}{2023}
+\newcommand{\mjmemail}{marchywka@hotmail.com}
+\end{comment}
+
+\input{mycommands.tex}
+
+
+\newcommand{\mjmauthor}{Mike J Marchywka }
+\newcommand{\mjmmakedate}{2023-09-14 }
+\newcommand{\mjmbasename}{\jobname}
+\newcommand{\mjmaddbio}{mjm_tr,releases}
+%\newcommand{\mjmversion}{0.00}
+%\newcommand{\mjmtrno}{MJM-2023-007}
+%\newcommand{\mjmbibday}{14}
+%\newcommand{\mjmbibmo}{09}
+%\newcommand{\mjmbibyear}{2023}
+
+% the build script changes these to creation day doh 
+\newcommand{\mjmbibday}{14}
+\newcommand{\mjmbibmo}{09}
+\newcommand{\mjmbibyear}{2023}
+
+
+\newcommand{\mjmmakebibday}{\number\day}
+\newcommand{\mjmmakebibmo}{\number\month}
+\newcommand{\mjmmakebibyear}{\number\year}
+
+\newcommand{\mjmbibtype}{techreport}
+
+\newcommand{\mjmbibname}{marchywka-\mjmbib}
+\mjmstartbib{\mjmbibtype}{\mjmbibname}
+
+\newcommand{\mjmprod}{MJMDatascope}
+
+
+\newcommand{\mjmabstract}{
+\mjmprod is designed to be a lightweight viewer or previewer for
+streaming numerical data from a variety of sources such as
+"R", FEM codes such as FreeFem++, and custom or proprietary
+numerical code with a current interface for c++.
+It is not designed to be particularly feature rich or
+generate publication quality output but mostly to monitor
+and compare number streams from disparite sources while
+providing a uniform user interface.
+The current form ( 2023-09-14)  is proof of concept and not usable
+by most users except developers with an interest in numerical
+codes. Note that with a simple interface, it could be
+used to plot streams of numbers from stdin making it
+useful for a variety of monitoring tasks.
+}
+
+
+
+\newcommand{\mjmemail}{marchywka@hotmail.com}
+%\newcommand{\mjmaddr}{306 Charles Cox , Canton GA 30115}
+\newcommand{\mjmaddr}{44 Crosscreek Trail, Jasper GA 30143}
+\mjmaddbib{title}{\mjmtitle}
+\mjmaddbib{author}{\mjmauthor}
+\mjmaddbib{type}{\mjmbibtype}
+\mjmaddbib{abstract}{\mjmabstract}
+%\mjmaddbib{name}{marchywka-\mjmbib}
+\mjmaddbib{name}{\mjmbibname}
+\mjmaddbib{number}{\mjmtrno}
+\mjmaddbib{version}{\mjmversion}
+\mjmaddbib{institution}{not institutionalized, independent }
+\mjmaddbib{address}{ \mjmaddr}
+\mjmaddbib{date}{\today}
+\mjmaddbib{startdate}{\mjmbibyear -\mjmbibmo -\mjmbibday }
+%\mjmaddbib{day}{\mjmbibday}
+%\mjmaddbib{month}{\mjmbibmo}
+%\mjmaddbib{year}{\mjmbibyear}
+\mjmaddbib{day}{\mjmmakebibday}
+\mjmaddbib{month}{\mjmmakebibmo}
+\mjmaddbib{year}{\mjmmakebibyear}
+
+\mjmaddbib{author1email}{\mjmemail}
+\mjmaddbib{contact}{\mjmemail}
+\mjmaddbib{author1id}{orcid.org/0000-0001-9237-455X}
+\CatchFileEdef\mjmpages{\mjmbasename.last_page}{\endlinechar=-1\relax}
+% TODO FIXME add this to the skeleton text 
+%\mjmaddbib{pages}{ \input{\mjmbasename.last_page}}
+\mjmaddbib{pages}{ \mjmpages}
+%\mjmaddbib{filename}{\mjmbasename}
+
+\begin{comment}
+\newcommand{\checkfortwo}[1]{%
+  \ifcsname#1\endcsname%
+  VERSION =        \{\mjmversion \today \mjmstatus \},
+  \else%
+  VERSION =        \{\mjmversion\},
+  \fi%
+}
+
+
+
+\newcommand{\xxxmjmfullbib}{
+{@}TECHREPORT\{mmarchywka-\mjmbib,
+  AUTHOR =        \{M.J. Marchywka\},
+  TITLE =         \{ \mjmtitle \},
+  NUMBER =        \{\mjmtrno\},
+\checkfortwo{mjmstatus}
+  %VERSION =        \{\mjmversion \today \mjmstatus \},
+  %VERSION =        \{\mjmversion\},
+ INSTITUTION =   \{  not institutionalized , independent\},
+  ADDRESS =       \{\mjmaddr\},
+  NOTE =          \{Version \mjmversion , may change signficantly if less than 1.00   \},
+  DATE  =          \{\today\},
+  DAY  =          \{\mjmbibday\},
+  MONTH =         \{\mjmbibmo\},
+  YEAR  =         \{\mjmbibyear\},
+ % AUTHOR1EMAIL = \{marchywka@hotmail.com\},
+  AUTHOR1EMAIL = \{\mjmemail\},
+  AUTHOR1ID = \{orcid.org/0000-0001-9237-455X\},
+%   PAGES =         \{6\},
+  %PAGES =         \{ \input{\mjmbasename.last_page} \},
+  PAGES =         \{ \mjmpages \},
+  CONTACT =       \{marchywka@hotmail.com\},
+  FILENAME =       \{\mjmbasename\}
+\}
+} %mjmfullbib
+
+\end{comment}
+%\mjmaddbib{bibtex}{\mjmfullbib}
+
+\mjmdonebib
+
+
+
+\lhead{\mjmauthor,  \mjmtrno }
+
+
+%\lhead{M Marchywka,  \mjmtrno }
+%\rhead{ \mjmversion not for public release}
+%\rhead{ { \today }  v. \mjmversion for release without review }
+%\rhead{ { \today }  v. \mjmversion NOT public DRAFT }
+%\rhead{ { \today }  v. \mjmversion { }  NOT public NOTES }
+\rhead{ { \today }  v. \mjmversion { }  \mjmstatus }
+
+\newfloatcommand{capbtabbox}{table}[][\FBwidth]
+
+
+%%%% build flags 
+%\newlength{\desttabw}  \setlength{\desttabw}{4in}
+\newlength{\desttabw}  \setlength{\desttabw}{\textwidth}
+\newlength{\chainwidth}  \setlength{\chainwidth}{.4\textwidth }
+\newlength{\slantwidth}  \setlength{\slantwidth}{.2\textwidth }
+\newlength{\subfigwidth}  \setlength{\subfigwidth}{.3\textwidth }
+\newlength{\fullfigwidth}  \setlength{\fullfigwidth}{.8\textwidth }
+\newlength{\subwfigwidth}  \setlength{\subwfigwidth}{.75\textwidth }
+\newlength{\subwfigwidthrot}  \setlength{\subwfigwidthrot}{\textwidth }
+\newlength{\myboxwidth}  \setlength{\myboxwidth}{.3\textwidth }
+\newlength{\picwidth}  \setlength{\picwidth}{.4\textwidth }
+% set to center for nowmal output 
+\newcommand{\destflushtab}{flushleft}
+\includecomment{mdpicomment}
+\excludecomment{draftcomment}
+\excludecomment{badmathcomment}
+\excludecomment{showworkcomment}
+% this does not fing work ... 
+
+\newcommand{\mjmed}[1]{
+%\begin{mjmedx} 
+[ mjm : #1   ]
+%\end{mjmedx} 
+}  
+
+% thinking outload
+\newcommand{\mjmtolx}[1]{}
+\newcommand{\mjmtolxx}[1]{}
+\newcommand{\mjmtol}[1]{
+ \fbox{  
+% thi does not ing work right 
+\begin{minipage}[t]{\textwidth}
+{ \centering{\bf{Thinking outloud}} }
+\par   
+#1 
+\end{minipage} 
+}
+}
+%\mjmpicture{Rscope.jpeg}{Output to \mjmprod using the R example}{Rdscope}
+
+\newcommand{\mjmpicture}[3]
+{
+\begin{figure}[H]
+{ \includegraphics[height=3in,width=4in]{keep/#1} }
+\caption{#2}
+\label{fig:#3}
+\end{figure}
+} % mjmpicture
+
+
+\newcommand{\mjmaside}[1]{
+ \fbox{  
+% thi does not ing work right 
+\begin{minipage}[t]{\textwidth}
+{ \centering{\bf{Aside: }} }
+\par   
+#1 
+\end{minipage} 
+}
+}
+
+
+
+
+\newcommand{\mjmgraphics}[1]{#1 }
+\newcommand{\mjmfullplot}[1]{\includegraphics[width=\fullfigwidth]{#1}}
+%\newcommand{\mjmincludeplot}[1]{\includegraphics[width=\fullfigwidth]{#1}}
+%\newcommand{\mjmincludeplot}[1]{\includegraphics[width=\subfigwidth]{#1}}
+\newcommand{\mjmincludeplot}[1]{\includegraphics[height=3in,width=\fullfigwidth]{#1}}
+
+% include here as likely to be doc specific 
+%\newcommand{\mjmreffig}[1]{Fig. \ref{#1}}
+\newcommand{\mjmreffig}[1]{Fig. \ref{fig:#1}}
+\newcommand{\mjmreftab}[1]{Table  \ref{tab:#1}}
+
+
+%cp yyy2.pdf ~/d/latex/keep/pp20171124biotin.pdf
+\newcommand{\mjmdatedplot}[1] 
+{ \includegraphics[height=3in,width=\fullfigwidth]{keep/pp20171124#1} }
+% right now there are too many figs to save for the end apaprently
+% hard limit is 36
+\newcommand{\mjmbeginfigure}{\begin{figure}[H] }
+%\newcommand{\mjmbeginfigure}{\begin{figure}[p] }
+\newcommand{\mjmfigure}[1]{
+%\begin{figure}[H]
+\mjmbeginfigure
+
+#1 
+
+\end{figure}
+}
+%\extrafloats{100}
+
+\newcommand{\mjmlisting}[1]
+{
+\begin{lstlisting} 
+#1 
+\end{lstlisting}
+}
+
+\newcommand{\mjmold}[1]{ } 
+
+
+
+\newcommand{\mjmeqn}[1]{\begin{equation} #1 \end{equation}  } 
+
+
+
+
+
+\begin{document}
+
+\title{\mjmtitle}
+\author         {Mike Marchywka}
+\email          {\mjmemail}
+\thanks{ to cite  or credit this work, see bibtex in Appendix \ref{appendix:citing} } 
+\date{\today}
+\affiliation{\mjmaddr}
+
+\mjmblackboxno{Release Notes  xxxx-xx-xx : }{
+not ready at all
+
+
+\mjmreleasewarning
+\mjmstatuswarn
+
+\mjmexplainbib
+
+\mjmreleasewarning
+
+\mjmwarnfeed
+
+\mjmwarnme
+
+\mjmwarntopic
+
+\bf{ Readers may experience discalimer fatigue. Doe not proceed if you 
+are weary or unable to thnk clearly}
+
+
+}
+
+\begin{abstract}
+\mjmabstract
+\begin{comment}
+\mjmprod is designed to be a lightweight viewer or previewer for
+streaming numerical data from a variety of sources such as
+"R", FEM codes such as FreeFem++, and custom or proprietary
+numerical code with a current interface for c++. 
+It is not designed to be particularly feature rich or
+generate publication quality output but mostly to monitor
+and compare number streams from disparite sources while
+providing a uniform user interface.
+The current form ( 2023-09-14)  is proof of concept and not usable
+by most users except developers with an interest in numerical
+codes. Note that with a simple interface, it could be
+used to plot streams of numbers from stdin making it
+useful for a variety of monitoring tasks.
+\end{comment}
+\end{abstract}
+
+\maketitle
+\tableofcontents
+\newpage
+
+
+\section{Introduction  }
+
+Many numerical codes exist in a spectrum of applications from
+comprehensive symolic math packages such as Mathematica ,
+distributed simulators running on supercomputers, personal
+FEM codes, to just generation of  a list of numbers piped
+in from stdin. In most cases, results are sent to a file
+for analysis off line or plotted synchronously at
+various times. Display applications vary widely too.
+As the data types are diverse, it may be expceted that diverse
+viewers also exist and are optimized for each type. However,
+for a range of applications a simple unobtrusive 
+monitoring system may be useful and that is the niche 
+targeted by \mjmprod.  
+
+Numerical data generating code interfaces to the viewer
+only via a connection such as a linux fifo or 
+UDP packets cleanly separating the generator from the 
+unreliable consumer. Currently, interfaces are provided
+for Freefem++,R, and most c++ code although the range
+of sources should be easily expanded. 
+
+All aspects of \mjmprod are currently being improved
+including the API. The current graphics implementation
+is largely in GLUT, as was my code from 2007. There is some
+possibility of doing this with a browser plugin but
+that removes the "lightweight" attribute. 
+
+\section{History and Context  }
+Going back at least to 2007, I wanted to be able to stream simple
+data in real time into a display application and began writing
+some simple code but quickly dropped the probject. While
+learning to use Freefem++, I noted that their graphics 
+was organized in a similar way to my earlier interests but
+there was no obvious easy was to plot 1D data. In any case,
+I needed that to develop my own finite difference code
+and make comparisons easy.
+
+In a quick discussion on the R devel mailing list, the
+package Trend was brought to my attention and this is
+very similar to my earlier interests. It is possible that
+that pacakge or an adaptation of the Freefem++ graphics
+code may be made to work similarly to \mjmprod.
+
+\section{ Download, Build, Install  }
+
+Currently the proof of concept code has been put up
+on github under the mmarchywka account.
+The components include the viewer source code, configuration
+files, and interfaces with examples and their configuration
+files. All of the source code is written as c++ header
+files making it easy to use a given class in an app
+or as a standalone simple/test app. Building is just a matter
+of one compile and link step. Most of this code goes into 
+a header library on my local machine but I just merged
+all the dependencies into this repo for now.  
+
+\subsection{ \mjmprod }
+
+\begin{lstlisting}
+./run_datascope -compile
+g++ -std=gnu++11 -DTEST_datascope__ -Wno-deprecated-declarations -gdwarf-3 -O0 -MMD -MF datascope.deps -I. -I/home/documents/cpp/mjm/hlib/ -I/home/documents/cpp/mjm/num -I/home/documents/cpp/mjm/ -I/home/documents/cpp/mjm/tcl -I/home/documents/cpp/mjm/include -I/home/documents/cpp/pkg/include -I/home/documents/cpp/pkg -I../freefem -I/usr/include/GL -Wall -Wno-unused-variable -Wno-unused-function -Wno-sign-compare -Wno-non-template-friend -Wno-misleading-indentation -x c++ ./datascope.h -o datascope.out -lreadline -lpthread -lGL -lglut -lGLU -lglut -lpng -lavcodec -lswscale -lavutil
+In file included from ./mjm_glut_scope_ii.h:7,
+                 from ./datascope.h:14:
+./mjm_glut_saver.h:95:2: warning: #warning ate out deprecated crap [-Wcpp]
+   95 | #warning ate out deprecated crap
+      |  ^~~~~~~
+
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}
+./datascope.out -source listenraw.txt  2>&1 
+\end{lstlisting}
+
+
+\subsection{ R interface  }
+
+
+\begin{lstlisting}
+
+ 2340  R_util -buildins mjmdscope
+
+
+build_ins()
+{
+pnm="$1"
+pdir=`pwd`
+#cat << ---xxx---
+export PKG_CXXFLAGS=" -MMD -MF $pdir/$pnm.deps -I/home/documents/cpp/proj/datascope -I/home/documents/cpp/mjm/hlib -I/home/documents/cpp/proj/freefem -I/home/documents/cpp/mjm/num"
+export PKG_LIBS="-lpthread -lreadline "
+R CMD build "$pnm"
+R CMD INSTALL ${pnm}_1.0.tar.gz
+#---xxx---
+
+\end{lstlisting}
+
+\subsection{ Freefem++ interface }
+
+\begin{lstlisting}
+
+
+freefem_util -module  mjm_dscope_freefem
+
+
+
+# make new module 
+# https://doc.freefem.org/documentation/developers.html#a-first-example-myfunction-cpp
+make_ff_module()
+{
+fn="$1"
+#ff-c++ myfunction.cpp
+I=" -lpthread -lreadline -I. -I../datascope -I../../mjm/hlib -I../../mjm/num -I/home/ubuntu/dev/freefem/FreeFem-sources-4.12/src/fflib"
+# get deps
+echo making deps file first 
+g++ -fPIC  -c -g -MMD -MF $1.deps $I  -I/home/ubuntu/dev/freefem/install/ff-petsc/r/include -I/home/ubuntu/dev/freefem/install/lib/ff++/4.12/include/ $I  "$fn".cpp 
+#g++ -bundle -undefined dynamic_lookup -g "$fn".o -o ./"$fn".dylib
+
+if [ "$SKIP_MODULE" == "" ]
+then
+ff-c++ $I  "$fn".cpp
+fi
+
+#g++ -bundle  -undefined dynamic_lookup  -g "$fn".o -o ./"$fn".dylib
+} # make_ff_module
+
+
+
+\end{lstlisting}
+
+
+\subsection{ A simple c++ app }
+
+This is not a minimal example but the results should compare
+to the Freefem++ example to illustrate the (vaporware) ability
+of \mjmprod to compare similar data from various streams.
+
+The compile command on my local machine is echoed by the script
+and can be modified to suit any local install,  
+
+\begin{lstlisting}
+!2298
+. quickg++ -last
+using mjm_simple_1d_dd.h
+g++ -Wall -Wno-misleading-indentation -MMD -MF mjm_simple_1d_dd.deps -std=gnu++11 -DTEST_MJM_SIMPLE_1D_DD -I. -I../datascope -I../../mjm/hlib -I../../mjm/num -gdwarf-3 -O0 -x c++ mjm_simple_1d_dd.h -o mjm_simple_1d_dd.out -lpthread -lreadline
+mjm_simple_1d_dd.h: In instantiation of ‘void mjm_simple_1d_dd<Tr>::Run(const StrTy&, const StrTy&) [with Tr = Tr; mjm_simple_1d_dd<Tr>::StrTy = std::__cxx11::basic_string<char>]’:
+mjm_simple_1d_dd.h:794:44:   required from ‘void mjm_simple_1d_dd<Tr>::run(const StrTy&, const StrTy&) [with Tr = Tr; mjm_simple_1d_dd<Tr>::StrTy = std::__cxx11::basic_string<char>]’
+mjm_simple_1d_dd.h:1326:37:   required from here
+mjm_simple_1d_dd.h:891:13: warning: unused variable ‘cc’ [-Wunused-variable]
+  891 | const IdxTy cc=ComputeDn(dn,rv.dt,0);
+
+\end{lstlisting}
+
+\section{ Running the examples  }
+
+At this point, there should be a \mjmprod executable
+with a sample configuration file to begin listening on 
+a default fifo. This is invoked with the command, 
+
+\begin{lstlisting}
+./datascope.out -source listenraw.txt  2>&1 
+
+
+cat listenraw.txt 
+# start the display although not needed right wawy
+scope launch
+# data client with no parameters
+##dgram launch "ipv4s=192.168.4.1" 2 
+# server 
+#dgram launch "ipv4s=127.0.0.1" 3 
+rawfifo launch "ipv4s=127.0.0.1" 3 
+# client or data source a source is a source of course of course
+#dgram launch "ipv4s=127.0.0.1" 2 
+# heart beat send no params 
+#send  "chunks=sinewave"
+#scope saver
+#scope spr width=600;height=600;mpeg;mpeg_name=foodoo.mpeg;fps=30 
+#scope saver
+displayfifo
+
+\end{lstlisting}
+
+At this point, a blank display window should appear along
+with a command prompt("mjm>") and a lot of informational
+messages. Failure to start could be due to inability to link
+and running ldd on the executable may be a good starting point. 
+lsof should show the fifo is opened. 
+
+Obviously this needs to run to display the output of the below
+examples but all should run regardless of the state
+of \mjmprod. Ideally they will stop packaging data
+for export if the send que fills up but this inot implemented
+yet. Control facilities exist in the case of UDP that could stop
+sending absent a negoatiated listener but that too is not implemeted. 
+
+
+\subsection{ R }
+
+Probably the example of most widespread interst would
+be the R data source illustrated here. If the module was
+built and installed the following code should
+produce moving sine waves on the \mjmprod graphics screen.
+The current version has the copious informational messages
+suppressed but that can be restroed by rebuilding
+the package with the global muting variable flipped. 
+
+
+\mjmpicture{Rdscope.jpeg}{Output to \mjmprod using the R example}{Rdscope}
+%ls keep | more ffdscope.jpeg Rdscope.jpeg simdscope.jpeg
+
+
+\begin{lstlisting}
+cat dscope.R 
+
+#Rcpp::compileAttributes("mjmdscope")
+library("mjmdscope")
+nr=100.0
+nc=5
+df<- as.data.frame(matrix(ncol=nc,nrow=nr,data=0.0))
+#df<-data.frame(nrows=nr,cols=nc)
+for(k in 1:10000)
+{
+for(i in 1.0:nr)
+{
+
+for(j in 1.0:(nc-1))
+{
+df[i,j]=sin(.01*2.0*pi*j*i/nc+.0333*k*2*pi);
+}  # j
+df[i,nc]=1.0*(i)/nr;
+} # i 
+mjmdscope::mjmdscopesend(df)
+Sys.sleep(.2)
+} # k 
+str(df)
+\end{lstlisting}
+
+
+
+
+\subsection{ Freefem++ }
+
+This should demonstrate the simple time evolution of
+a diffusion problem with a central source region
+and a concentration dependent diffusivity. 
+The problem is documented in ctryptic form in 
+the configuration file for the following c++
+code which solves a similar problem using finite difference. 
+
+\mjmpicture{ffdscope.jpeg}{Output to \mjmprod using the Freefem++  example}{ffdscope}
+
+\begin{lstlisting}
+ 2360  FreeFem++ -ne ddglue1d.edp  -dt .1 -kdiff 20
+\end{lstlisting}
+
+
+\subsection{ A c++ app }
+The configuration file contains a terse description
+of a diffusion probablm nominally identical to the 
+above Freefem++ code. 
+
+\mjmpicture{simdscope.jpeg}{Output to \mjmprod using the simple c++ fd  example}{cppdscope}
+\begin{lstlisting}
+
+
+2330  ./mjm_simple_1d_dd.out "source sime1d.txt"  quit 2>&1
+
+cat sime1d.txt 
+# correct for factor of 2/d_sigma or avg pt distance ( 1000 lol) 
+add_point n=1000;d=.001
+check
+#kvp.get(m_nz,"nz"); kvp.get(m_ii,"nzed"); kvp.get(m_if,"nend");
+#kvp.get(m_dz,"dz"); kvp.get(m_q,"q"); kvp.get(m_mu,"mu");
+add_species TF nz=0;dz=0;q=0;mu=10;br0=.29999;bv0=0;br1=.3;bv1=1;br2=.6;bv2=1
+add_species f1 nz=1;dz=.0000100;q=0;mu=0
+add_species f1a nz=0;dz=.00005;q=0;mu=0
+add_species f2 nz=1;dz=.00005;q=0;mu=0
+add_species f2a nz=0;dz=.000001;q=0;mu=0
+#add_species f3 nz=1;dz=.00005;q=0;mu=0
+#add_species f3a nz=0;dz=.00001;q=0;mu=0
+#add_species f4 nz=1;dz=.05;q=0;mu=0
+#add_species f4a nz=0;dz=.01;q=0;mu=0
+add_species fgn nz=1;dz=.0001;q=0;mu=0
+add_species fb nz=0;dz=.0000001;q=0;mu=0
+add_reaction f1a f1 ; TF , 1.0e-1 -> f1a
+add_reaction f2a f2 ; f1a , 1.0e-1 -> f2a
+#add_reaction f3a f3 ; f2a , 1.0e-1 -> f3a
+#add_reaction f4a f4 ; f3a , 1.0e-1 -> f4a
+#add_reaction fb fgn ; f1a , 1.0e-0 -> fb
+add_reaction fb fgn ; f2a , 1.0e-0 -> fb
+dscope "rawfifo launch  2"
+list 
+setup
+# run n=0;dt=.01;sleep=0;itermod=100;geldof=fb;ef=20
+run n=0;dt=.01;sleep=0;itermod=100;geldof=fb;ef=2
+
+
+
+\end{lstlisting}
+
+
+
+\mjmtol{
+}
+
+
+\section{Conclusions}
+
+
+\section{Supplemental Information}
+
+\subsection{Computer Code}
+
+
+\begin{lstlisting}
+
+
+\end{lstlisting}
+\section{Bibliography}
+
+
+\bibliography{\mjmbasename,\mjmaddbio}
+\bibliographystyle{plainurl}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{acknowledgments} 
+
+% \input{generalack.tex}
+\begin{enumerate}
+\item Pubmed eutils facilities and the basic research it provides. 
+\item Free software including Linux, R, LaTex  etc.
+\item Thanks everyone who contributed incidental support. 
+\end{enumerate}
+
+\end{acknowledgments}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clearpage
+\appendix
+
+\begin{mdpicomment}
+
+\section{ Statement of Conflicts }
+ No specific funding was used in this effort and there are no relationships
+with others that could create a conflict of interest. I would like to develop
+these ideas further and have obvious bias towards making them appear 
+successful. Barbara Cade, the dog owner, has worked in the pet food industry
+but this does not likely create a conflict. We have no interest in the
+makers of any of the products named in this work.  
+
+\end{mdpicomment}
+
+\begin{mdpicomment}
+\section{About the Authors and Facility}
+This work was performed at a dog rescue run by Barbara Cade and
+housed in rural Georgia.  The author of this report 
+,Mike Marchywka,
+has a background in electrical engineering and 
+has done extensive research using free online literature sources.  
+I hope to find additional people interested in critically 
+examining the results and verify that they can be reproduced
+effectively to treat other dogs.
+
+\begin{comment}
+\begin{figure}[htb] 
+\centering
+\mjmed{ picture commented out to save space in drafts...  } 
+%\includegraphics[width=\picwidth]{me_on_brick.jpg}
+\caption{ 
+ }
+\end{figure}
+
+\end{comment}
+
+
+\section{Symbols, Abbreviations and Colloquialisms}
+
+\begin{comment}
+% grep "[A-Z][A-Z]" paradox.tex | sed -e 's/[^A-Z]/\n/g' | grep "[A-Z]" | sort | uniq -c
+% cat  paradox.tex | sed -e 's/  */\n/g' | grep "[A-Z][A-Z]"  | grep -v "[^A-Z]" | sort | uniq  |awk '{print $0" &   \\\\"; }'
+\end{comment}
+
+
+%\abbreviations{The following abbreviations are used in this manuscript:\\
+%\begin{table}
+\noindent
+\begin{tabular}{@{}ll}
+%SMVT & Sodium dependent Multi-Vitamin Transporter\\
+TERM & definition and meaning   \\
+\hline
+%TLA & Three letter acronym\\
+%LD & linear dichroism
+\end{tabular} % }
+%\end{table}
+
+% https://tex.stackexchange.com/questions/5957/bibtex-entry-for-white-papers-and-technical-reports
+
+\section{General caveats and disclaimer }
+\label{appendix:caveats}
+
+%\input{disclaimer-informal.tex}
+\input{disclaimer-gaslight.tex}
+\input{disclaimer-status.tex}
+
+\section{Citing this as a tech report or white paper }
+\label{appendix:citing}
+
+Note: This is mostly manually entered and not assured to be error free.
+
+This is tech report \mjmtrno. 
+
+\begin{table}[H] \centering
+\begin{tabular}{r|r|c|r}
+Version & Date & Comments  &  \\
+0.01 & \mjmmakedate  &  Create from empty.tex template  &  \\
+-  & \today & version  \mjmversion { }   \mjmtrno  &  \\
+1.0 & 20xx-xx-xx & First revision for distribution &  \\
+\end{tabular}
+\end{table}
+
+
+Released versions,
+
+build script needs to include empty releases.tex
+\begin{table}[H] \centering
+\begin{tabular}{|r|r|l|}
+Version & Date & URL    \\
+\hline
+\input{releases.tex}
+\hline
+\end{tabular}
+\end{table}
+
+
+
+
+
+% 2020-11-30 keep on same page 
+%\input{bibtex2.txt}
+
+\begin{minipage}{\linewidth}
+%\input{bibtex2.txt}
+%\input{bibtex3.txt}
+\mjmshowbib
+\end{minipage}
+
+
+
+
+\begin{comment}
+
+{@}TECHREPORT\{mmarchywka-\mjmtrno,
+
+  AUTHOR =        \{M.J. Marchywka\},
+
+  TITLE =         \{ \mjmtitle \},
+ 
+  NUMBER =        \{\mjmtrno\},
+  
+  VERSION =        \{\mjmversion\},
+
+  INSTITUTION =   \{  not institutionalized , independent\},
+
+  ADDRESS =       \{306 Charles Cox , Canton GA 30115\},
+
+  NOTE =          \{ May be recycled in appropriate media \},
+
+  DATE  =          \{\today\},
+
+  DAY  =          \{\mjmbibday\},
+
+  MONTH =         \{\mjmbibmo\},
+
+  YEAR  =         \{\mjmbibyear\},
+
+ % AUTHOR1EMAIL = \{marchywka@hotmail.com\},
+  AUTHOR1EMAIL = \{\mjmemail\},
+
+  AUTHOR1ID = \{orcid.org/0000-0001-9237-455X\},
+
+%   PAGES =         \{6\},
+  PAGES =         \{ \input{\mjmbasename.last_page} \},
+
+  CONTACT =       \{marchywka@hotmail.com\},
+
+  FILENAME =       \{\mjmbasename\}
+
+\}
+\end{comment}
+\vspace{1cm}
+Supporting files. Note that some dates,sizes, and md5's will change as this is
+rebuilt.
+
+This really needs to include the data analysis code 
+but right now it is auto generated picking up things from prior
+build in many cases 
+\lstinputlisting{\mjmbasename.bundle_checksums}
+\end{mdpicomment}
+\end{document}

@@ -1,0 +1,33 @@
+mjm_ff_phase_bound.out: mjm_ff_phase_bound.h ../../mjm/hlib/mjm_globals.h \
+ mjm_etch_info.h ../../mjm/hlib/mjm_thread_util.h mjm_string_kvp.h \
+ ../../mjm/hlib/mjm_collections.h ../../mjm/hlib/mjm_globals.h \
+ ../../mjm/hlib/mjm_string_tokenizer.h \
+ ../../mjm/hlib/mjm_generic_iterators.h ../../mjm/hlib/mjm_instruments.h \
+ ../../mjm/hlib/mjm_read_buffer.h ../../mjm/hlib/mjm_thread_util.h \
+ ../../mjm/hlib/mjm_format_text.h ../../mjm/hlib/mjm_read_buffer.h \
+ ../../mjm/hlib/mjm_misc_parse.h \
+ ../../mjm/hlib/mjm_data_model_error_log.h \
+ ../../mjm/hlib/mjm_block_matrix.h ../../mjm/hlib/mjm_logic_base.h \
+ ../../mjm/hlib/mjm_strings.h ../datascope/mjm_dscope_rawfifo.h \
+ ../datascope/mjm_pthread_que.h ../../mjm/hlib/mjm_canned_methods.h \
+ ../../mjm/hlib/mjm_char_mat.h ../../mjm/num/mjm_rational.h \
+ ../../mjm/hlib/mjm_cli_ui.h ../../mjm/hlib/mjm_fasta_ii.h \
+ ../../mjm/hlib/mjm_text_data.h ../../mjm/hlib/mjm_solvers.h \
+ ../../mjm/hlib/mjm_templates.h ../../mjm/hlib/mjm_io.h \
+ ../../mjm/hlib/mjm_interchanges.h ../../mjm/hlib/mjm_jdftx_base.h \
+ ../../mjm/hlib/mjm_dft_collection_data.h ../../mjm/hlib/mjm_csv_ops.h \
+ ../../mjm/hlib/mjm_collections.h ../../mjm/hlib/mjm_svg_writer.h \
+ ../../mjm/hlib/mjm_taxonomy_stuff.h ../../mjm/hlib/mjm_gen_viz.h \
+ ../../mjm/hlib/mjm_part_iterators.h ../../mjm/hlib/mjm_iterator_base.h \
+ mjm_string_kvp.h mjm_so_loader.h ../datascope/mjm_dscope_serial.h \
+ ../datascope/mjm_buffer_alloc.h \
+ ../../mjm/hlib/mjm_data_model_error_log.h \
+ ../../mjm/hlib/mjm_instruments.h ../../mjm/hlib/mjm_strings.h \
+ mjm_ff_mesh_adapt.h mjm_ff_mesh.h ../../mjm/hlib/mjm_block_matrix.h \
+ ../../mjm/hlib/mjm_pawnoff.h ../../mjm/hlib/mjm_blob.h mjm_ff_objects.h \
+ mjm_worm_blob.h mjm_affine_mesh_hood.h \
+ ../../mjm/hlib/mjm_tokenized_collections.h mjm_geo_contains.h \
+ ../../mjm/hlib/mjm_generic_iterators.h ../../mjm/hlib/mjm_cli_ui.h \
+ mjm_etchfront.h ../datascope/mjm_dscope_dgram.h mjm_ff_band.h \
+ mjm_versatile_point.h mjm_etch_point.h mjm_etch_curve.h \
+ ../../mjm/hlib/mjm_blob.h mjm_mesh_tape.h
