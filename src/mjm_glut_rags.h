@@ -4,6 +4,10 @@
 #include "mjm_globals.h"
 #include "mjm_thread_util.h"
 
+#include "mjm_index_buffer.h"
+#include "mjm_tokenized_points.h"
+#include "mjm_vector_shapes.h"
+#include "mjm_svg_render.h"
 #include "mjm_collections.h"
 #include "mjm_string_kvp.h"
 #include "mjm_so_loader.h"
@@ -90,8 +94,16 @@ typedef mjm_worm_blob<Tr,D> WORMBlob;
 typedef Ragged InputType;
 typedef IdxTy (Myt:: * p_add_fun_type ) (const InputType & r, const IdxTy flags) ; 
 typedef std::map<StrTy, p_add_fun_type> AddMap;
+// these are the points specified by user 
+typedef mjm_tokenized_points<Tr> TokPoints; 
+typedef typename TokPoints::PointEntry PointEntry;
+typedef mjm_vector_shapes<Tr> Shapes;
+typedef typename Shapes::shape_t Shape;
+typedef typename Shapes::point_t Point;
 
-
+typedef mjm_index_buffer<Tr,ModelInfo> ModelIndex;
+typedef typename ModelIndex::pool_t pool_t;
+//typedef mjm_svg_render<Tr> SvgRender;
 
 public:
 #define HAPIRC virtual IdxTy 
@@ -107,6 +119,7 @@ mjm_glut_rags() {Init();}
 mjm_glut_rags(const StrTy & src) {Init(src);}
 const StrTy srcname() const { return m_src; } 
 void  srcname(const StrTy & s ) { m_src=s; } 
+void pool(pool_t * p ) { m_data_idx.pool(p); } 
 ~mjm_glut_rags() {}
 ViewInfo& view() { return m_view; } 
 // add a rag to the contents
@@ -165,7 +178,8 @@ bool Bit(const IdxTy f, const IdxTy b) const  { return  ((f>>b)&1)!=0; }
 // should loop over map now 
 StrTy Dump(const IdxTy flags=0) {Ss ss;
 ss<<m_view.dump();
-ss<<MMPR(m_data.size());
+//ss<<MMPR(m_data.size());
+ss<<MMPR(m_data_idx.size());
   return ss.str(); }
 typedef typename mjm_thread_util<Tr>::mutex_vector MutexVector;
 
@@ -184,7 +198,9 @@ if (sz<3)
 MM_ERR(" received ragged too small "<<MMPR(r.size()))
  return 0;
 }
-// line zero is a comment 
+// line zero is a comment sort of 
+// it has to be of form "# id ... srcname"
+// where the last word is used for on-screen id etc. 
 // id on line 1 
 const StrTy ty=r[1][1];
 //if (ty=="oscilloscope") return AddOscilloscope(r,flags);
@@ -204,8 +220,10 @@ return 0;
 void MakeAddMap()
 {
 m_add_map["oscilloscope"]=&Myt::AddOscilloscope;
+m_add_map["ornate-points"]=&Myt::AddOrnate;
 m_add_map["ffmesh"]=&Myt::AddFFmesh;
 m_add_map["time-snap"]=&Myt::AddTimeSnap;
+m_add_map["svg"]=&Myt::AddSvg;
 
 
 } // MakeAddMap
@@ -365,7 +383,69 @@ AddNewModel(mi);
 
 return rc;
 } // AddTimeSnap
+IdxTy AddSvg(const input_type & r, const IdxTy flags) 
+{
 
+IdxTy sz=r.size();
+if (sz<3) 
+{
+MM_ERR(" too few lines for svg file "<<MMPR(r.size()))
+return BAD;
+}
+// should not be padded but just in case 
+while (sz>2)
+{
+const Line & l=r[sz-1];
+const IdxTy len=l.size();
+if (len) break;
+--sz; 
+}
+const Line & l=r[sz-1];
+const IdxTy len=l.size();
+if (len<1)
+{
+MM_ERR(" cant find svg "<<MMPR(sz))
+return BAD;
+}
+const StrTy& data=l[len-1];
+ModelInfo mi;
+mi.add_svg(data);
+AddNewModel(mi);
+return 0;
+} // AddSvg
+IdxTy AddOrnate(const input_type & r, const IdxTy flags) 
+{
+//MM_ERR(" adding ornate "<<MMPR2(__FUNCTION__,r.size()))
+// junk_bin
+ModelInfo mi;
+//ADDITOR
+// parameters can include aging and fading subserquent ones... 
+// TODO seg faiult assign probably no wrok 
+//mi.m_ornate_points= typename ModelInfo::TokPoints(r,0,0,0);
+mi.m_ornate_points.load(r,0,0,0);
+
+ADDITORC
+if (l[0]=="#")
+{
+if (len<2) continue;
+const StrTy & cmd=l[1];
+if (cmd=="params"){   AddParams(mi,l,len); continue; }
+//mi.add_params(l,2,len);
+if (cmd=="etc"){  mi.add_etc(l,2,len);  continue; }
+//if (cmd=="names") {  AddNames(mi,l,len); continue; }
+//MM_ONCE(" silently ignoring future comments like  "<<MMPR(cmd),)
+//continue;
+}  // # 
+
+} // ADDITROC 
+
+
+//if (cmd=="params"){   AddParams(mi,l,len); continue; } 
+//MM_ERR(MMPR(mi.m_ornate_points.size()))
+//} // ADDITOR
+AddNewModel(mi);
+return 0;
+} // AddOrnate
 IdxTy AddOscilloscope(const input_type & r, const IdxTy flags) 
 {
 ModelInfo mi;
@@ -388,25 +468,34 @@ AddNewModel(mi);
 return 0;
 } // AddOscilloscope
 
+// models are mde outside of queue and then added
+// when done although this requires a copy it keeps
+// out invalid and partials. 
 IdxTy AddNewModel(ModelInfo & mi, const IdxTy flags=0)
 {
 
+m_data_idx.push_back(mi);
+
+#if 0 
 EnterSerial(0);
+
 m_data.push_back(mi);
 IdxTy mdsz=m_data.size();
+// This is dumb it is 
 const IdxTy szlim=mi.m_szlim; // 10;
 if (mdsz>szlim)
 { // TODO need a different data struct of make a circular buffer
 // FIXME this is dum 
 Models  _data;
 if (m_debug) { MM_ERR(" trimming data stack "<<MMPR2(mdsz,szlim)) } 
+// This is dumb too it needs to be a circular queue.. 
 IdxTy sz=szlim;
 while (sz) { _data.push_back(m_data[mdsz-sz]); --sz; } 
 m_data=_data;
 } // size
 ExitSerial(0);
 
-
+#endif 
 
 
 return 0;
@@ -492,13 +581,14 @@ const auto & pj=p[j];
 Gf r=1.0;
 Gf g=1.0;
 Gf b=1.0;
-D fu=v.distance;
+//D fu=v.distance;
 int cx=j%3;
   glColor3f(r,g,b);     // Green
 if (cx==0)  glColor3f(1.0,0,0);     // Green
 else if (cx==1)   glColor3f(0,1.0,0);     // Green
 else   glColor3f(0,0,1.0);     // Green
 // distance doesn't work with line assf cuk 
+D fu=v.distance;
 Gf fukx=(pj.x-v.m_c[0])*fu;
 Gf fuky=(pj.y-v.m_c[1])*fu;
 Gf fukz=(pj.z-v.m_c[2])*fu;
@@ -513,6 +603,71 @@ Gf fukz=(pj.z-v.m_c[2])*fu;
 
 return 0;
 } // DrawTri 
+IdxTy DrawOrnatePoints(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
+{
+//MM_ERR(" drawing ornate ")
+auto& p=m.m_ornate_points;
+//MM_ERR(MMPR(p.size()))
+MM_LOOP(ii,p)
+{
+//MM_ERR(" point ")
+// ornate points 
+// this is a tokenized_point
+const PointEntry& pi=(*ii); 
+// these need to be translated internally.
+const StrTy & shape=p(pi.shape());
+//const StrTy & color=p(pi.color());
+// mjm_vector_shapes<Tr>
+Shape * pshape=(Shape*)pi.shapep();
+if (pshape==NULL)
+{
+MM_ERR(" no pshapep")
+continue;
+} // null 
+//MM_ERR(MMPR4(shape,pi.x(),pi.y(),pshape))
+//MM_ERR(MMPR(pi.dump()))
+DrawOrnateShape(pi,pshape,v,sdp);
+/*
+// size and place ok... 
+// maybe output vectors or something? 
+//glTranslatef(); 
+//glColor3f();//
+ glBegin(GL_LINE_LOOP);
+ glBegin(GL_POLYGON);
+v.doglutpos(glVertex3f,pi);
+glEnd();
+*/
+} // ii 
+
+return 0;
+} // DrawOrnatePoints
+IdxTy DrawOrnateShape(const PointEntry & pi,Shape * pshape, ViewInfo & v, DrawInfo * sdp)
+{
+Shape & s=*pshape;
+// size and place ok... 
+// maybe output vectors or something? 
+// FIXME the bastard coords- both glut and view have xforms, make this
+// confusing. Need to pick one but too time consuming for now. 
+//glTranslatef(); 
+//glColor3f();//
+// TODO use the color in shape this is dumb 
+glColor3f(pi.r(),pi.g(),pi.b() );//
+if (s.filled())  glBegin(GL_POLYGON);
+else  glBegin(GL_LINE_LOOP);
+// this has to be a translated shape or else translated... 
+MM_LOOP(ii,s)
+{
+//v.doglutpos(glVertex3f,pi);
+v.doglutpos(glVertex3f,(*ii).triple(pi.x(),pi.y(),pi.z(),pi.size()));
+} // ii 
+
+glEnd();
+
+
+return 0;
+} // DrawOrnateShape
+
+
 
 IdxTy DrawSeg(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
 {
@@ -609,25 +764,37 @@ virtual IdxTy Draw(scope_draw_param_type * sdp , const IdxTy flags)
 EnterSerial(0);
 ViewInfo & v=m_view;
 GlutUtil::start_view(v);
-const IdxTy szd=m_data.size();
-for(IdxTy i=0; i<szd; ++i)
+//const IdxTy szd=m_data.size();
+const IdxTy szd=m_data_idx.used();
+if (sdp) sdp->hist_size(szd);
+//for(IdxTy i=0; i<szd; ++i)
+for(int i=(szd-1); i>=0; --i)
 {
+if (sdp) sdp->hist_index(i);
 // TODO FIXME copy for threading issue... 
 // bno help ... 
 // this is organized by source so name collisions
 // or different type from one source not handled right
 // 
-ModelInfo&  m=m_data[i];
+// TODO this should draw newest last for Z-buffering lol 
+// need fase options etc. 
+//ModelInfo&  m=m_data[i];
+ModelInfo&  m=m_data_idx(i);
+// do this first as right now it obliterate entire background
+ DrawSvg(m,v,sdp); 
 // TOFO fix this... 
 if (m.m_segs.size()) DrawRealSeg(m,v,sdp); 
  DrawLine(m,v,sdp); 
  DrawTri(m,v,sdp); 
 DrawSeg(m,v,sdp); 
+DrawOrnatePoints(m,v,sdp); 
+
 //ExitSerial(0);
 } // i 
 if (szd)
 {
-ModelInfo&  m=m_data[szd-1];
+//ModelInfo&  m=m_data[szd-1];
+ModelInfo&  m=m_data_idx(szd-1);
 DrawParams(m,v,sdp);
 }  // szd
 
@@ -800,6 +967,41 @@ GlutUtil::end_screen_coords(vv);
 
 return 0; 
 } // DrawParams
+IdxTy DrawSvg(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
+{
+auto & sv= m.m_svgs;
+int w=glutGet(GLUT_WINDOW_WIDTH);
+int h=glutGet(GLUT_WINDOW_HEIGHT);
+MM_LOOP(ii,sv)
+{
+// not const as it renders 
+auto & svg=(*ii);
+// right now no rendering specs 
+// need to request a render first...
+Ss rr;
+rr<<"w="<<w;
+rr<<";";
+rr<<"h="<<h;
+svg.render_saved(rr.str(),0);
+if (svg.data())
+{
+// https://stackoverflow.com/questions/15871616/turning-picture-upside-down-when-using-gldrawpixels
+float zf=v.distance;
+glRasterPos2f(v.m_c[0],v.m_c[1]);
+glPixelZoom(1,-zf);
+// red and blue seem to be interchanged 
+//GLenum ty= GL_UNSIGNED_INT_8_8_8_8_REV;
+GLenum ty= GL_UNSIGNED_BYTE;
+//glDrawPixels(m_svg.w(),m_svg.h(),GL_RGBA, ty,m_svg.data());
+glDrawPixels(svg.w(),svg.h(),GL_BGRA, ty,svg.data());
+
+} // data 
+else MM_ERR(" svg no data ")
+} // ii 
+
+return 0;
+} // DrawSvg
+
 IdxTy DrawLine(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
 {
 
@@ -840,6 +1042,7 @@ return 0;
 void Init()
 {
 m_debug=0;
+m_data_idx.set_size(10);
   m_mutex_vector= MutexVector(3);;
  MakeAddMap();
 
@@ -860,9 +1063,11 @@ Init();
 StrTy m_src;
 ViewInfo m_view;
 ModelInfo m_background;
-Models  m_data;
+//Models  m_data;
+ModelIndex m_data_idx;
 AddMap m_add_map;
 IdxTy m_debug;
+//SvgRender m_svg;
 }; // mjm_glut_rags
 
 //////////////////////////////////////////////

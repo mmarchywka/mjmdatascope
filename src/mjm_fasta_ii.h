@@ -295,7 +295,7 @@ class fasta_file
 typedef fasta_file Myt;
 typedef std::vector<NameTy> Names;
 typedef std::vector<SeqTy> Seqs;
-
+typedef std::stringstream Ss; 
 class _streaming_state_buffer
 {
 public:
@@ -380,8 +380,26 @@ const StrTy & name(const IdxTy &i ) const { return m_names[i];}
 // compiler warning wtf
 const StrTy & name(const IdxTy &i ) { return m_names[i];}
 const Signature & sig(const IdxTy &i ) const { return m_sigs[i];}
-
-
+StrTy dump(const IdxTy flags=0) const
+{ Ss ss; 
+{ ss<<MMPR(size()); }
+if (flags&(1))  return ss.str(); 
+MM_SZ_LOOP(i,(*this),szf)
+{
+ss<<MMPR3(i,name(i),seq(i).length())<<";";
+} // i 
+return ss.str();
+} // dump 
+IdxTy remove_gt() 
+{
+IdxTy i=0;
+MM_SZ_LOOP(j,m_names,szn)
+{
+const bool isgt=m_names[j].c_str()[0]=='>';
+if (isgt){ m_names[j]=m_names[j].substr(1); ++i; } 
+} // j 
+return i;
+} // remove_gt
 private:
 // stupid line readers.. 
 enum {  MAXLEN=(1<<20)-2} ;

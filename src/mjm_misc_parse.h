@@ -80,6 +80,7 @@ public:
 mjm_misc_parse() {}
 ~mjm_misc_parse() {}
 
+static const bool is(const Iv&  m1,const Iv&  m2) { return (m1&m2)!=0; } 
 static const bool mask(const Ch c,const Iv&  m) { return (Lut(c)&m)!=0; } 
 static const Iv lut(const Ch c) { return Lut(c); } 
 static const Iv*  lut() { return Lut(); } 
@@ -121,6 +122,26 @@ enum { ALPHA=LC|UC } ;
 enum { ALPHANUM=LC|UC|DIGIT } ; 
 enum { DARK=LC|DIGIT|UC|PUNC|START|STOP|OPER } ; 
 enum { PRINT=LC|DIGIT|WHITE|UC|PUNC|EOL|START|STOP|OPER } ; 
+
+bool is_uc(const Iv iv ) const { return is(iv,UC); }  
+bool is_lc(const Iv iv ) const { return is(iv,LC); }  
+bool is_uc(const Ch c  ) const { return mask(c,UC); }  
+bool is_lc(const Ch c  ) const { return mask(c,LC); }  
+bool is_digit(const Ch c  ) const { return mask(c,DIGIT); }  
+bool is_alpha(const Iv iv ) const { return is(iv,ALPHA); }  
+bool is_digit(const Iv iv ) const { return is(iv,DIGIT); }  
+// zed length is false 
+bool is_uc(const Ch * p) const 
+{ while (*p) { if (!is_uc(*p)) return false; ++p;} return true; }
+// zed length is false 
+bool is_uint(const Ch * p) const 
+{ while (*p) {/* MM_ERR(MMPR(*p)) */  if (!is_digit(*p)) return false; ++p;} return true; }
+// no scientific notation of actual parsing. 
+bool is_float(const Ch * p) const 
+{ while (*p) { if (!is_digit(*p)&&(*p!='.')&&(*p!='-')&&(*p!='+')) return false; ++p;} return true; }
+bool is_floate(const Ch * p) const 
+{ while (*p) { /* MM_ERR(MMPR(*p)) */ if (!is_digit(*p)&&(*p!='E')&&(*p!='e')&&(*p!='.')&&(*p!='-')&&(*p!='+')) return false; ++p;} return true; }
+
 
 //enum{ BAD=CharLUT::BAD};
 #if 0

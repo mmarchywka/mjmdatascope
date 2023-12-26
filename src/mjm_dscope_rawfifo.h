@@ -133,6 +133,8 @@ mjm_dscope_rawfifo() {Init(); }
 ~mjm_dscope_rawfifo() {Free();}
 void debug(const IdxTy d) { m_debug=d; }
 IdxTy send(const Ragged & r, const IdxTy flags=0) {return Send(r,flags); } 
+bool send_note() const { return false;} 
+bool read_note() const { return false;} 
 bool full() const  { return m_sq.full(); } // not const due to mutex but mutable? 
 IdxTy get( Ragged & r, const IdxTy flags=0) {return Get(r,flags); } 
 StrTy*  next(const IdxTy flags=0 ) {return Next(flags); } 
@@ -220,7 +222,9 @@ return rc;
 IdxTy Send(const Ragged & r, const IdxTy flags=0)
 {
 //IdxTy rc=0;
-Ss ss; ss<<r.dump_ssv(); 
+Ss ss; ss<<r.dump_ssv_unsafe(); 
+//MM_ERR(MMPR(ss.str()))
+//MM_DIE(" ok here ")
 if (false){  MM_ERR(" SENDING "<< MMPR2(r.size(),ss.str())) }
 return Send(ss.str(),flags); 
 } // Send
@@ -230,7 +234,7 @@ IdxTy Send(const StrTy  & s, const IdxTy flags=0)
 IdxTy rc=0;
 StrTy * p= new StrTy(s);
 m_sq.push(p);
-MM_ERR(MMPR3(__FUNCTION__,s.length(),m_sq.size()))
+if ( send_note()) { MM_ERR(MMPR3(__FUNCTION__,s.length(),m_sq.size())) }
 //MM_ERR(" queeded pkt to send "<<MMPR2(m_sq.size(),pload->size()))
 return rc;
 } // Send 
@@ -258,7 +262,8 @@ try {
 if (!pload) return BAD;
 StrTy s=StrTy(*pload); // ->payload,pload.size());
 Ss ss(s);
-r.load(ss);
+//r.load(ss);
+r.load_stop(ss,">FILE");
 if (false) { MM_ERR("GETTT "<< MMPR2(r.size(),r.dump_ssv())) } 
 } catch (...) { MM_ERR(" error in Get ") } 
 if (m_debug) MM_ERR(MMPR2(__FUNCTION__,r.size()))
@@ -295,7 +300,7 @@ while (true)
 //MM_ERR("  AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA getting nex t");
 //Payload *  pload = m_sq.next();
 StrTy *  pload = m_sq.next();
-MM_ERR(MMPR2(__FUNCTION__,(*pload).size()))
+if (read_note()) { MM_ERR(MMPR2(__FUNCTION__,(*pload).size())) } 
 //MM_ERR(" AAAAAAAAAAAAAAAAAAAAAAAAAAA have next "<<MMPR(pload));
 if (pload==0) break; 
 try{ 
@@ -318,6 +323,7 @@ return rc;
 IdxTy StartDataServer(const StrTy & s,const IdxTy flags )
 {
 IdxTy rc=0;
+IdxTy dumb=0;
 MM_ERR(MMPR2(__FUNCTION__,flags))
 BaseParams sk(s);
 StrTy fifo_name=m_default_fifo_name; // "/tmp/datascope_fifo.txt";
@@ -350,7 +356,7 @@ if (n>0)
 	} 
 if (n==0) usleep(1000);
 if (n>0) MM_ERR(MMPR3(__FUNCTION__,n,rd.size()))
-if (n<0) break;
+if (n<0){ MM_ERR(MMPR(n))  break; }
 } // true
 } catch (...)
 {
@@ -361,9 +367,17 @@ if (m_debug) MM_ERR(" have string "<< MMPR2(__FUNCTION__,rd.size()))
 if (rd.size())
 {
 StrTy * pload= new StrTy(rd.buf()); 
+//MM_ERR(MMPR((*pload)))
+//MM_DIE(" ok or no")
 m_rq.push(pload);
 // need to prune m_rq from front ...
-} else usleep(2000000);
+} else
+{ 
+++dumb;
+MM_ERR(" dumb sleep "<<MMPR(dumb))
+//usleep(2000000);
+usleep(200);
+}
 
 } // truel 
 delete[] p;

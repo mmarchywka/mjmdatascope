@@ -107,6 +107,13 @@ typedef uint64_t KeyCode;
 
 static int myatoi(const StrTy & s ) { return myatoi(s.c_str()); } 
 static int myatoi(const char * c) { return ::strtol(c,0,0); }
+static int myatoix(const char * c) { 
+if (*c=='#') 
+{
+return myatoi(StrTy("0x")+StrTy(c+1)); 
+}
+return ::strtol(c,0,0); 
+}
 
 //typedef mjm_sparse_matrix<D> MySparse;
 }; // 
@@ -1922,6 +1929,14 @@ public:
 
 static int myatoi(const StrTy & s ) { return myatoi(s.c_str()); } 
 static int myatoi(const char * c) { return ::strtol(c,0,0); }
+static int myatoix(const char * c) { 
+if (*c=='#') 
+{
+return myatoi(StrTy("0x")+StrTy(c+1)); 
+}
+return ::strtol(c,0,0); 
+}
+
 
 public :
 //mjm_linc_graph():m_dmel(new Dmel()) {Init();}

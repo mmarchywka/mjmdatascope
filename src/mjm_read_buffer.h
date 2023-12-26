@@ -84,12 +84,43 @@ const IdxTy  space() const  { return m_size-m_pc; }
 const IdxTy  alloc() const  { return m_size; } 
 void release()  {LetGo(); } //  Release(); } 
 Ch * buf() { return m_ptr; } 
+// const ptr or const data pointed at?
 const Ch * buf() const  { return m_ptr; } 
 Ch * next() { return m_ptr+m_pc; } 
 void appended(const IdxTy n ) { m_pc+=n; } 
 void push_back(const Ch _c) { append(_c); } 
 void append(const Ch _c) { Ch c[2]; c[0]=_c; c[1]=0; Append(c,1); }
 IdxTy write(std::ostream & os, const IdxTy flags ) {os.write(m_ptr,m_pc); return 0;  }
+// https://stackoverflow.com/questions/116038/how-do-i-read-an-entire-file-into-a-stdstring-in-c
+IdxTy write_file(const StrTy fn, const IdxTy flags=0)
+{
+std::ofstream ofs(fn);
+return write(ofs,flags); 
+}
+IdxTy read_file(const StrTy fn, const IdxTy flags=0)
+{
+std::ifstream ifs(fn.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
+    std::ifstream::pos_type fileSize = ifs.tellg();
+if (fileSize==0)
+{
+MM_ERR(" empty of missing file "<<MMPR(fn))
+return ~0; 
+}
+    ifs.seekg(0, std::ios::beg);
+    //vector<char> bytes(fileSize);
+    //ifs.read(bytes.data(), fileSize);
+// it would make more sense to expand and then append directly 
+ //Ch * p= new Ch[fileSize];
+ //   ifs.read(p, fileSize);
+//	Append(p,fileSize);
+IdxTy tgt=m_pc+fileSize+1;
+Expand(tgt);
+   ifs.read(m_ptr+m_pc, fileSize);
+//memcpy(m_ptr+m_pc,c,len);
+m_pc+=fileSize;
+return 0; 
+} // read_file
+
 // TODO there is no assurance this has an eos 0 or even allocated
 // space at this point, not pushing valid string start? 
 // put next available location on the mark stack 

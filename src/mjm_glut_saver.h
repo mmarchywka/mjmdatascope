@@ -175,9 +175,11 @@ m_codec_id=BAD;
 MM_ERR(MMPR2(m_codec_id,AV_CODEC_ID_MPEG1VIDEO))
 offscreen=0;
 // output_formats = PPM_BIT | LIBPNG_BIT | FFMPEG_BIT;
+output_formats=0;
 m_fps=30;
 m_width=128;
 m_height=128;
+m_stuffer=3;
 manual_start=false;
 sk.get(m_fn_mpeg,"mpeg_name");
 sk.get(m_codec_id,"mpeg_codec_id");
@@ -186,6 +188,7 @@ sk.get(m_width,"width");
 sk.get(m_height,"height");
 sk.get(output_formats,"output_formats");
 sk.get(manual_start,"manual");
+sk.get(m_stuffer,"stuffer");
 { bool x=false; sk.get(x,"mpeg"); if (x) output_formats|=FFMPEG_BIT; } 
 { bool x=false; sk.get(x,"ppm"); if (x) output_formats|=LIBPNG_BIT; } 
 { bool x=false; sk.get(x,"png"); if (x) output_formats|=PPM_BIT; } 
@@ -212,7 +215,7 @@ output_formats|=FFMPEG_BIT; }
 IdxTy offscreen;
 IdxTy output_formats;
 StrTy m_fn_mpeg;
-IdxTy m_codec_id,m_fps,m_width,m_height;
+IdxTy m_codec_id,m_fps,m_width,m_height,m_stuffer;
 bool manual_start;
 }; // _save_params  
 public:
@@ -592,13 +595,13 @@ if (!paused)
 {
 	  frame->pts = nframes;
         ffmpeg_encoder_glread_rgb(&rgb, &pixels, sp.m_width, sp.m_height);
-        ffmpeg_encoder_encode_frame(rgb);
+MM_ILOOP(dummy, sp.m_stuffer) {frame->pts=nframes;    ffmpeg_encoder_encode_frame(rgb); ++nframes; } 
 } // paused 
 	MM_STATUS(" x to stop, mpeg frame "<<MMPR2(paused, nframes))   
  }
 else if (m_mpeg_state!=0){ ffmpeg_encoder_finish(); free(rgb); } 
 #endif
-    nframes++;
+//    nframes++;
 return 0; 
 //    if (model_finished()) exit(EXIT_SUCCESS);
 }

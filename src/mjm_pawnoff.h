@@ -177,6 +177,7 @@ typedef Blob blob;
 mjm_pawnoff() { Init(); }
 ~mjm_pawnoff() { Cleanup(); }
 void clean() { Cleanup(); }
+void verify_temps(const bool x) {  m_verify_temps_gone=x;}
 void debug(const IdxTy n ) { m_debug=n; }  
 IdxTy  debug()const  { return  m_debug; }  
 IdxTy view(const StrTy & h)
@@ -263,6 +264,42 @@ if (!dfile) dest=StrTy(cout);
 else { cout.save(dest); }
 return rc;
 }// cmd_exec
+StrTy sexc(IdxTy & rc, const StrTy &cmd)
+{
+StrTy rv;
+const IdxTy _rc=simple_cmd_exec(rv,StrTy(),cmd,4);
+rc=_rc;
+return rv;
+}
+IdxTy simple_cmd_exec(StrTy & dest, const StrTy & s, const StrTy &cmd, const IdxTy flags)
+{
+const bool always= Bit(flags,0);
+const bool file= Bit(flags,1);
+const bool notrailingcrlf= Bit(flags,2); // 4 
+const bool dfile= Bit(flags,3); /// 8
+const bool errnonzed= !Bit(flags,4); /// 16
+Blob d,err,cout;
+StrTy _cmd;
+//if (file) { _cmd="cat \""+s+"\" |"+cmd; }
+if (file) { _cmd=cmd; d.load(s); }
+else { d=s; _cmd=cmd; }
+IdxTy rc=fileio(cout,err,d,_cmd,3);
+const bool wrong=(rc!=0)||(err.size());
+if (always||(wrong)) { MM_ERR(MMPR3(dest,s,dfile)<< MMPR4(file,notrailingcrlf,flags,rc)<<MMPR4(cmd,StrTy(cout),StrTy(err),StrTy(d))) }
+if (notrailingcrlf) {
+IdxTy ncrlf= cout.no_trailing_crlf();
+if (always) { MM_ERR(MMPR(ncrlf)) }
+ }
+const bool reterr=errnonzed&&wrong;
+Blob & retblob=reterr?err:cout;
+if (!dfile) dest=StrTy(retblob);
+else { retblob.save(dest); }
+return rc+err.size();
+}// simple_cmd_exec
+
+
+
+
 
 
 
@@ -470,12 +507,13 @@ IdxTy m_debug;
 void Cleanup()
 {
 const bool norem= (mjm_global_flags::mm_delete_temps );
-MM_ERR(" pawnoff cleanup "<<MMPR2(norem,m_files.size()))
+if (m_verify_temps_gone) {
+MM_ERR(" pawnoff cleanup "<<MMPR2(norem,m_files.size())) } 
 if (!norem  ) return;
 
 MM_LOOP(ii,m_files)
 {
-MM_ERR(" removing "<<MMPR((*ii)))
+if ( m_verify_temps_gone ) {  MM_ERR(" removing "<<MMPR((*ii))) } 
 std::remove((*ii).c_str());
 
 } // files
@@ -483,6 +521,7 @@ std::remove((*ii).c_str());
 } // Cleanup 
 void Init()
 {
+m_verify_temps_gone=true;
 m_ext=".pawnoff";
 m_width=120;
 m_nl="\n";
@@ -878,7 +917,8 @@ memcpy(b,&buffer[0],cnt);
 return 0; 
 }
 
-
+// MEMBERS
+bool m_verify_temps_gone;
 
 }; // mjm_pawnoff
 

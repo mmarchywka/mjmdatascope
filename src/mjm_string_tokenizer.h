@@ -67,11 +67,22 @@ typedef IdxTy _coded_type;
 typedef std::map<_public_type, _coded_type> Fmap;
 typedef std::vector<_public_type> Rmap;
 public:
+enum {BAD=~0};
 typedef Myt mapped_type;
 string_tokenizer():BADINT("invalid") {}
 typedef _public_type public_type;
 typedef _coded_type coded_type;
+// decode the int n to the string if it is a  valid idx
+
 const public_type&  operator()( const coded_type &  n ) const {if ( n<m_vec.size())  return m_vec[n]; return BADINT;  }
+// note this makes a copy of the vector element into the other
+// string s instead of just returning a ptr, 
+const IdxTy  operator()( public_type & s, const coded_type &  n ) const {if ( n>=m_vec.size())  return BAD; s=m_vec[n]; return 0;  }
+// note that ptrs are not stable if vector is modieied.. 
+void operator()( const public_type * & p, const coded_type &  n ) const {if ( n<m_vec.size())  p=&m_vec[n];  }
+
+
+
 const coded_type&  operator()( const char *  k  )  
 { return (*this)(public_type(k)); } 
 const coded_type&  operator()( const public_type & k  )  {
@@ -83,6 +94,9 @@ m_vec.push_back(k);
  return m_map[k];  // TODO just to return a ref lol?
 
 }
+// return true if this word has been coded or isin vocabulary
+bool have(const public_type &k) const{return m_map.find(k)!=m_map.end();} 
+
 typedef std::vector<coded_type> coded_vector;
 typedef std::vector<public_type> public_vector;
 
@@ -238,6 +252,7 @@ default:
 void clear() { m_map.clear(); m_vec.clear(); } 
 
 private:
+// MEMBERS 
 Fmap m_map;
 Rmap m_vec;
 StrTy BADINT;

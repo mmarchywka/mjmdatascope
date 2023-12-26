@@ -191,7 +191,47 @@ const IdxTy sz=data.size();
 for (IdxTy i=0; i<sz; ++i ) data(i)=(*this)(i,col);
 }
 
+D dot_cols(const IdxTy i, const IdxTy j)
+{
+D x=0;
+MM_ILOOP(k,ny()) { x+=(*this)(k,i)*(*this)(k,j); }
+return x;
+}
+class _triple_type
+{
+typedef std::stringstream Ss; 
+public: 
+_triple_type() :i(0),j(0),v(0){}
+_triple_type( const IdxTy _i,const IdxTy _j, const  D&  _v ) 
+	:i(_i),j(_j),v(_v){}
+bool operator<(const _triple_type & that) const { return v<that.v;}
+StrTy dump() const { Ss ss; ss<<MMPR3(i,j,v); return ss.str(); } 
+IdxTy i,j; D v;
+}; // _triple_type
 
+typedef _triple_type triple_type;
+static bool Bit(const IdxTy f, const IdxTy b) { return (0!=(f&(1<<b))); } 
+template <class Tt> void  to_triples( Tt & tt, const IdxTy flags)
+{
+const bool non_zed=Bit(flags,0);
+const bool upper_tria=Bit(flags,1);
+const bool lower_tria=Bit(flags,2);
+const bool exclude_diag=Bit(flags,3);
+const IdxTy i0=lower_tria?(exclude_diag?(1):0):0;
+const IdxTy iif=ny(); //lower_tria?(exlude_diag?(i-1):i):ny();
+for(IdxTy i=i0; i<iif; ++i) 
+{
+const IdxTy j0=upper_tria?(exclude_diag?(i+1):i):0;
+const IdxTy jf=lower_tria?(exclude_diag?(i-1):i):nx();
+for(IdxTy j=j0; j<jf; ++j) 
+{
+const D& v = (*this)(i,j);
+if ((v!=0)||!non_zed) tt.push_back(triple_type(i,j,v));
+} // j 
+} // i 
+
+
+} // to_triples 
 
 Myt transpose() const
 {
@@ -484,6 +524,8 @@ return p;
 }
 D * realloc(const D* that)  
 {
+// TODO moving the delete after memcpy allow self copy
+// but also increases peak memory usage.. 
 delete [] m_ptr;
 //MM_ERR(info_string())
 //MM_ERR(" size is "<<m_sizes[0])

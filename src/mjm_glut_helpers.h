@@ -3,6 +3,11 @@
 
 #include "mjm_globals.h"
 #include "mjm_thread_util.h"
+
+#include "mjm_tokenized_points.h"
+#include "mjm_svg_render.h"
+
+
 // TODO FIXME should use template move this crap out 
 #include "mjm_hot_zones.h"
 
@@ -71,13 +76,33 @@ typedef std::map<StrTy,Elements> Scenes;
 
 // accumlate hot zones with actions etc. 
 typedef mjm_hot_zones<Tr>  HotZones;
+
+
 class _draw_info
 {
 
 public:
 typedef HotZones hot_type;
-hot_type m_hz;
+_draw_info() { Init(); }
+// i or n in a chrono sequence 
+void hist_index(const IdxTy n) {m_hist=n;  } 
+IdxTy hist_index()const  {return m_hist;  } 
+void hist_size(const IdxTy n) {m_hist_cnt=n;  } 
+IdxTy hist_size()const  {return m_hist_cnt;  } 
+// total number of actives 
+void actives(const IdxTy n) { m_act_cnt=n; } 
+IdxTy actives()const  {return  m_act_cnt; } 
+// this one
+void active(const IdxTy n) { m_act=n; } 
+IdxTy active()const  {return m_act; } 
+void Init()
+{m_act_cnt=0;
+m_act=0;
 
+}
+hot_type m_hz;
+IdxTy m_act_cnt,m_act;
+IdxTy m_hist_cnt,m_hist;
 
 }; // _draw_info
 class _key_info
@@ -99,6 +124,8 @@ typedef std::vector<G> Vec;
 public:
 _view() {Init(); }
 void reset() { Init(); } 
+void reset(const StrTy & s ) { Init(s); } 
+StrTy encode(const IdxTy flags=0) { return Encode(flags);}
 const IdxTy vidx() const { return m_vidx; }
 void  vidx(int d )  { int x=m_vidx+d; if (x<0) x=0; m_vidx=x;  }
 void mov(const D dx, const D dy,const D dz)
@@ -117,6 +144,42 @@ m_focus[1]=sin(theta)*sin(phi);
 m_focus[2]=cos(theta);
 
 }
+template < class Tf, class Tp> void doglutpos(Tf * f, const Tp & p)
+{
+ 
+D fu=distance;
+Gf fukx=(p.x()-m_c[0])*fu;
+Gf fuky=(p.y()-m_c[1])*fu;
+Gf fukz=(p.z()-m_c[2])*fu;
+//glVertex3f(fukx,fuky,fukz);//upper-right corner
+(*f)(fukx,fuky,fukz);//r
+} // doglutpos
+
+StrTy Encode(const IdxTy flags=0) { 
+BaseParams kvp;
+StrTy s;
+kvp.encode(s,"vifx",m_vidx);
+return s;} // Encode
+void Init(const StrTy & s,const IdxTy flags)
+{
+const bool reinit=!Bit(flags,0);
+BaseParams kvp(s);
+if (reinit) Init();
+kvp.get(m_vidx,"vidx");
+kvp.get(m_scale[0],"scalex");
+kvp.get(m_scale[1],"scaley");
+kvp.get(m_scale[2],"scalez");
+kvp.get(m_focus[0],"focusx");
+kvp.get(m_focus[1],"focusy");
+kvp.get(m_focus[2],"focusz");
+kvp.get(m_up[0],"upx");
+kvp.get(m_up[1],"upy");
+kvp.get(m_up[2],"upz");
+kvp.get(theta,"theta");
+kvp.get(phi,"phi");
+kvp.get(distance,"distance");
+
+} // Init
 void Init()
 {
 m_vidx=5;
@@ -253,11 +316,18 @@ class _seg_desc : public std::vector<_point_desc>
 class _junk_bin
 {
 
+typedef mjm_svg_render<Tr>  SvgRender;
 public:
 _junk_bin(): m_code(0),m_szlim(10) {}
 void add_point(const D & x, const D & y, const D & z=0)
 { _point_desc p(x,y,z); m_points.push_back(p); } 
+void add_svg(const StrTy& s)
+{
+SvgRender x;
+x.load(s.c_str(),s.length(),0);
+m_svgs.push_back(x);
 
+}
 void add_seg(const IdxTy s, const D & x, const D & y, const D & z, const
 color_type & ct)
 { _point_desc p(x,y,z,ct); 
@@ -272,6 +342,18 @@ m_params[l[i]]=l[i+1];
 } // i 
 
 } // add_names
+void add_etc( const Line & l, const IdxTy ii,const IdxTy len )
+{
+for(IdxTy i=ii; i<(len-1); i+=2)
+{
+m_etc[l[i]]=l[i+1];
+} // i 
+
+} // add_etc 
+
+
+
+
 void add_names( const Line & l, const IdxTy ii, const IdxTy len )
 {
 //const IdxTy ii=2;
@@ -284,8 +366,9 @@ m_params[ss.str()]=l[i];
 }// add_params
 
 
+typedef mjm_tokenized_points<Tr>  TokPoints;
 
-
+typedef std::vector<SvgRender> SvgVec;
 typedef std::vector<_point_desc> PointVec;
 typedef std::vector<_seg_desc> SegVec;
 typedef std::vector<_text_desc> StrVec;
@@ -294,17 +377,21 @@ void clear() { m_strings.clear(); m_points.clear(); m_segs.clear();
 }
 StrVec m_strings;
 PointVec m_points;
+TokPoints m_ornate_points;
 SegVec m_segs;
+SvgVec m_svgs;
 IdxTy m_code;
 IdxTy m_szlim;
 Parameters m_params;
+Parameters m_etc;
+
+
 }; // _junk_bin
 typedef _junk_bin junk_bin_type;
 
 private:
 mjm_glut_helpers() {}
 ~mjm_glut_helpers() {}
-
 
 
 // these things need mutexes.... 

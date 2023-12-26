@@ -426,7 +426,8 @@ StrTy s=StrTy(*pload); // ->payload,pload.size());
 //pload->payload(ss.str().c_str(),ss.str().length());
 //m_sq.push(pload);
 Ss ss(s);
-r.load(ss);
+//r.load(ss);
+r.load_stop(ss,">FILE");
 //MM_ERR(r.dump_ssv())
 } catch (...) { MM_ERR(" error in Get ") } 
 if (false) MM_ERR(MMPR2(__FUNCTION__,r.size()))

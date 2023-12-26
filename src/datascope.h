@@ -10,9 +10,16 @@
 // complains if included later doh 
 // although this should only be in glut_scope NOT
 // here in datascope. 
+// save is all deprecated crap needs to be fixed 
 //#include "mjm_glut_saver.h" 
 #include "mjm_glut_scope_ii.h"
 #include "mjm_glut_rags.h" 
+//#include "mjm_svg_render.h" 
+
+// the pool makes a problem... 
+// for the rags objects
+#include "mjm_glut_helpers.h"
+#include "mjm_object_pool.h"
 #endif
 
 #include "mjm_data_model_error_log.h"
@@ -210,7 +217,15 @@ typedef mjm_glut_rags<Tr> RagScene;
 typedef mjm_glut_rags_map<Tr,StrTy> SceneMap;
 typedef mjm_glut_scope_ii<Tr> GlutScope;
 typedef mjm_glut_saver<Tr> Saver;
+//typedef mjm_svg_render<Tr> SvgRender;
 typedef typename Saver::save_params_type Sp;
+// added for recycling 
+// while this is the model it is defeined in view stuff
+typedef mjm_glut_helpers<Tr> GlutUtil;
+typedef typename  GlutUtil::junk_bin_t ModelInfo;
+typedef mjm_object_pool<Tr,ModelInfo> ModelPool;
+
+
 #endif
 
 typedef mjm_dscope_dgram<Tr> DgramID;
@@ -1038,9 +1053,10 @@ if (r.size() == 0 ) return 0; //  continue;
 // this needs to get a string key from r[0][len-1] 
 // or last entry on line 0 
 RagScene * rs=m_scenes[r];
+rs->pool(&m_pool);
 const StrTy srcname=rs->srcname();
 if (false) MM_ERR(MMPR(rs->dump()))
-
+// fck this needs a model info here ... 
 rs->add(r,0);
 // this needs to create a glut_rag 
 // 
@@ -1253,6 +1269,7 @@ void Init()
 m_debug=0;
 #ifndef NO_DSCOPE_GRAPHICS
 GlutScope::p(& m_glut);
+m_pool.set_size(100);
 #endif
 m_done=false;
 m_stop_send=false;
@@ -1315,7 +1332,9 @@ else { MM_ERR(" m_dmel is null ") }
 IdxTy m_debug;
 #ifndef NO_DSCOPE_GRAPHICS
 GlutScope m_glut;
+// TODO the pool belongs in the SceneMap maybe?
 SceneMap m_scenes;
+ModelPool m_pool;
 Saver m_saver;
 #else
 public:

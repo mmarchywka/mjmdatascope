@@ -69,6 +69,9 @@ credit(const std::string & src, const std::string & v) { mm_credit(src,v); }
 }; // mjm_global_credits
 
 
+#define MM_GETSET(t,x,y) const t & x()const  { return y; } void  x(const t & asdf )  { y=asdf; } 
+
+
 #define MM_WAIT {std::cerr<<" wiat for input "<<__FILE__<<__LINE__<<"\n"; std::cerr.flush(); StrTy x;  std::cin >> x; }
 #define MM_MARK __FILE__<<__LINE__
 #define MM_MARKF __FUNCTION__<<__FILE__<<__LINE__
@@ -85,7 +88,6 @@ credit(const std::string & src, const std::string & v) { mm_credit(src,v); }
 
 //void enter_serial() { pthread_mutex_lock( mutex1() ); }
 //void exit_serial() { pthread_mutex_unlock( mutex1() ); }
-
 
 ///////////////////////////////////////////
 

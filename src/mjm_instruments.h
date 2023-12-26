@@ -1821,7 +1821,8 @@ const StrTy & cmd() { return w[0]; }
 const StrTy & line() { return m_li.line(); } 
 const Words& words() const { return w; }
 const Words& words2() const { return w2; }
-const IdxTy params() {if (w.size()==0) return 0;  return w.size()-1; } 
+const IdxTy size() const  {return w.size(); } 
+const IdxTy params()const {if (w.size()==0) return 0;  return w.size()-1; } 
 const StrTy  wif(const IdxTy i)  const 
 { if (i<w.size()) return w[i]; return StrTy(""); } 
 

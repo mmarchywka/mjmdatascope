@@ -97,7 +97,7 @@ return p;
 bool full()  const 
 {
 EnterSerial(COUNT_MUX);
- const bool x  =(m_que.size()>m_limit_size) ; 
+ const bool x  =(m_que.size()>=m_limit_size) ; 
 ExitSerial(COUNT_MUX);
 return x; 
 }// full

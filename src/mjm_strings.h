@@ -690,6 +690,34 @@ if ( j==ncs) return i;
 return -1;
 
 }
+// lens>lencs
+static int indexOf(const ChTy * s, const int lens, const ChTy *cs, const int lencs)
+{
+const int ncs=lencs;
+const int  lim=lens-ncs+1;
+// eh, I take it int R uint doesn't work with int<0???
+for ( int i=0; i<lim; ++i)
+{
+
+int j=0;
+for(; j<ncs; ++j) 
+ if ( s[i+j]!=cs[j]) { break; }
+if ( j==ncs) return i; 
+}
+return -1;
+
+}
+
+// delsize 
+// indexOf returns offset if found or -1 if not.
+// same here up to user to sort out size.. 
+static int contains(const ChTy * s, const int lens, const ChTy *cs, const int lencs)
+{
+if (lens<lencs) return indexOf(cs,lencs,s,lens);
+if (lens>lencs) return indexOf(s,lens,cs,lencs);
+return indexOf(s,lens,cs,lencs);
+} // contains 
+
 
 
 // return the first char past the string or zero
@@ -932,6 +960,32 @@ StrTy x(c+start);
 delete[]  c;
 return x;
 }
+
+static StrTy ws_remove(const StrTy & s, IdxTy n=~0 )
+{
+IdxTy cnt=0;
+const char * p=s.c_str();
+const IdxTy sz=s.length();
+char c[sz+1];
+//int  level=0;
+//IdxTy nsofar=0;
+for (IdxTy i=0; i<sz; ++i) {  char  b=p[i];
+//if (nsofar>=n) { c[cnt]=b; ++cnt; continue; } 
+//if ( b=='[') { ++level; continue;}
+//if ( b==']') {++nsofar;  --level; continue;}
+//if ( level==0) { c[cnt]=b; ++cnt; }
+if (b==' ') b='_';
+c[cnt]=b; ++cnt;
+}
+c[cnt]=0;
+return StrTy(c);
+}
+
+
+
+
+
+
 // BraceRemove 
 static StrTy brace_remove(const StrTy & s, IdxTy n=~0 )
 {

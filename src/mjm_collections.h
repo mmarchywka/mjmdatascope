@@ -559,6 +559,19 @@ const IdxTy len=m_lines[i].size();
 for(IdxTy j=0; j<len; ++j) ss<<MMPR2(j,m_lines[i][j]);
 return ss.str();
 }
+void loadkvp(const StrTy & s, const StrTy &  sep, const IdxTy flags=0)
+{
+const bool  debug=Bit(flags,0);
+const bool  is_str=Bit(flags,1);
+//void load(CommandInterpretter & li,const bool debug=false )
+std::istream * is=0;
+if (is_str) is= new Ss(s);
+else is=new std::ifstream(s);
+CommandInterpretter  li(is);
+MM_ERR(" loadkvp not implemented yet needs to use parse_partial or similar")
+load(li,debug);
+delete is;
+} // loadkvp
 void load(const StrTy & fn ,const bool debug=false)
 {
 //std::map<StrTy,IdxTy> m;
@@ -725,6 +738,75 @@ void load(CommandInterpretter & li,const bool debug=false )
 
 } // load (CommandInterpretter .. 
 
+// https://stackoverflow.com/questions/3203452/how-to-read-entire-stream-into-a-stdstring
+void loadFromStream(StrTy & s, std::istream & stream)
+{ 
+//  std::string s;
+
+  std::streampos p = stream.tellg();  // remember where we are
+
+  stream.seekg(0, std::ios_base::end); // go to the end
+  std::streamoff sz = stream.tellg() - p;  // work out the size
+if (sz==0) { s=""; return ; }  
+ stream.seekg(p);        // restore the position
+
+  s.resize(sz);          // resize the string
+  stream.read(&s[0], sz);  // and finally, read in the data.
+
+} // loafFromStream
+
+// load up to a stop word finish that line and
+// put reset of stream on next linke 
+bool load_stop(std::istream & is,const StrTy & stop,const bool debug=false )
+{
+CommandInterpretter li(&is);
+ConmfigureReader(  li,debug);
+    while (li.nextok())
+    {
+        const IdxTy sz=li.size();
+		if ( m_ignore_hash) if (sz>0) if (li.words()[0].c_str()[0]=='#') continue;
+		if (m_min_words>m_max_words) m_min_words=sz;
+		Add(li.words());
+	 const IdxTy lsz=m_lines.back().size();	
+	if (lsz>0) if (m_lines.back()[0]==stop) 
+{
+StrTy s;
+loadFromStream(s,is);
+Line l;
+l.push_back(s);
+Add(l);
+return  true; 
+}
+		if (debug) { MM_ERR(MMPR4(li.line(),sz,(*this).size(),li.ok())) }
+    } // nextok()
+return false; 
+} // load_stop
+void  noparse_stop(std::istream & is,const StrTy & stop,const bool debug=false )
+{
+if (stop.length()==0)
+{
+StrTy s;
+loadFromStream(s,is);
+Line l;
+l.push_back(s);
+//MM_ERR(MMPR(s))
+Add(l);
+return ;
+} // no stop
+const IdxTy BSZ=1<<10; // safe for stack space  
+char c[BSZ];
+Ss ss;
+while(is.good()&&!is.eof())
+{
+is.getline(&c[0],BSZ);
+ss<<StrTy(c,is.gcount());
+if (!is.fail()) ss<<CRLF;
+} // while 
+Line l;
+l.push_back(ss.str());
+Add(l);
+} // noparse_stop 
+
 void load(std::istream & is,const bool debug=false )
 {
 // IdxTy lines=0;
@@ -834,7 +916,7 @@ Add(li.words());
 
 }
 
-
+// writing saving and dumping output 
 
 void write_file(const StrTy & fn, const IdxTy  flags=0)  const
 {
@@ -1027,6 +1109,7 @@ return x;
 // TODO FIXME add a latex output option 
 // should have a sg to dump to a srream 
 StrTy dump_ssv( ) const { return dump(1+2+128+1024," "); } 
+StrTy dump_ssv_unsafe( ) const { return dump(1+2," "); } 
 StrTy dump( const IdxTy flags=0,const StrTy &  s=" ") const
 {
 Ss ss;

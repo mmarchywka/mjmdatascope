@@ -4,7 +4,10 @@
 #include "mjm_globals.h"
 #include "mjm_thread_util.h"
 
+// the include order here is a problem
+// TODO find out wth saver does to make render harder to compile
 #include "mjm_glut_saver.h"
+#include "mjm_svg_render.h"
 
 #include "mjm_glut_helpers.h"
 #include "mjm_glut_rags.h"
@@ -13,6 +16,8 @@
 #include "mjm_so_loader.h"
 //#include "mjm_glut_elements.h"
 
+// for the rags objects
+#include "mjm_object_pool.h"
 
 #include <freeglut.h> 
 
@@ -89,6 +94,11 @@ typedef mjm_glut_helpers<Tr> GlutUtil;
 typedef typename  GlutUtil::draw_info_t DrawInfo;
 typedef typename  GlutUtil::key_info_t KeyInfo;
 typedef typename  GlutUtil::ptr_info_t PtrInfo;
+
+// not used here just for pooling 
+typedef typename  GlutUtil::junk_bin_t ModelInfo;
+typedef mjm_object_pool<Tr,ModelInfo> ModelPool;
+
 
 //typedef typename  GlutUtil::draw_info_t scope_draw_param_type;
 //typedef typename  GlutUtil::key_info_t scope_key_param_type;
@@ -213,6 +223,7 @@ typedef _mjm_gl_status MyGLStatus;
 
 //typedef typename DrawInfo::hot_type::layout_type lt;
 typedef typename DrawInfo::hot_type GuiLayout;
+typedef mjm_svg_render<Tr> SvgRender;
 //typedef typename Tr::FlagTy; 
 // typedef typename Tr::MyBlock  MyBlock;
 public:
@@ -236,6 +247,7 @@ bool alive() const { return m_alive; }
 // this is a source of confiusion.. 
 static Myt * p( Myt * pin=0)  { static Myt * x=(pin)?pin: new Myt(); return x; } 
 // add a scene - this creates ptr ownership issues, smartptr?
+// this comes from datascope and it has not parse
 RagScene *  add( RagScene * p, const StrTy name, const IdxTy flags) 
 { return Add(p,name,flags);  } 
 IdxTy actives() const { return m_actives.size();}
@@ -261,7 +273,8 @@ RagScene* pold=0;
 if (ii!=m_scenes.end()) pold=(*ii).second;
 m_scenes[name]=p; 
 //if (actives()==0) 
-	activate(name,0); 
+if (m_deactive.find(name)==m_deactive.end()) {	activate(name,0); 
+if (pold==0) BuildPopupMenu(); } 
 glutPostRedisplay();
 ExitSerial(0);
 return pold; 
@@ -273,6 +286,9 @@ void  Activate( const StrTy name, const IdxTy flags)
 auto ii=m_scenes.find(name);
 if (ii!=m_scenes.end())
 	if (m_actives.find(name)==m_actives.end())  m_actives[name]=(*ii).second;
+{auto ii=m_deactive.find(name);
+if (ii!=m_deactive.end()) m_deactive.erase(ii);
+}
 glutPostRedisplay();
 } // Activate  
 
@@ -280,10 +296,39 @@ glutPostRedisplay();
 void  Deactivate( const StrTy name, const IdxTy flags) 
 { 
 // TODO FIXME need a mutex here.. 
-auto ii=m_actives.find(name);
-if (ii!=m_scenes.end()) m_actives.erase(ii);
+{auto ii=m_actives.find(name);
+if (ii!=m_actives.end()) {  m_actives.erase(ii); m_deactive[name]=(*ii).second; } 
+
+}
 glutPostRedisplay();
 } // Deactivate  
+
+
+void  Select( const StrTy name, const IdxTy flags) 
+{ 
+// TODO FIXME need a mutex here.. 
+auto ii=m_scenes.find(name);
+if (ii!=m_scenes.end())
+	if (m_select.find(name)==m_select.end())  m_select[name]=(*ii).second;
+{auto ii=m_deselect.find(name);
+if (ii!=m_deselect.end()) m_deselect.erase(ii);
+}
+glutPostRedisplay();
+} // Activate  
+
+
+void  Deselect( const StrTy name, const IdxTy flags) 
+{ 
+// TODO FIXME need a mutex here.. 
+{auto ii=m_select.find(name);
+if (ii!=m_select.end()) {  m_select.erase(ii); m_deselect[name]=(*ii).second; } 
+
+}
+glutPostRedisplay();
+} // Deactivate  
+
+
+
 
 bool Bit(const IdxTy f, const IdxTy b) const  { return  ((f>>b)&1)!=0; }
 // should loop over map now 
@@ -303,6 +348,7 @@ static void _MouseButton(int button, int state, int x, int y)
 static void _MouseMotion(int x, int y) { p()->MouseMotion(x,y); } 
 static void _AnimateScene(void) { p()->AnimateScene(); } 
 static void _SelectFromMenu(int idCommand) { p()->SelectFromMenu(idCommand); } 
+static void _SelectFromSubMenu(int idCommand) { p()->SelectFromSubMenu(idCommand); } 
 static void _SpecialInput(int key, int x, int y) { p()->SpecialInput(key,x,y); } 
 static void _Keyboard(unsigned char key, int x, int y) { p()->Keyboard(key,x,y); } 
 
@@ -372,17 +418,43 @@ if (false)
 GlutUtil::end_screen_coords();
 
 } // DrawTexts
+void DealWithLocals(const DrawInfo & di)
+{
+// this is purely for testing or maybe some other thing late
+// the working one is in rags.h 
+if (m_svg.data())
+{
+// upside down wtf.. 
+//glPixelZoom(1,-1);
+// red and blue seem to be interchanged 
+GLenum ty= GL_UNSIGNED_INT_8_8_8_8_REV;
+//GLenum ty= GL_UNSIGNED_INT_8_8_8_8;
+//GLenum ty= GL_UNSIGNED_BYTE;
+//glDrawPixels(m_svg.w(),m_svg.h(),GL_RGBA, ty,m_svg.data());
+glDrawPixels(m_svg.w(),m_svg.h(),GL_BGRA, ty,m_svg.data());
+//glPixelZoom(1,1);
+
+} // data 
+
+} // DealWithLocals
 
 void Display(void)
 {
 GlutUtil::start_view_zed();
 DrawInfo di;
+di.actives(m_actives.size());
 //MM_ERR(" in display  "<<MMPR(this))
 // TODO FIXME needs mutex 
-MM_LOOP(ii,m_actives) (*ii).second->draw(&di,0);
+IdxTy i=0;
+MM_LOOP(ii,m_actives){
+di.active(i);
+ (*ii).second->draw(&di,0);
+++i;
+}
 // finally add the  hot zone texts 
 DrawTexts(di);
-
+// svg Svg
+DealWithLocals(di);
 glutSwapBuffers();
 //glFlush();
 //MM_ERR(" flushing ")
@@ -413,6 +485,21 @@ MyGLStatus & gls= m_gl_status;
    glLoadIdentity();
   glutPostRedisplay();
 }
+IdxTy ResetViews(const IdxTy flags)
+{
+IdxTy  dispu=false;
+const bool reset_all=!Bit(flags,0);
+EnterSerial(0);
+if (reset_all) 
+	{ MM_LOOP(ii,m_scenes) {++dispu;  ((*ii).second->view()).reset(); }  } 
+else 
+	{ MM_LOOP(ii,m_actives) {++dispu;  ((*ii).second->view()).reset(); }  }
+//if (m_active!=0 ) { auto & v=m_active->view(); v.reset(); }
+ ExitSerial(0);
+if (dispu)   glutPostRedisplay();
+return dispu;
+} // ResetViews 
+
 
 // https://stackoverflow.com/questions/14378/using-the-mouse-scrollwheel-in-glut
 void MouseButton(int button, int state, int x, int y)
@@ -420,15 +507,18 @@ void MouseButton(int button, int state, int x, int y)
 //MM_ERR(MMPR4(button,state,x,y))
 MyGLStatus & gls= m_gl_status;
 // pressing wheel gives this 
-bool dispu=false;
+//bool dispu=false;
+// this is apparently the GLTU middle butteon and now
+// is a menu trigger 
 if (button==1) if (state==GLUT_DOWN)
 {
-EnterSerial(0);
-MM_LOOP(ii,m_actives) {dispu=true;  ((*ii).second->view()).reset(); } 
+ResetViews(0);
+//EnterSerial(0);
+//MM_LOOP(ii,m_actives) {dispu=true;  ((*ii).second->view()).reset(); } 
 //if (m_active!=0 ) { auto & v=m_active->view(); v.reset(); }
- ExitSerial(0);
+// ExitSerial(0);
 
-if (dispu)   glutPostRedisplay();
+//if (dispu)   glutPostRedisplay();
 
 return; 
 }// reset
@@ -459,9 +549,10 @@ D x,y; IdxTy flags; */
 
 EnterSerial(0);
 //if (m_active==0 ) { ExitSerial(0); return; } 
-dispu=false;
+bool dispu=false;
 MM_LOOP(ii,m_actives)
 {
+dispu=true;
 auto & v=(*ii).second->view();
 // Wheel reports as button 3(scroll up) and button 4(scroll down)
    if ((button == 3) || (button == 4)) // It's a wheel event
@@ -560,15 +651,72 @@ void AnimateScene(void)
  */
  // Force redraw
 //MM_ERR(" animate redisplay ")  
-usleep(100000);
+usleep(200000);
 if (!false)  glutPostRedisplay();
 }
+enum { POPUP_RESET,POPUP_TOGGLE_VIS };
+//static 
+// needs to be rebuilt when new scenes added. 
+// TODO needs a mutex for m_scenees... 
+// active, deactive to avoid auto-active, 
+// select for manipulation 
+
+int BuildPopupMenu (void)
+{
+glutDetachMenu(GLUT_MIDDLE_BUTTON);
+//  int menu;
+  m_vismenu = glutCreateMenu (Myt::_SelectFromSubMenu);
+int i=0;
+MM_LOOP(ii,m_scenes) { glutAddMenuEntry((*ii).first.c_str(),i); ++i; }
+  m_selmenu = glutCreateMenu (Myt::_SelectFromSubMenu);
+MM_LOOP(ii,m_scenes) { glutAddMenuEntry((*ii).first.c_str(),i); ++i; }
+
+  m_menu = glutCreateMenu (Myt::_SelectFromMenu);
+glutAddMenuEntry("Reset Views \tl",POPUP_RESET);
+//if (m_scenes.size()) glutAddSubMenu("Visibility \tl",POPUP_TOGGLE_VIS);
+if (m_scenes.size()) glutAddSubMenu("Visibility \tl",m_vismenu);
+if (m_scenes.size()) glutAddSubMenu("Select \tl",m_selmenu);
+
+ // glutAddMenuEntry ("Toggle polygon fill\tp", MENU_POLYMODE);
+ // glutAddMenuEntry ("Toggle texturing\tt", MENU_TEXTURING);
+ // glutAddMenuEntry ("Exit demo\tEsc", MENU_EXIT);
+if (!false)   glutAttachMenu (GLUT_MIDDLE_BUTTON);
+  return m_menu;
+}
+
+
+void SelectFromSubMenu(int idCommand)
+{
+const IdxTy nscenes=m_scenes.size(); // TODO hazard? 
+MM_ERR(" sbimenu  "<<MMPR2(idCommand,nscenes))
+bool sel=(idCommand>=nscenes);
+
+auto ii=m_scenes.begin();
+if (sel) idCommand-=nscenes;
+while (idCommand) { ++ii; --idCommand;  } 
+if (sel)
+{
+if (m_select.find((*ii).first)!=m_select.end())
+Deselect((*ii).first,0);
+else Select((*ii).first,0);
+
+} // sel 
+else
+{
+if (m_actives.find((*ii).first)!=m_actives.end())
+Deactivate((*ii).first,0);
+else Activate((*ii).first,0);
+} // ! sel 
+
+
+} // SelectFromSubMenu
 void SelectFromMenu(int idCommand)
 {
 MM_ERR(" could have a menu for this ")
-/*  switch (idCommand)
+  switch (idCommand)
     {
-    case MENU_LIGHTING:
+		case POPUP_RESET : { ResetView(0); break; } 
+ /*   case MENU_LIGHTING:
       g_bLightingEnabled = !g_bLightingEnabled;
       if (g_bLightingEnabled)
          glEnable(GL_LIGHTING);
@@ -589,8 +737,8 @@ MM_ERR(" could have a menu for this ")
     case MENU_EXIT:
       exit (0);
       break;
-    }
  */
+    }
  // Almost any menu selection requires a redraw
   glutPostRedisplay();
 }
@@ -737,18 +885,6 @@ case ' ' : { ResetView(0); break; }
   glutPostRedisplay();
 } // Keyboardj
 
-
-static int BuildPopupMenu (void)
-{
-  int menu;
-  menu = glutCreateMenu (Myt::_SelectFromMenu);
- // glutAddMenuEntry ("Toggle lighting\tl", MENU_LIGHTING);
- // glutAddMenuEntry ("Toggle polygon fill\tp", MENU_POLYMODE);
- // glutAddMenuEntry ("Toggle texturing\tt", MENU_TEXTURING);
- // glutAddMenuEntry ("Exit demo\tEsc", MENU_EXIT);
-  return menu;
-}
-
 IdxTy  ResetView(const IdxTy flags)
 {
 EnterSerial(0);
@@ -813,8 +949,10 @@ glutInitDisplayMode ( GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
  // glutIdleFunc (0);
   // Create our popup menu
 // TODO create hot-area menu 
-  //BuildPopupMenu ();
+// can do both now... 
+  BuildPopupMenu ();
 //if (false)   glutAttachMenu (GLUT_RIGHT_BUTTON);
+//if (!false)   glutAttachMenu (GLUT_MIDDLE_BUTTON);
   // Get the initial time, for use by animation
 #ifdef _WIN32
   last_idle_time = GetTickCount();
@@ -836,6 +974,8 @@ m_alive=false;
 
 void Free()
 {
+// TODO FIXME menu etc?
+
 
 //delete[] g_lightPos;
 } //Free
@@ -850,6 +990,13 @@ m_thread=0;
 m_gl_status.setup();
 //m_active=0;
 m_psaver=0;
+m_menu=BAD;
+//m_submenu=BAD;
+m_vismenu=BAD;
+m_selmenu=BAD;
+const StrTy svgstr="";
+// merely for testing stuff can remove m_svg etc or use for bakcground 
+if (false) { m_svg.render(svgstr,0); }
 } // Init
 
 
@@ -858,17 +1005,21 @@ StrTy m_product;
 volatile bool m_alive=false; 
 volatile bool m_displayed=false; 
 ThreadId m_thread;
+int m_menu,m_vismenu,m_selmenu;
 //volatile 
 //Scenes m_scenes;
 //StrTy m_scene;
 //Views m_views;
 //RagScene * m_active;
+//ModelPool m_pool;
 // These are just pointers... 
-RagSceneMap m_scenes,m_actives;
+RagSceneMap m_scenes,m_actives,m_deactive,m_select,m_deselect;
 MyGLStatus m_gl_status;
 Saver * m_psaver;
 Sp m_save_params;
 GuiLayout m_gui;
+// tacked in
+SvgRender m_svg;
 }; // mjm_glut_scope_ii
 
 //////////////////////////////////////////////
