@@ -1,0 +1,5 @@
+# start the display although not needed right wawy
+scope launch
+#rawfifo launch "ipv4s=127.0.0.1" 3 
+#displayfifo
+
