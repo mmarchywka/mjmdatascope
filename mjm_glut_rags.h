@@ -183,7 +183,7 @@ const IdxTy szd=m_data_idx.used();
 for(IdxTy i=0; i<szd; ++i)
 {
 ModelInfo&  m=m_data_idx(i);
-if (m.m_strip.size())  return m;
+if (m.strip_d().size())  return m;
 } 
 return m_data_idx(0);
 } // amodel
@@ -253,6 +253,8 @@ m_add_map["ffmesh"]=&Myt::AddFFmesh;
 m_add_map["time-snap"]=&Myt::AddTimeSnap;
 m_add_map["heatmap"]=&Myt::AddHeatmap;
 m_add_map["svg"]=&Myt::AddSvg;
+m_add_map["decorations"]=&Myt::AddDecorations;
+m_add_map["molecule"]=&Myt::AddMolecule;
 
 
 } // MakeAddMap
@@ -388,8 +390,8 @@ if (cmd=="etc"){  mi.add_etc(l,2,len);  continue; }
 // add flag for extra_vertex_data as fespace values are on the vertex lines
 //fmesh.read_ff_mesh(r,StrTy(),2,0);
 //fmesh.read_ff_mesh(r,StrTy(),startline,8);
-mi.m_ff_mesh.read_ff_mesh(r,StrTy(),startline,8);
-mi.m_ff_mesh.compile();
+mi.ff_mesh().read_ff_mesh(r,StrTy(),startline,8);
+mi.ff_mesh().compile();
 
 MM_ERR(" done making mi for  adding ffmesh" )
 AddNewModel(mi);
@@ -513,7 +515,7 @@ ModelInfo mi;
 // parameters can include aging and fading subserquent ones... 
 // TODO seg faiult assign probably no wrok 
 //mi.m_ornate_points= typename ModelInfo::TokPoints(r,0,0,0);
-mi.m_ornate_points.load(r,0,0,0);
+mi.ornate_points().load(r,0,0,0);
 
 ADDITORC
 if (l[0]=="#")
@@ -551,6 +553,16 @@ ModelInfo mi;
 // TODO seg faiult assign probably no wrok 
 //mi.m_ornate_points= typename ModelInfo::TokPoints(r,0,0,0);
 //mi.m_ornate_points.load(r,0,0,0);
+ExtractHdrInfo(mi,r,flags);
+mi.load_heatmap(r,flags);
+AddNewModel(mi);
+return 0;
+} // AddHeatmap
+
+IdxTy ExtractHdrInfo(ModelInfo & mi,const input_type & r,const IdxTy flags )
+{
+
+
 ADDITORC
 if (l[0]=="#")
 {
@@ -565,13 +577,35 @@ continue;
 }  // # 
 break; // only parse headers here.. 
 } // ADDITROC 
-mi.load_heatmap(r,flags);
 //if (cmd=="params"){   AddParams(mi,l,len); continue; } 
 //MM_ERR(MMPR(mi.m_ornate_points.size()))
 //} // ADDITOR
-AddNewModel(mi);
+
+ return 0; 
+
+} // ExtractHdrInfo
+
+IdxTy AddDecorations(const input_type & r, const IdxTy flags) 
+{
+ModelInfo mi;
+mi.m_src=m_src;
+mi.m_type="decorations";
+ExtractHdrInfo(mi,r,flags);
+mi.add_decorations(r,flags);
+AppendModel(mi,flags);
 return 0;
-} // AddHeatmap
+} // AddDecorations
+IdxTy AddMolecule(const input_type & r, const IdxTy flags) 
+{
+ModelInfo mi;
+mi.m_src=m_src;
+mi.m_type="molecule";
+mi.add_molecule(r,flags);
+AppendModel(mi,flags);
+return 0;
+} // AddMolecule
+
+
 
 IdxTy AddStripChart(const input_type & r, const IdxTy flags) 
 {
@@ -715,7 +749,7 @@ IdxTy DrawMesh(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
   glColor3f(1,1,1);     // white default for mesh  
 // this can't work since it subtracts m_c center lol 
 //v.doglutpos(glColor3f,1.0,1.0,1.0);
-auto& p=m.m_ff_mesh;
+auto& p=m.ff_mesh_d();
 const StrTy sin=m.etc("kvp");
 BaseParams kvp(sin);
 const IdxTy ndofs=p.size(3);
@@ -764,7 +798,7 @@ IdxTy DrawTri(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
 {
  glBegin(GL_TRIANGLES);
 
-auto p=m.m_points;
+auto p=m.points_d();
 for(IdxTy j=0; j<p.size(); ++j)
 {
 const auto & pj=p[j];
@@ -786,13 +820,28 @@ v.doglutpos(glVertex3f,fukx,fuky,fukz);
 
 return 0;
 } // DrawTri 
+IdxTy DrawMolecule(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
+{
+
+//m.m_molecule.draw(m,v,sdp);
+m.molecule_d().draw(m,v,sdp);
+return 0;
+} // DrawMolecule
+IdxTy DrawDecorations(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
+{
+
+m.decorations_d().draw(m,v,sdp);
+
+return 0;
+} // DrawDecorations 
+
 IdxTy DrawStrip(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
 {
-m.m_strip.draw_points(m,v,sdp);
+m.strip().draw_points(m,v,sdp);
 // need lock on the changed flag 
 if (m_grat_changed) 
-{ m_grat_changed=0; m.m_graticule.config(m_grat_config); }
-m.m_graticule.draw(m,v,sdp);
+{ m_grat_changed=0; m.graticule_d().config(m_grat_config); }
+m.graticule_d().draw(m,v,sdp);
 
 return 0;
 } // DrawStrip
@@ -800,7 +849,7 @@ return 0;
 IdxTy DrawOrnatePoints(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
 {
 //MM_ERR(" drawing ornate ")
-auto& p=m.m_ornate_points;
+auto& p=m.ornate_points_d();
 //MM_ERR(MMPR(p.size()))
 MM_LOOP(ii,p)
 {
@@ -855,7 +904,8 @@ return 0;
 IdxTy DrawSeg(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
 {
  glBegin(GL_LINES);
-auto p=m.m_points;
+// note no ref doh
+auto p=m.points_d();
 for(IdxTy j=0; j<p.size(); ++j)
 {
 const auto & pj=p[j];
@@ -950,7 +1000,8 @@ if (m.m_segs.size()) DrawRealSeg(m,v,sdp);
 DrawSeg(m,v,sdp); 
 DrawOrnatePoints(m,v,sdp); 
 DrawStrip(m,v,sdp); 
-
+DrawMolecule(m,v,sdp);
+DrawDecorations(m,v,sdp);
 //ExitSerial(0);
 } // i 
 if (szd)
@@ -1012,12 +1063,12 @@ IdxTy code=0;
 const IdxTy sz=12;
 D x=0;
 D y=0;
-const IdxTy np=m.m_params.size();
+const IdxTy np=m.params_d().size();
 const IdxTy nl=2;
 D dy=1.0/(nl+np);
 //sdp->m_hz.add_text(x,y,sz,"MJMDatascope 1",ctv[0],this,code);
 y+=dy; // 1.0/(nl+np);
-MM_LOOP(ii,m.m_params)
+MM_LOOP(ii,m.params_d())
 {
 ++code; // k v start at 1 with src at zero 
 const StrTy & k=(*ii).first;
@@ -1070,7 +1121,7 @@ if (pass==1) GlutUtil::begin_screen_coords(vv);
 // glClear(GL_COLOR_BUFFER_BIT);
 IdxTy n=0;
 glColor3f(1,1,1);
-MM_LOOP(ii,m.m_params)
+MM_LOOP(ii,m.params_d())
 {
 
 glColor3f(1,1,1);
@@ -1133,7 +1184,7 @@ return 0;
 } // DrawParams
 IdxTy DrawHeat(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
 {
-auto & hm= m.m_heatmap;
+auto & hm= m.heatmap_d();
 int w=glutGet(GLUT_WINDOW_WIDTH);
 int h=glutGet(GLUT_WINDOW_HEIGHT);
 int rows=hm.rows();
@@ -1359,7 +1410,7 @@ IdxTy DrawLine(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
 
 
     glBegin(GL_LINE_STRIP); //starts drawing of points
-auto p=m.m_points;
+auto p=m.points_d();
 for(IdxTy j=0; j<p.size(); ++j)
 {
 const auto & pj=p[j];

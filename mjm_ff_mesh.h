@@ -144,7 +144,7 @@ IdxTy make_mesh(const StrTy & ptsfile, const StrTy &sin, const IdxTy flags)
 { return MakeMesh(ptsfile,sin,flags); } 
 IdxTy change_boundary_numbers(const IdxTy flags)
 { return ChangeBoundaryNumbers(flags); } 
-template < class Tp> void get_triangle( IdxTy  & v, Tp & coords, const IdxTy i, const IdxTy n)
+template < class Tp> void get_triangle( IdxTy  & v, Tp & coords, const IdxTy i, const IdxTy n) const
 { GetTriangle( v, coords,  i, n); } 
 
 const Verticies & get_verticies() const { return m_verticies; }
@@ -293,7 +293,7 @@ return 0;
 
 
 ////////////////////////////////////////
-template < class Tp> void GetTriangle( IdxTy  & v, Tp & coords, const IdxTy i, const IdxTy n)
+template < class Tp> void GetTriangle( IdxTy  & v, Tp & coords, const IdxTy i, const IdxTy n) const 
 {
 //wb.capacity(szet*m_tri.size());
 //IdxTy i=0; 

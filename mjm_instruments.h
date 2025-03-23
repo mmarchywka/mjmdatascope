@@ -461,6 +461,7 @@ m_words.clear();
 // can add quotes and comments and crap later 
 // danger will robinson this does not update n if there is nothing there, need to check
 //while (ok(&ss)) { ss>>n; m_words.push_back(n); }
+//MM_ERR(" ASSFUCK "<<MMPR(m_splitter))
 switch (m_splitter)
 {
 case 1: { parse_full(m_words,line,m_sep); break; } 

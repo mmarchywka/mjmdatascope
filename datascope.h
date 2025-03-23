@@ -469,6 +469,18 @@ MM_ERR(" return from "<<MMPR(__FUNCTION__) )
 
 
 
+void cmd_modify(Cip & cip , LocalVar & lv )
+{
+const StrTy cmd=cip.cmd();
+const StrTy sin=cip.p1;
+//const StrTy s=cip.p2;
+const IdxTy flags=myatoi(cip.wif(2));
+MM_ERR(MMPR4(__FUNCTION__,sin,cmd,flags))
+m_glut.modify(sin,flags);
+
+} // cmd_modify
+
+
 
 #endif
 
@@ -529,18 +541,6 @@ if (cmd=="launch") { auto wtf=x.launch(s,flags); MM_ERR(wtf)  }
 //if (cmd=="wait") { StrTy x; std::cin>> x ; }
 MM_ERR(" return from cmd_rawfifo")
 } // cmd_rawfifo
-
-void cmd_modify(Cip & cip , LocalVar & lv )
-{
-const StrTy cmd=cip.cmd();
-const StrTy sin=cip.p1;
-//const StrTy s=cip.p2;
-const IdxTy flags=myatoi(cip.wif(2));
-MM_ERR(MMPR4(__FUNCTION__,sin,cmd,flags))
-m_glut.modify(sin,flags);
-
-} // cmd_modify
-
 // send stdin to a  ragged and send somewhere  
 // this cn fork is the commands are not coming from stdin,
 // not sure if source works from cmdline...
@@ -730,7 +730,6 @@ m_cmd_map[StrTy("err-msg")]=&Myt::cmd_err_msg;
 m_cmd_map[StrTy("source")]=&Myt::cmd_source;
 
 m_cmd_map[StrTy("quit")]=&Myt::cmd_quit;
-m_cmd_map[StrTy("modify")]=&Myt::cmd_modify;
 m_cmd_map[StrTy("cm")]=&Myt::cmd_cm;
 m_cmd_map[StrTy("banner")]=&Myt::cmd_banner;
 m_cmd_map[StrTy("set-param")]=&Myt::cmd_set_param;
@@ -749,6 +748,7 @@ m_cmd_map[StrTy("sendfifo")]=&Myt::cmd_sendfifo;
 m_cmd_map[StrTy("set")]=&Myt::cmd_set;
 
 #ifndef NO_DSCOPE_GRAPHICS
+m_cmd_map[StrTy("modify")]=&Myt::cmd_modify;
 m_cmd_map[StrTy("scope")]=&Myt::cmd_scope;
 m_cmd_map[StrTy("clear")]=&Myt::cmd_clear;
 m_cmd_map[StrTy("saver")]=&Myt::cmd_saver;

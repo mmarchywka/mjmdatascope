@@ -380,7 +380,24 @@ SeeRedisplay(); // if (m_alive) glutPostRedisplay();
 
 bool Bit(const IdxTy f, const IdxTy b) const  { return  ((f>>b)&1)!=0; }
 // should loop over map now 
-StrTy Dump(const IdxTy flags=0) {Ss ss;  return ss.str(); }
+
+void DumpScenes(Ss & ss)
+{
+MM_LOOP(ii,m_scenes)
+{
+const StrTy &nm=(*ii).first;
+const auto  p=(*ii).second;
+const bool act=(m_actives.find(nm)!=m_actives.end());
+const bool sel=(m_select.find(nm)!=m_select.end());
+MM_ERR(MMPR3(nm,act,sel))
+
+} // ii 
+
+} // DumpScenes
+StrTy Dump(const IdxTy flags=0) {Ss ss;  
+DumpScenes(ss); 
+
+return ss.str(); }
 typedef typename mjm_thread_util<Tr>::mutex_vector MutexVector;
 
 enum { MAP_MU=0 , MU_SZ};
@@ -713,6 +730,7 @@ ExitSerial(0);
 if (gls.b1down()||gls.b2down())  //  glutPostRedisplay();
 SeeRedisplay(); // if (m_alive) glutPostRedisplay();
 }
+// used as a watch dog thingy
 void AnimateScene(void)
 {
 m_alive=true; // we don't have a better way to set this doh!
@@ -739,7 +757,8 @@ m_alive=true; // we don't have a better way to set this doh!
 //MM_ERR(" animate redisplay ")  
 usleep(200000);
 //if (!false)  glutPostRedisplay();
-SeeRedisplay(); // if (m_alive) glutPostRedisplay();
+// 2025-03-20 suspect if redisplay missing but may save CPU lol. 
+//SeeRedisplay(); // if (m_alive) glutPostRedisplay();
 }
 enum { POPUP_RESET,POPUP_TOGGLE_VIS,POPUP_CLEAR };
 //static 
@@ -838,6 +857,49 @@ SeeRedisplay(); // if (m_alive) glutPostRedisplay();
 
 #define FOREACHA(x)  MM_LOOP(ii,m_actives){ auto & act=(*ii).second;  auto & v=(*ii).second->view();  x } 
 
+// display specs come from the input data, the console, the display screen keys,
+// and mouse action menu.  These should be symmetric lol.
+
+void ZoomX(const D & f) { EnterSerial(0); 
+MM_ERR(" X") FOREACHA( v.scale_factor(f,1,1,0); ) ExitSerial(0);
+}
+void ZoomY(const D & f) { EnterSerial(0); 
+MM_ERR(" Y") FOREACHA( v.scale_factor(1,f,1,0); ) ExitSerial(0);
+}
+void ZoomZ(const D & f) { EnterSerial(0); 
+MM_ERR(" Z") FOREACHA( v.scale_factor(1,1,f,0); ) ExitSerial(0);
+}
+void Snap() { EnterSerial(0); MM_ERR(" s")
+FOREACHA( act->config_grat("snap=1"); ) 
+ExitSerial(0);
+}  
+void Unsnap() { EnterSerial(0); MM_ERR(" s")
+FOREACHA( act->config_grat("snap=0"); ) 
+ExitSerial(0);
+} 
+void Capture(const IdxTy flags)
+{
+const bool start=Bit(flags,0);
+const bool pause=Bit(flags,1);
+const bool stop=Bit(flags,2);
+EnterSerial(0);
+if (!m_psaver) return; 
+if (stop) m_psaver->stop_capture(); 
+if (start) m_psaver->start_capture(); 
+if (pause) m_psaver->pause_capture(); 
+ExitSerial(0);
+}
+void Style(const IdxTy act=0)
+{
+switch (act)
+{
+case 1 : { FOREACHA( v.style(1|v.style()); ) }
+case 2 : { FOREACHA( v.style((~1)&v.style()); ) }
+default: { FOREACHA( v.style(~v.style()); ) }
+} // act
+
+} // Style
+
 
 void Modify(const  StrTy & sin, const IdxTy flags)
 {
@@ -848,7 +910,7 @@ StrTy cmd="";
 kvp.get(cmd,"cmd");
 
 const bool set_strip_color=(cmd=="color");
-if (sin.length()==0) { FOREACHA( v.style(~v.style()); ) }
+if (sin.length()==0) { Style();}
 else // sin!=""
 if (set_strip_color)
 {
@@ -864,6 +926,7 @@ FOREACHA( act->set_strip_color(0,idx,r,g,b); )
 
 ExitSerial(0);
 
+SeeRedisplay(); // if (m_alive) glutPostRedisplay();
 } // Modify 
 
 void SpecialInput(int key, int x, int y)
@@ -965,51 +1028,21 @@ MyGLStatus & gls= m_gl_status;
 	  _SelectFromMenu(MENU_TEXTURING);
 	  break;
 */
-case 'x': 
-{
-EnterSerial(0);
-if (m_psaver) m_psaver->stop_capture(); 
-ExitSerial(0);
-break;
-}
-case 'c': 
-{
-EnterSerial(0);
-if (m_psaver) m_psaver->start_capture(); 
-ExitSerial(0);
-break;
-}
+case 'l':  { Style(0); break; }  // Stop
+case 'd':  { MM_ERR(dump()) break; }  // Start
+case 'v':  { Capture(1); break; }  // Start
+case '-':  { Capture(2); break; }  // Pause 
+case '|':  { Capture(4); break; }  // Stop
+  case 'X': { ZoomX(1.1); break; } 
+  case 'x': { ZoomX(0.9); break; } 
 
-case 'v': 
-{
-EnterSerial(0);
-if (m_psaver) m_psaver->pause_capture(); 
-ExitSerial(0);
-break;
-}
-
-  case 'Y':
-EnterSerial(0);
-MM_ERR(" Y")
-//if (m_active) m_views[""].m_scale[2]*=1.1;
-//if (m_active) m_active->view().m_scale[2]*=1.1;
-//FOREACHA( v.m_scale[2]*=1.1; ) 
-FOREACHA( v.scale_factor(1,1.1,1,0); ) 
-ExitSerial(0);
-break;
-  case 'y':
-EnterSerial(0);
-MM_ERR(" y")
-//m_views[""].m_scale[2]*=.9;
-//if (m_active) m_active->view().m_scale[2]*=0.9;
-//FOREACHA( v.m_scale[2]*=0.9; ) 
-FOREACHA( v.scale_factor(1,0.9,1,0); ) 
-ExitSerial(0);
-break;
+  case 'Y': { ZoomY(1.1); break; } 
+  case 'y': { ZoomY(0.9); break; } 
 
 
-
-
+  case 'z': { ZoomZ(0.9); break; } 
+  case 'Z': { ZoomZ(1.1); break; } 
+/*
   case 'z':
 EnterSerial(0);
 MM_ERR(" z")
@@ -1028,27 +1061,11 @@ MM_ERR(" z")
 FOREACHA( v.scale_factor(1,1,0.9,0); ) 
 ExitSerial(0);
 break;
+*/
 
 //////////////////////////////////
-  case 's':
-EnterSerial(0);
-MM_ERR(" s")
-//m_views[""].m_scale[2]*=.9;
-//if (m_active) m_active->view().m_scale[2]*=0.9;
-//FOREACHA( v.m_scale[2]*=0.9; ) 
-FOREACHA( act->config_grat("snap=1"); ) 
-ExitSerial(0);
-break;
-  case 'S':
-EnterSerial(0);
-MM_ERR(" s")
-//m_views[""].m_scale[2]*=.9;
-//if (m_active) m_active->view().m_scale[2]*=0.9;
-//FOREACHA( v.m_scale[2]*=0.9; ) 
-FOREACHA( act->config_grat("snap=0"); ) 
-ExitSerial(0);
-break;
-
+  case 's': { Snap(); break; }
+case 'S': { Unsnap(); break; } 
 
 
 //////////////////////////////////
@@ -1093,7 +1110,7 @@ IdxTy  BoundBox(const IdxTy flags)
 
 EnterSerial(0);
 FOREACHA( 
-if (act->amodel().m_strip.size()) { 	v.reset_geometry(); v.contain(act->amodel().m_strip); 
+if (act->amodel().strip_d().size()) { 	v.reset_geometry(); v.contain(act->amodel().strip_d()); 
 MM_ERR(MMPR2(__FUNCTION__,v.dump())) 
  }
 //MM_ERR(MMPR(v.dump())) 

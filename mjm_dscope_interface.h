@@ -207,7 +207,10 @@ bool send( const Ragged & r,  const IdxTy flags)
 { return Send(r,NULL,flags); } 
 bool send_strip_chart( const Ragged & r,  const StrTy & src,const StrTy & params, const IdxTy flags)
 { return SendStripChart(r,src,params,flags); } 
-
+bool send_decorations( const Ragged & r,  const StrTy & src,const StrTy & params, const IdxTy flags)
+{ return SendDecorations(r,src,params,flags); } 
+bool send_molecule( const Ragged & r,  const StrTy & src,const StrTy & params, const IdxTy flags)
+{ return SendMolecule(r,src,params,flags); } 
 
 IdxTy send_block( const Block & data, const StrTy & params, const ColTy & col_names,  const StrTy & src,const IdxTy flags)
 { return SendBlock(data,params,col_names,src,flags); } 
@@ -429,6 +432,29 @@ setup(h, src, "strip-chart",params );
 m_sender.m_rawfifo.send(h,r);
 return true; 
 }  // SendStripChart
+
+
+bool  SendDecorations( const Ragged & r, const StrTy& src, const StrTy & params, const IdxTy flags)
+{
+if (SendGuard(flags)) return false;
+//MM_ERR(MMPR3(data.nx(),data.ny(),pload.size()))
+Ragged h;
+setup(h, src, "decorations",params );
+MM_ERR(MMPR4(__FUNCTION__,h.size(),r.size(),flags))
+m_sender.m_rawfifo.send(h,r,flags);
+return true; 
+}  // SendDecorations
+
+
+bool  SendMolecule( const Ragged & r, const StrTy& src, const StrTy & params, const IdxTy flags)
+{
+if (SendGuard(flags)) return false;
+//MM_ERR(MMPR3(data.nx(),data.ny(),pload.size()))
+Ragged h;
+setup(h, src, "molecule",params );
+m_sender.m_rawfifo.send(h,r);
+return true; 
+}  // SendMolecule
 
 
 

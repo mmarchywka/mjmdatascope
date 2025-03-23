@@ -530,6 +530,7 @@ const StrTy dump(const IdxTy flags=0) const
 { Ss ss; dump(ss); return ss.str(); }  
 }; // _ActualLine
 
+// API
 
 public:
 typedef StrTy Word;

@@ -235,9 +235,13 @@ return Send(ss.str(),flags);
 } // Send
 IdxTy Send(const Ragged & rh,const Ragged & rb, const IdxTy flags=0) 
 {
+// bit zed used by sendguard need better stff kk 
+const bool deb=Bit(flags,1);
+const bool dump=Bit(flags,2);
 Ss ss; ss<<rh.dump_ssv_unsafe(); 
 ss<<rb.dump_ssv_unsafe(); 
-if (false){  MM_ERR(" SENDING "<< MMPR3(rh.size(),rb.size(),ss.str().length())) }
+if (dump) MM_ERR(MMPR(ss.str()))
+if (deb){  MM_ERR(" SENDING "<< MMPR3(rh.size(),rb.size(),ss.str().length())) }
 return Send(ss.str(),flags); 
 } // Send 
 IdxTy Send(const StrTy  & s, const IdxTy flags=0)

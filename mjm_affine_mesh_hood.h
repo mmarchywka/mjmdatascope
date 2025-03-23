@@ -371,7 +371,7 @@ void ExitSerial(const IdxTy i)const  {  m_mutex_vector.exit_serial(i ); }
 //m_mutex_vector = MutexVector(MU_SZ);
 void AddBox(const D&x,const D&y, const D&w, const D&h, const IdxTy src)
 {
-if (!false)
+if (false)
 {
 static int cnt=0;
 if (cnt<20) {  MM_ERR(MMPR4(x,y,w,h)<<MMPR3(m_dx,m_dy,src)) } 

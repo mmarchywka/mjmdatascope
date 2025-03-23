@@ -9,6 +9,9 @@
 #include "mjm_tokenized_points.h"
 #include "mjm_svg_render.h"
 
+#include "mjm_glut_decorations.h"
+#include "mjm_glut_molecule.h"
+
 
 // TODO FIXME should use template move this crap out 
 #include "mjm_hot_zones.h"
@@ -74,6 +77,12 @@ typedef mjm_glut_elements<Tr> Elements;
 typedef  typename Elements::Element Element ;
 
 typedef mjm_strip_chart<Tr> strip_t;
+
+typedef mjm_glut_decorations<Tr> decorations_t;
+typedef mjm_glut_molecule<Tr> mole_t; 
+
+
+
 typedef mjm_glut_graticule<Tr> graticule_t;
 
 typedef GLfloat Gf ;
@@ -482,6 +491,29 @@ inplacepos(fukx,fuky,fukz);
 (*f)(fukx,fuky,fukz);//r
 } // doglutpos
 
+template < class Tf, class Tp> void dogluttext(Tf * f, const Tp & x, const Tp & y, const Tp & z, const Tp &_sz)
+{
+Gf fukx=x;   Gf fuky=y; Gf fukz=z;  
+inplacepos(fukx,fuky,fukz);
+draw_string(fukx,fuky,fukz,f);
+//glVertex3f(fukx,fuky,fukz);//upper-right corner
+//(*f)(fukx,fuky,fukz);//r
+// goog ai
+glPushMatrix();
+glTranslatef(fukx, fuky, fukz);
+const Gf sz=.0416667*_sz; // thought to normalize more oe less lol
+MM_ERR(MMPR4(fukx,fuky,fukz,sz)<<MMPR2(_sz,f))
+glScalef(sz,sz,sz); // Adjust scale for better visibility
+glutStrokeString(GLUT_STROKE_ROMAN, (const unsigned char*)f);
+glPopMatrix();
+
+} // dogluttext
+
+
+
+
+
+
 // this is called in heatmap
 // TODO in general there are a lot of cllipped points
 // and we need a wa to clip them early...
@@ -678,7 +710,7 @@ class _junk_bin
 {
 
 typedef mjm_svg_render<Tr>  SvgRender;
-
+typedef std::map<IdxTy,IdxTy> Umap;
 public:
 //_junk_bin(): m_code(0),m_szlim(10),m_pstrip(0)  {}
 _junk_bin(): m_code(0),m_szlim(10)  {}
@@ -703,7 +735,7 @@ void add_params( const Line & l, const IdxTy ii,const IdxTy len )
 {
 for(IdxTy i=ii; i<(len-1); i+=2)
 {
-m_params[l[i]]=l[i+1];
+params()[l[i]]=l[i+1];
 } // i 
 
 } // add_names
@@ -711,15 +743,15 @@ void add_etc( const Line & l, const IdxTy ii,const IdxTy len )
 {
 for(IdxTy i=ii; i<(len-1); i+=2)
 {
-m_etc[l[i]]=l[i+1];
+etc()[l[i]]=l[i+1];
 } // i 
 
 } // add_etc 
 
 const StrTy etc(const StrTy & k) const
 {
-const auto ii=m_etc.find(k);
-if (ii==m_etc.end()) return StrTy();
+const auto ii=etc_d().find(k);
+if (ii==etc_d().end()) return StrTy();
 return (*ii).second;
 
 }
@@ -731,7 +763,7 @@ void add_names( const Line & l, const IdxTy ii, const IdxTy len )
 for(IdxTy i=ii; i<len; ++i)
 {
 Ss ss; ss<<"name"<<(i-ii);
-m_params[ss.str()]=l[i];
+params()[ss.str()]=l[i];
 } // i 
 
 }// add_params
@@ -740,11 +772,11 @@ m_params[ss.str()]=l[i];
 IdxTy load_heatmap(const Ragged & r, const IdxTy flags)
 {
 IdxTy taxin=7;
-auto ii=m_etc.find("ntax");
-if (ii!=m_etc.end()) taxin=atoi((*ii).second.c_str());
-MM_ERR(MMPR4(r.size(),taxin,m_etc.size(),m_params.size()))
+auto ii=etc_d().find("ntax");
+if (ii!=etc_d().end()) taxin=atoi((*ii).second.c_str());
+MM_ERR(MMPR4(r.size(),taxin,etc_d().size(),params_d().size()))
 // only keep 2 
-return m_heatmap.load_heatmap(r, taxin, 2, flags);
+return heatmap().load_heatmap(r, taxin, 2, flags);
 }
 //IdxTy load_heatmap(const Ragged & r, const IdxTy taxin, const IdxTy taxkeep, const IdxTy flags)
 typedef mjm_dscope_heatmap<Tr> Heatmap;
@@ -791,7 +823,7 @@ return 0;
 IdxTy set_strip_color( const IdxTy idx, const D & r,
 const D & g, const D & b)
 {
- m_strip.set_color(idx,r,g,b,0);
+ strip().set_color(idx,r,g,b,0);
 return 0; 
 }
 
@@ -802,15 +834,62 @@ void add_strip( const Ragged & r, const IdxTy flags)
 {
 //if (m_pstrip==0) m_pstrip= new strip_t();
 //m_pstrip->append(r,flags); 
-m_strip.append(r,flags); 
+strip().append(r,flags); 
 } // add_strip
+
+
+void add_decorations( const Ragged & r, const IdxTy flags)
+{ decorations().append(r,flags); 
+} // add_decorations
+
+void add_molecule( const Ragged & r, const IdxTy flags)
+{ 
+molecule().append(r,flags); 
+} // add_decorations
+
 // alled by rges for strip chart
+// usually one entity gets updated along with params and etc. 
 void append(const _junk_bin  & that,const IdxTy flags=0)
 {
 //MM_ERR(" append not complete")
-m_strip.append(that.m_strip,flags); 
+strip().append(that.strip_d(),flags); 
 
 } // append 
+
+// new accessors to account for usage...
+// cat pieces.txt| sed -e 's/;//g'  | while read ; do t=`echo $REPLY | awk '{print $1}' `; v=`echo $REPLY | awk '{print $2}'`; e=`echo $v | tr "[a-z]" "[A-Z]" `;n=`echo $v| sed -e 's/m_//' `;  enum="$enum,$e" ; echo $v $t $e $enum; echo -e "$t & $n() { ++m_usage_map[$e];  return $v; } "  ; done | grep "()"
+
+enum { M_STRINGS,M_POINTS,M_ORNATE_POINTS,M_SEGS,M_SVGS,M_CODE,M_SZLIM,M_PARAMS,M_ETC,M_HEATMAP,M_FF_MESH,M_STRIP,M_GRATICULE,M_DECORATIONS,M_MOLECULE};
+
+
+SegVec & segs() { ++m_usage_map[M_SEGS];  return m_segs; } 
+SvgVec & svgs() { ++m_usage_map[M_SVGS];  return m_svgs; } 
+IdxTy & code() { ++m_usage_map[M_CODE];  return m_code; } 
+IdxTy & szlim() { ++m_usage_map[M_SZLIM];  return m_szlim; } 
+
+StrVec & strings() { ++m_usage_map[M_STRINGS];  return m_strings; } 
+const StrVec & strings_d() const {  return m_strings; } 
+PointVec & points() { ++m_usage_map[M_POINTS];  return m_points; } 
+const PointVec & points_d() const {  return m_points; } 
+TokPoints & ornate_points() { ++m_usage_map[M_ORNATE_POINTS];  return m_ornate_points; } 
+const TokPoints & ornate_points_d() const  {  return m_ornate_points; } 
+Parameters & params() { ++m_usage_map[M_PARAMS];  return m_params; } 
+const Parameters & params_d() const {  return m_params; } 
+Parameters & etc() { ++m_usage_map[M_ETC];  return m_etc; } 
+const Parameters & etc_d()const { return m_etc; } 
+Heatmap & heatmap() { ++m_usage_map[M_HEATMAP];  return m_heatmap; } 
+const Heatmap & heatmap_d()const {  return m_heatmap; } 
+_ff_mesh_t & ff_mesh() { ++m_usage_map[M_FF_MESH];  return m_ff_mesh; } 
+const _ff_mesh_t & ff_mesh_d() const  {  return m_ff_mesh; } 
+strip_t & strip() { ++m_usage_map[M_STRIP];  return m_strip; } 
+const strip_t & strip_d() const  {  return m_strip; } 
+graticule_t & graticule() { ++m_usage_map[M_GRATICULE];  return m_graticule; } 
+graticule_t & graticule_d() {  return m_graticule; } 
+decorations_t & decorations() { ++m_usage_map[M_DECORATIONS];  return m_decorations; } 
+decorations_t & decorations_d() { return m_decorations; } 
+mole_t & molecule() { ++m_usage_map[M_MOLECULE];  return m_molecule; } 
+mole_t & molecule_d() { return m_molecule; } 
+
 
 // junk_MEMBERS
 
@@ -821,20 +900,29 @@ m_strip.append(that.m_strip,flags);
 // typicall 10 or so while may want unlimited += operation. 
 StrTy m_type,m_src;
 
-StrVec m_strings;
-PointVec m_points;
-TokPoints m_ornate_points;
+// make private to allow more intelligent merger or append
+
+//private:
+
 SegVec m_segs;
 SvgVec m_svgs;
 IdxTy m_code;
 IdxTy m_szlim;
+private:
+Umap m_usage_map;
+StrVec m_strings;
+PointVec m_points;
+TokPoints m_ornate_points;
+
 Parameters m_params;
 Parameters m_etc;
 Heatmap m_heatmap;
 _ff_mesh_t m_ff_mesh;
-//strip_t * m_pstrip;
 strip_t  m_strip;
 graticule_t m_graticule;
+decorations_t m_decorations;
+mole_t m_molecule; 
+
 }; // _junk_bin
 typedef _junk_bin junk_bin_type;
 
