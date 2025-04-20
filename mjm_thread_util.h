@@ -67,6 +67,7 @@ typedef std::vector<mutex> MuVector;
 public:
 mutex_vector() : m_v() {}
 mutex_vector(const IdxTy n) : m_v(n) {}
+IdxTy size() const { return m_v.size(); } 
 void enter_serial(const IdxTy n) { m_v[n].enter_serial(); } 
 void exit_serial(const IdxTy n) { m_v[n].exit_serial(); } 
 typename MuVector::iterator begin() { return m_v.begin(); } 

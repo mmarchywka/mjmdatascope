@@ -294,10 +294,12 @@ void load_xny(const Ragged & r, const StrTy & sin, const IdxTy flags)
 //mjm_strip_chart & operator=(const mjm_strip_chart & that ) { return *this;}
 
 StrTy dump(const IdxTy flags=0) { return Dump(flags); }
+StrTy show(const IdxTy flags=0)const  { return Show(flags); }
 private:
 
 void SetColor(const IdxTy idx, const D & r, const D & g, const D & b,const IdxTy flags)
 {
+// the key is a tokenized string this is dumb... 
 auto ii=m_map.find(idx);
 if (ii==m_map.end()) 
 {
@@ -482,6 +484,15 @@ m_y1=0;
 
 } // Init
 
+StrTy Show(const IdxTy flags=0)const {Ss ss;  
+ss<<MMPR4(m_size,m_x0,m_x1,m_y0)<<MMPR(m_y1);
+ss<<CRLF;
+MM_LOOP(ii,m_map) { const IdxTy tok=(*ii).first; const StrTy nm=m_st(tok);   ss<<MMPR2(tok,nm)<<" ";  }
+//ss<<",";
+ss<<CRLF;
+MM_LOOP(ii,m_info) { const IdxTy tok=(*ii).first; const StrTy nm=m_st(tok);   ss<<MMPR2(tok,nm)<<" ";  }
+
+return ss.str(); }
 
 
 // MEMBERS

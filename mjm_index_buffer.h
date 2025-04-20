@@ -142,7 +142,18 @@ void set_size(const IdxTy sz) { Resize(sz); }
 void pool(pool_t* p ) { m_poolp=p; } 
 IdxTy size() const { return m_sz; }
 IdxTy used() const { return m_used; }
-
+void clear()
+{
+MM_ERR(" clearing index buffer")
+//EnterSerial(RWLOCK);
+MM_LOOP(ii,m_vec)
+{
+m_poolp->free(*ii);
+} // ii 
+m_vec.clear();
+//ExitSerial(RWLOCK);
+} // clear
+ 
 index_t push_back(target_t & t)
 {
 const IdxTy n=m_poolp->alloc(t);

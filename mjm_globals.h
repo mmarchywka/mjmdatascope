@@ -53,6 +53,13 @@ namespace mjm_global_credits
 {
 std::map<std::string, int> mm_credited;
 std::vector<std::string> mm_credit_vector;
+std::string credits()
+{
+std::string s;
+auto ii=mm_credited.begin(); while (ii!=mm_credited.end())  
+{ const auto & x=mm_credit_vector[(*ii).second]; if (x.length()>2) s=s+"\n"+x ; ++ii; }
+return s;
+}
 void mm_credit(const std::string & src, const std::string & v)
 {
 if (mm_credited.find(src)==mm_credited.end()) { mm_credited[src]=mm_credit_vector.size();

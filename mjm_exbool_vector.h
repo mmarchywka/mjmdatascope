@@ -205,9 +205,13 @@ void load(const StrTy & sin,const IdxTy flags) {Init(sin,flags); }
 void load(const Ragged & r,const IdxTy start, const IdxTy first,const IdxTy flags ) {Init(r,start,first,flags);}
 void save(const StrTy & fn,const StrTy &s) {Save(fn,s); }
 
-~mjm_exbool_vector() {delete [] m_ptr; }
+~mjm_exbool_vector() {
+//MM_ERR(MMPR(dump()))
+delete [] m_ptr;
 
-mjm_exbool_vector(const mjm_exbool_vector & that ) { *this=that ; }  
+ }
+
+mjm_exbool_vector(const mjm_exbool_vector & that ) {m_ptr=0;  *this=that ; }  
 bool operator<(const mjm_exbool_vector & that) const { return false;}
 bool operator==(const mjm_exbool_vector & that) const { return false;}
 bool operator>(const mjm_exbool_vector & that) const { return false;}
@@ -281,19 +285,22 @@ IdxTy po2=SZ&(SZ-1);
 if (po2){ MM_DIE(" predicated on SZ being a power of 2 lol "<<MMPR(SZ));
 }
 m_ptr=0;
-m_sz=0;
-m_elem=0;
+m_sz=0; // actual number of BITS in array 
+m_elem=0; // number of data ty newed DataTy[m_elem]
 m_term_mask=0; // should neve rreally happen 
 m_one=0;
 //enum { SZ=sizeof(DataTy), SHIFTS=Ns<1,SZ>::Nv, PAD=(SZ*8-1), MASK=((1<<SHIFTS)-1) };
 MM_ERR(MMPR4(SZ,SHIFTS,PAD,MASK))
 
 } // Init
-void Zero() { ::memset(m_ptr,0,m_elem*m_sz); m_one=0; }
-void One() { ::memset(m_ptr,~0,m_elem*m_sz); m_one=m_sz; }
+// fing corruption fck 
+//void Zero() { ::memset(m_ptr,0,m_elem*m_sz); m_one=0; }
+void Zero() { ::memset(m_ptr,0,m_elem*SZ); m_one=0; }
+//void One() { ::memset(m_ptr,~0,m_elem*m_sz); m_one=m_sz; }
+void One() { ::memset(m_ptr,~0,m_elem*SZ); m_one=m_sz; }
 void Alloc(const IdxTy sz)
 {
-delete m_ptr;
+delete[] m_ptr;
 m_sz=sz;
 m_elem=(m_sz+PAD)>>SHIFTS;
 m_ptr= new DataTy[m_elem];

@@ -277,7 +277,8 @@ void load(const Ragged & r,const IdxTy start, const IdxTy first,const IdxTy flag
 void save(const StrTy & fn,const StrTy &s) {Save(fn,s); }
 
 ~mjm_glut_graticule() {}
-
+IdxTy append(const Myt & that, const IdxTy flags)
+{ return Append(that,flags); } 
 mjm_glut_graticule(const mjm_glut_graticule & that ) { *this=that ; }  
 bool operator<(const mjm_glut_graticule & that) const { return false;}
 bool operator==(const mjm_glut_graticule & that) const { return false;}
@@ -511,7 +512,11 @@ m_ny=5;
 m_use_snap_x=true;
 m_use_snap_y=true;
 } // Init
+IdxTy Append(const Myt & that, const IdxTy flags)
+{ 
+// save nothing ... 
 
+return 0; } 
 IdxTy Config(const StrTy & sin=StrTy(), const IdxTy flags=0)
 { 
 m_config=sin;

@@ -128,6 +128,8 @@ typedef std::map<StrTy,dof_type> Dofs;
 typedef Dofs dofmap_type;
 void clear() { Clear(); }
 void compile() { Compile(); }
+IdxTy append(const Myt & that, const IdxTy flags)
+{ return Append(that,flags); } 
 IdxTy size() const { return m_verticies.size(); }
 IdxTy size(const IdxTy n) const { return Size(n); }
 IdxTy read_ff_mesh(const StrTy & fn, const StrTy & sv, const IdxTy flags)
@@ -1002,7 +1004,11 @@ default: return ~0;
 } // switch 
 return  ~0; 
 } // Size
-
+IdxTy Append(const Myt & that, const IdxTy flags)
+{
+MM_DIE(" not impl ")
+return 0; 
+} // Append 
 public: // objects need to be friends 
 // MEMBERS
 IdxTy m_nv, m_nt,m_ne;

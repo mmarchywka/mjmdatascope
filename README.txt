@@ -21,3 +21,10 @@ glib etc,
  2028  find -mtime -1
  2029  ./datascope.out
 
+possible use in a headless mode for automation, 
+
+https://stackoverflow.com/questions/6281998/can-i-run-glu-opengl-on-a-headless-server
+
+Xvfb :5 -screen 0 800x600x24 &
+export DISPLAY=:5
+glxgears 

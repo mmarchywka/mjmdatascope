@@ -491,7 +491,7 @@ inplacepos(fukx,fuky,fukz);
 (*f)(fukx,fuky,fukz);//r
 } // doglutpos
 
-template < class Tf, class Tp> void dogluttext(Tf * f, const Tp & x, const Tp & y, const Tp & z, const Tp &_sz)
+template < class Tf, class Tp> void dogluttext(Tf * f, const Tp & x, const Tp & y, const Tp & z, const Tp &_sz, const Tp & ang=0)
 {
 Gf fukx=x;   Gf fuky=y; Gf fukz=z;  
 inplacepos(fukx,fuky,fukz);
@@ -501,8 +501,10 @@ draw_string(fukx,fuky,fukz,f);
 // goog ai
 glPushMatrix();
 glTranslatef(fukx, fuky, fukz);
-const Gf sz=.0416667*_sz; // thought to normalize more oe less lol
+glRotatef(ang,0,0,1);
+const Gf sz=.5*.0416667*_sz; // thought to normalize more oe less lol
 MM_ERR(MMPR4(fukx,fuky,fukz,sz)<<MMPR2(_sz,f))
+// this is partially managed by us and glut lol.
 glScalef(sz,sz,sz); // Adjust scale for better visibility
 glutStrokeString(GLUT_STROKE_ROMAN, (const unsigned char*)f);
 glPopMatrix();
@@ -722,14 +724,14 @@ void add_svg(const StrTy& s)
 {
 SvgRender x;
 x.load(s.c_str(),s.length(),0);
-m_svgs.push_back(x);
+svgs().push_back(x);
 
 }
 void add_seg(const IdxTy s, const D & x, const D & y, const D & z, const
 color_type & ct)
 { _point_desc p(x,y,z,ct); 
-if (s>=m_segs.size()) m_segs.resize(s+1); 
-m_segs[s].push_back(p); } 
+if (s>=segs().size()) segs().resize(s+1); 
+segs()[s].push_back(p); } 
 
 void add_params( const Line & l, const IdxTy ii,const IdxTy len )
 {
@@ -849,11 +851,28 @@ molecule().append(r,flags);
 
 // alled by rges for strip chart
 // usually one entity gets updated along with params and etc. 
+// this gets the data but maintains our current view etc. 
 void append(const _junk_bin  & that,const IdxTy flags=0)
 {
 //MM_ERR(" append not complete")
-strip().append(that.strip_d(),flags); 
-
+MM_ERR(" model append "<<MMPR2(usages(), that.usages()))
+//if (that.used(M_STRIP)) strip().append(that.strip_d(),flags); 
+//if (that.used(M_STRINGS)) m_strings.append(that.m_strings,flags); 
+//if (that.used(M_POINTS)) m_points.append(that.m_points,flags); 
+if (that.used(M_ORNATE_POINTS)) m_ornate_points.append(that.m_ornate_points,flags); 
+//if (that.used(M_SEGS)) m_segs.append(that.m_segs,flags); 
+//if (that.used(M_SVGS)) m_svgs.append(that.m_svgs,flags); 
+//if (that.used(M_CODE)) m_code.append(that.m_code,flags); 
+//if (that.used(M_SZLIM)) m_szlim.append(that.m_szlim,flags); 
+// update or overwrite? 
+//if (that.used(M_PARAMS)) m_params.append(that.m_params,flags); 
+//if (that.used(M_ETC)) m_etc.append(that.m_etc,flags); 
+if (that.used(M_HEATMAP)) m_heatmap.append(that.m_heatmap,flags); 
+if (that.used(M_FF_MESH)) m_ff_mesh.append(that.m_ff_mesh,flags); 
+if (that.used(M_STRIP)) m_strip.append(that.m_strip,flags); 
+if (that.used(M_GRATICULE)) m_graticule.append(that.m_graticule,flags); 
+if (that.used(M_DECORATIONS)) m_decorations.append(that.m_decorations,flags); 
+if (that.used(M_MOLECULE)) m_molecule.append(that.m_molecule,flags); 
 } // append 
 
 // new accessors to account for usage...
@@ -863,7 +882,9 @@ enum { M_STRINGS,M_POINTS,M_ORNATE_POINTS,M_SEGS,M_SVGS,M_CODE,M_SZLIM,M_PARAMS,
 
 
 SegVec & segs() { ++m_usage_map[M_SEGS];  return m_segs; } 
+const SegVec & segs_d() const  {  return m_segs; } 
 SvgVec & svgs() { ++m_usage_map[M_SVGS];  return m_svgs; } 
+const SvgVec & svgs_d() const {   return m_svgs; } 
 IdxTy & code() { ++m_usage_map[M_CODE];  return m_code; } 
 IdxTy & szlim() { ++m_usage_map[M_SZLIM];  return m_szlim; } 
 
@@ -891,6 +912,58 @@ mole_t & molecule() { ++m_usage_map[M_MOLECULE];  return m_molecule; }
 mole_t & molecule_d() { return m_molecule; } 
 
 
+typedef  std::map<IdxTy,StrTy> UmapTy;
+
+static UmapTy & umaps()
+{
+static UmapTy m;
+if (m.size()==0) { 
+// cat xxx | sed -e 's/,/\n/g' | awk '{print "m["$1"]=\""$1"\";"}'
+m[M_STRINGS]="M_STRINGS";
+m[M_POINTS]="M_POINTS";
+m[M_ORNATE_POINTS]="M_ORNATE_POINTS";
+m[M_SEGS]="M_SEGS";
+m[M_SVGS]="M_SVGS";
+m[M_CODE]="M_CODE";
+m[M_SZLIM]="M_SZLIM";
+m[M_PARAMS]="M_PARAMS";
+m[M_ETC]="M_ETC";
+m[M_HEATMAP]="M_HEATMAP";
+m[M_FF_MESH]="M_FF_MESH";
+m[M_STRIP]="M_STRIP";
+m[M_GRATICULE]="M_GRATICULE";
+m[M_DECORATIONS]="M_DECORATIONS";
+m[M_MOLECULE]="M_MOLECULE";
+}
+
+
+
+return m;
+} // umaps
+StrTy usages() const
+{
+UmapTy   m=umaps();
+Ss ss;
+MM_LOOP(ii, m_usage_map) { if ((*ii).second!=0) ss<<m[(*ii).first]<<"="<<(*ii).second<<" "; }
+return ss.str();
+} // usages
+
+bool used(const IdxTy e) const { const auto ii=m_usage_map.find(e); 
+if (ii==m_usage_map.end()) return false;  return (*ii).second !=0; } 
+
+
+StrTy show() const
+{
+Ss ss;
+MM_LOOP(ii,m_usage_map)
+{
+const IdxTy id=(*ii).first;
+ss<<" "<<umaps()[id];
+if (id==M_STRIP) { ss<< m_strip.show(); } 
+ss<<CRLF;
+} // ii 
+return ss.str();
+} // show
 // junk_MEMBERS
 
 // operator += designed to add a new update existing entry.
@@ -904,12 +977,13 @@ StrTy m_type,m_src;
 
 //private:
 
-SegVec m_segs;
-SvgVec m_svgs;
 IdxTy m_code;
 IdxTy m_szlim;
 private:
+
 Umap m_usage_map;
+SegVec m_segs;
+SvgVec m_svgs;
 StrVec m_strings;
 PointVec m_points;
 TokPoints m_ornate_points;
@@ -1110,7 +1184,7 @@ void ExitSerial(const IdxTy i)const  {  m_mutex_vector.exit_serial(i ); }
 static IdxTy Display(const junk_bin_t & bin, const view_info_t & view, const IdxTy flags)
 {
 MM_LOOP(ii,bin.m_strings) { DisplayString((*ii),view,flags); } 
-MM_LOOP(ii,bin.m_segs) { DisplaySeg((*ii),view,flags); } 
+MM_LOOP(ii,bin.segs_d()) { DisplaySeg((*ii),view,flags); } 
 MM_LOOP(ii,bin.m_points) { DisplayPoint((*ii),view,flags); } 
 //StrVec m_strings;
 //PointVec m_points;

@@ -126,7 +126,11 @@ ViewInfo& view() { return m_view; }
 // add a rag to the contents
 IdxTy add(const input_type & r, const IdxTy flags) 
 { return Add(r,flags); } 
-void clear() {}
+void clear() {
+//ModelIndex 
+m_data_idx.clear();
+
+}
 // changed flag needs draw lock lol 
 IdxTy config_grat(const StrTy & x=StrTy()) { m_grat_config=x;  m_grat_changed=1; return 0; } 
 IdxTy set_strip_color(const IdxTy n, const IdxTy idx, const D & r,
@@ -197,6 +201,7 @@ return m_data_idx(0);
 // load 
 
 // short human readable info 
+StrTy show(const IdxTy flags=0) { return Show(flags); }
 StrTy dump(const IdxTy flags=0) { return Dump(flags); }
 protected:
 bool Bit(const IdxTy f, const IdxTy b) const  { return  ((f>>b)&1)!=0; }
@@ -206,6 +211,22 @@ ss<<m_view.dump();
 //ss<<MMPR(m_data.size());
 ss<<MMPR(m_data_idx.size());
   return ss.str(); }
+
+
+StrTy Show(const IdxTy flags=0) {Ss ss;
+const IdxTy szd=m_data_idx.used();
+if (szd>1) { MM_ERR(" should only have one to append "<<MMPR2(szd,m_src))}
+MM_ILOOP(i,szd)
+{
+ModelInfo&  m=m_data_idx(i);
+ss<<m.show();
+ss<<CRLF;
+} // i 
+return ss.str();
+} // Show
+
+
+
 typedef typename mjm_thread_util<Tr>::mutex_vector MutexVector;
 
 enum { MAP_MU=0 , MU_SZ};
@@ -217,11 +238,19 @@ void ExitSerial(const IdxTy i)const  {  m_mutex_vector.exit_serial(i ); }
 // maybe a delegate? 
 IdxTy Add(const input_type & r, const IdxTy flags) 
 {
+MM_ERR(" Adding "<<MMPR(r.dump(0,"|",6))) 
+
 const IdxTy sz=r.size();
 if (sz<3)
 {
-MM_ERR(" received ragged too small "<<MMPR(r.size()))
+MM_ERR(" received ragged too small "<<MMPR2(r.size(),r.dump()))
  return 0;
+}
+if (r[2].size()<2)
+{
+MM_ERR(" received ragged no name "<<MMPR3(r[2].size(),r.size(),r.dump()))
+return 0; 
+
 }
 // 2025-02-21 bombing duing updates lol 
 EnterSerial(0);
@@ -935,10 +964,11 @@ IdxTy DrawRealSeg(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
 // glBegin(GL_LINES);
 // ref may not be prudcent until threading worked out lol 
 // 2024-02-21 sure engough bombing during updates lol 
-const auto & _p=m.m_segs;
+const auto & _p=m.segs_d();
 for(IdxTy segs=0; segs<_p.size(); ++segs)
 {
-const auto&  p=m.m_segs[segs];
+//const auto&  p=m.m_segs[segs];
+const auto&  p=m.segs_d()[segs]; // non const but ok if already stuff there 
 
     glBegin(GL_LINE_STRIP); //starts drawing of points
 for(IdxTy j=0; j<p.size(); ++j)
@@ -993,7 +1023,7 @@ ModelInfo&  m=m_data_idx(i);
  DrawSvg(m,v,sdp); 
 if (i==(szd-1)) {  DrawHeat(m,v,sdp);  }
 // TOFO fix this... 
-if (m.m_segs.size()) DrawRealSeg(m,v,sdp); 
+if (m.segs_d().size()) DrawRealSeg(m,v,sdp); 
  DrawLine(m,v,sdp); 
  DrawTri(m,v,sdp); 
  DrawMesh(m,v,sdp); 
@@ -1017,10 +1047,11 @@ return 0;
 
 IdxTy DrawOnCurve(ModelInfo & m, ViewInfo & v, const IdxTy seg,const char * string )
 {
-const auto & _p=m.m_segs;
+const auto & _p=m.segs(); // m_segs;
 const IdxTy segs=_p.size();
 //MM_ERR(MMPR2(seg,segs))
-const auto&  p=m.m_segs[seg];
+//const auto&  p=m.m_segs[seg];
+const auto&  p=m.segs_d()[seg];
 const IdxTy points=p.size();
 const IdxTy j=points>>1;
 const auto & pj=p[j];
@@ -1370,7 +1401,7 @@ z=zz;
 } // fuck         
 IdxTy DrawSvg(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
 {
-auto & sv= m.m_svgs;
+auto & sv= m.svgs_d();
 int w=glutGet(GLUT_WINDOW_WIDTH);
 int h=glutGet(GLUT_WINDOW_HEIGHT);
 MM_LOOP(ii,sv)

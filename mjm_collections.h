@@ -1222,7 +1222,7 @@ return x;
 // should have a sg to dump to a srream 
 StrTy dump_ssv( ) const { return dump(1+2+128+1024," "); } 
 StrTy dump_ssv_unsafe( ) const { return dump(1+2," "); } 
-StrTy dump( const IdxTy flags=0,const StrTy &  s=" ") const
+StrTy dump( const IdxTy flags=0,const StrTy &  s=" ",const IdxTy maxlines=0) const
 {
 Ss ss;
 IdxTy i=0;
@@ -1251,6 +1251,8 @@ StrTy quote="\"";
 
 const StrTy sep=seps;
 const char cs=sep.c_str()[0];
+// just found 2025-04-03 no idea wth it was 4 lol. 
+//IdxTy line=0;
 MM_LOOP(ii,m_lines)
 {
 IdxTy field=0;
@@ -1283,10 +1285,11 @@ if (add_quote) ss<<quote;
 ++field;
 add_sep=true;
 ++debug_field_count;
-}
+} // jj? 
 ss<<CRLF;
 ++i;
-} 
+if (maxlines!=0) if (i>=maxlines) break; 
+}  // ii ? 
 
 return ss.str();
 }

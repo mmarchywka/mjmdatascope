@@ -383,12 +383,12 @@ return pol?x:!x;
 }
 
 #ifndef NO_DSCOPE_GRAPHICS
-void clear()
+void clear(const IdxTy flags=0)
 {
 MM_ERR(" app clearing ")
 // this does nothing alone
 //m_scenes.clear();
-m_glut.clear();
+m_glut.clear(flags);
 
 m_scenes.clear();
 } // clear
@@ -479,6 +479,17 @@ MM_ERR(MMPR4(__FUNCTION__,sin,cmd,flags))
 m_glut.modify(sin,flags);
 
 } // cmd_modify
+
+void cmd_show(Cip & cip , LocalVar & lv )
+{
+const StrTy cmd=cip.cmd();
+const StrTy sin=cip.p1;
+//const StrTy s=cip.p2;
+const IdxTy flags=myatoi(cip.wif(2));
+MM_ERR(MMPR4(__FUNCTION__,sin,cmd,flags))
+StrTy s=m_glut.show(sin,flags);
+MM_MSG(MMPR(s))
+} // cmd_show
 
 
 
@@ -749,6 +760,7 @@ m_cmd_map[StrTy("set")]=&Myt::cmd_set;
 
 #ifndef NO_DSCOPE_GRAPHICS
 m_cmd_map[StrTy("modify")]=&Myt::cmd_modify;
+m_cmd_map[StrTy("show")]=&Myt::cmd_show;
 m_cmd_map[StrTy("scope")]=&Myt::cmd_scope;
 m_cmd_map[StrTy("clear")]=&Myt::cmd_clear;
 m_cmd_map[StrTy("saver")]=&Myt::cmd_saver;
@@ -1320,6 +1332,7 @@ m_debug=0;
 #ifndef NO_DSCOPE_GRAPHICS
 GlutScope::p(& m_glut);
 m_pool.set_size(100);
+m_glut.app(this);
 #endif
 m_done=false;
 m_stop_send=false;

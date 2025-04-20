@@ -306,7 +306,8 @@ void load( const D &x, const D &y, const D &z,
 _point_entry p(x, y, z, r,g,b,flags) ;
 m_points.push_back(p);
 }
-
+IdxTy append(const Myt & that, const IdxTy flags)
+{ return Append(that,flags); }
 
 const StrTy & operator()(const IdxTy i)  const { return m_st(i); } 
 void save(const StrTy & fn,const StrTy &s) {Save(fn,s); }
@@ -422,7 +423,11 @@ m_shapes.load(StrTy(),0);
 
 } // Init
 
+IdxTy Append(const Myt & that, const IdxTy flags)
+{ MM_DIE(" not impl ")
 
+return 0;
+} // Append 
 
 // MEMBERS
 Tokenizer m_st;

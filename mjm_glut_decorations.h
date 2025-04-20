@@ -373,11 +373,12 @@ const D r= myatof(l[3]);
 const D g= myatof(l[4]);
 const D b= myatof(l[5]);
 const D sz= myatof(l[6]);
-const char * p=l[7].c_str();
-MM_ERR(MMPR4(p,x,y,z)<<MMPR4(r,g,b,sz))
+const D ang= myatof(l[7]);
+const char * p=l[8].c_str();
+MM_ERR(MMPR4(p,x,y,z)<<MMPR4(r,g,b,sz)<<MMPR(ang))
 //glLineWidth(w);
 glColor3f(r,g,b );//
-v.dogluttext(p,x,y,z,sz);
+v.dogluttext(p,x,y,z,sz,ang);
 Bounds(x,y); ++m_size; // not really right but works unless "b" already called
 #if 0
 IdxTy i=10;
@@ -507,7 +508,7 @@ m_r=r; // LoadXNY(r,"",flags);
 // these all have different m_st values doh... 
 void Append(const Myt & that, const IdxTy flags)
 {
-MM_LOOP(ii,that) { m_r.add(*ii); }
+MM_LOOP(ii,that.m_r) { m_r.add(*ii); }
 #if 0 
 MM_LOOP(ii,that.m_map)
 {

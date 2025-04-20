@@ -146,7 +146,10 @@ ExitSerial(RWLOCK);
 }
 m_bits.set(n,true);
 ExitSerial(RWLOCK);
-m_ptr[n]=ObjectTy();
+// this relies on working assignment should just give address 
+// somehow- there is a way 
+//m_ptr[n]=ObjectTy();
+new (m_ptr+n) ObjectTy();
 // call dtor an dctor? lol 
 return n; 
 } // alloc 
@@ -201,7 +204,9 @@ void save(const StrTy & fn,const StrTy &s) {Save(fn,s); }
 ~mjm_object_pool() {
 //MM_DIE(" figure out dtor lol")
 Free();
-delete [] (char*) m_ptr; }
+delete [] (char*) m_ptr; 
+//MM_ERR(" del obj pool ")
+}
 
 StrTy dump(const IdxTy flags=0) { return Dump(flags); }
 private:
@@ -273,10 +278,13 @@ void Copy(const Myt & that )
 {
 Free();
 delete[] (char*)m_ptr;
-m_ptr= new ObjectTy[that.m_sz];
 m_sz=that.sz;
+m_ptr=(ObjectTy*) new char[m_sz*SZ];
+//m_ptr= new ObjectTy[that.m_sz];
 //::memcpy(m_ptr,that.m_ptr,sz*SZ);
-MM_ILOOP(i,m_sz){  m_ptr[i]=that.m_ptr[i];}
+// this should only COPY allocated ones... 
+//MM_ILOOP(i,m_sz){  m_ptr[i]=that.m_ptr[i];}
+MM_ILOOP(i,m_sz){ if( that.m_bits[i])  m_ptr[i]=that.m_ptr[i];}
 m_bits=that.m_bits;
 }// Copy 
 void Free()

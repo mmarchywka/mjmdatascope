@@ -240,7 +240,7 @@ typedef Tapp app_t;
 typedef typename Saver::save_params_type Sp;
 mjm_glut_scope_ii() {Init();}
 ~mjm_glut_scope_ii() {Free(); }
-void app(const app_t * p ) { m_p_app=p; } 
+void app( app_t * p ) { m_p_app=p; } 
 // TODO FIXME thes is a hazard here but not sure it is worth
 // creating a posisble deadlock on panic exit until
 // threading worked out.  
@@ -266,6 +266,9 @@ setting=false;
  return x; } 
 void modify(const  StrTy & sin, const IdxTy flags)
 { Modify(sin,flags); } 
+StrTy show(const  StrTy & sin, const IdxTy flags)
+{ return Show(sin,flags); } 
+
 
 // add a scene - this creates ptr ownership issues, smartptr?
 // this comes from datascope and it has not parse
@@ -825,7 +828,7 @@ MM_ERR(" could have a menu for this ")
   switch (idCommand)
     {
 		case POPUP_RESET : { ResetView(0); break; } 
-		case POPUP_CLEAR : { ClearViews(0); break; } 
+		case POPUP_CLEAR : { ClearViews(1); break; } 
  /*   case MENU_LIGHTING:
       g_bLightingEnabled = !g_bLightingEnabled;
       if (g_bLightingEnabled)
@@ -855,7 +858,11 @@ SeeRedisplay(); // if (m_alive) glutPostRedisplay();
 }
 // https://community.khronos.org/t/what-are-the-codes-for-arrow-keys-to-use-in-glut-keyboard-callback-function/26457
 
+// RagSceneMap m_scenes,m_actives,m_deactive,m_select,m_deselect;
 #define FOREACHA(x)  MM_LOOP(ii,m_actives){ auto & act=(*ii).second;  auto & v=(*ii).second->view();  x } 
+#define FOREACHS(x)  MM_LOOP(ii,m_scenes){ const auto & id=(*ii).first; auto & act=(*ii).second;  auto & v=(*ii).second->view();  x } 
+
+
 
 // display specs come from the input data, the console, the display screen keys,
 // and mouse action menu.  These should be symmetric lol.
@@ -899,6 +906,22 @@ default: { FOREACHA( v.style(~v.style()); ) }
 } // act
 
 } // Style
+StrTy Show(const  StrTy & sin, const IdxTy flags)
+{ Ss ss;
+
+BaseParams kvp(sin);
+// RagSceneMap m_scenes,m_actives,m_deactive,m_select,m_deselect;
+FOREACHS( 
+const bool ac=(m_actives.find(id)!=m_actives.end());
+const bool dac=(m_deactive.find(id)!=m_deactive.end());
+const bool sel=(m_select.find(id)!=m_select.end());
+const bool dsel=(m_deselect.find(id)!=m_deselect.end());
+const StrTy x=act->show(); 
+ss<<MMPR4(ac,dac,sel,dsel)<<x<<CRLF;
+)  
+
+return ss.str(); }  // Show
+
 
 
 void Modify(const  StrTy & sin, const IdxTy flags)
@@ -1098,7 +1121,7 @@ IdxTy  ClearViews(const IdxTy flags)
 {
 MM_ERR(" clearing viwew ")
 EnterSerial(0);
-if (m_p_app) m_p_app->clear();
+if (m_p_app) m_p_app->clear(1);
 else{  MM_ERR(" no app ")  clear(1); } 
 ExitSerial(0);
 return 1; 

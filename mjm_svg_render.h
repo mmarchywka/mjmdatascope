@@ -133,7 +133,9 @@ IdxTy load(const  char * p, const IdxTy len, const IdxTy flags)
 { return Load((const unsigned char *)p,len,flags); } 
 IdxTy load(const unsigned char * p, const IdxTy len, const IdxTy flags)
 { return Load(p,len,flags); } 
-void render_saved(const StrTy & sin,const IdxTy flags) {RenderSaved(sin,flags); }
+IdxTy append(const Myt & that, const IdxTy flags)
+{ return Append(that,flags);  }
+void render_saved(const StrTy & sin,const IdxTy flags) const  {RenderSaved(sin,flags); }
 void render(const StrTy & sin,const IdxTy flags) {Render(sin,flags); }
 void load(const Ragged & r,const IdxTy start, const IdxTy first,const IdxTy flags ) {Init(r,start,first,flags);}
 void save(const StrTy & fn,const StrTy &s) {Save(fn,s); }
@@ -193,7 +195,7 @@ g_object_unref(handle); // .unref();
 return 0; 
 } // Load 
 // https://gnome.pages.gitlab.gnome.org/librsvg/Rsvg-2.0/recommendations.html
-void RenderSaved(const StrTy & sin, const IdxTy flags )
+void RenderSaved(const StrTy & sin, const IdxTy flags ) const 
 {
 MM_ERR(" this crap leaks memory still wtf")
 int w=m_vp.width; int h=m_vp.height;
@@ -330,11 +332,15 @@ m_h=BAD;
 
 } // Init
 
-
+IdxTy Append(const Myt & that, const IdxTy flags)
+{
+MM_DIE(" not impl ")
+return 0; 
+} // Append
 
 // MEMBERS
-DataTy * m_data;
-IdxTy m_w,m_h;
+mutable DataTy * m_data;
+mutable IdxTy m_w,m_h;
 RsvgRectangle m_vp,m_lvp;
 StrTy m_svg;
 

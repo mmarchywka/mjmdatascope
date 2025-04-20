@@ -244,7 +244,8 @@ box_iterator end() const { return m_boxes.end(); }
 void load(const StrTy & sin,const IdxTy flags) {Init(sin,flags); }
 void load(const Ragged & r,const IdxTy start, const IdxTy first,const IdxTy flags ) {Init(r,start,first,flags);}
 void save(const StrTy & fn,const StrTy &s) {Save(fn,s); }
-
+IdxTy append(const Myt & that, const IdxTy flags)
+{ return Append(that,flags); } 
 ~mjm_dscope_heatmap() {}
 StrTy dump(const IdxTy flags=0) { return Dump(flags); }
 private:
@@ -356,7 +357,11 @@ m_col_names=x;
 return 0;
 } // LoadHeatMap
 
-
+IdxTy Append(const Myt & that, const IdxTy flags)
+{
+MM_DIE(" not impl ")
+return 0; 
+} // Append 
 
 // MEMBERS
 // TODO need to do somethng more complete
