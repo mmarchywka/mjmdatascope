@@ -10,3 +10,14 @@ nolaunch.txt
 proj_files.txt
 sinefifo.txt
 sine.txt
+mjmdscope/NAMESPACE
+mjmdscope/src/RcppExports.cpp
+mjmdscope/src/rcpp_hello_world.cpp
+mjmdscope/src/rcpp_mjmdscope_send.cpp
+mjmdscope/R/RcppExports.R
+mjmdscope/DESCRIPTION
+mjmdscope/man/rcpp_hello_world.Rd
+mjmdscope/man/mjmdscope-package.Rd
+mjmdscope/Read-and-delete-me
+../freefem/ff_dscope_line.zip
+../freefem/first_ff_dscope.zip
