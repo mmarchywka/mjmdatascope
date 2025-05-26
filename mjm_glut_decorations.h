@@ -413,7 +413,7 @@ IdxTy DrawPoints(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
 {
 const IdxTy sz=m_r.size();
 const int style=v.style();
-MM_ERR(MMPR2(sz,style))
+if (false) MM_ERR(MMPR2(sz,style))
 IdxTy flags=0;
 // right now this is interpreted but want to compile later
 IdxTy idx=01; // skpi headers TODO FIXME get number right 

@@ -16,6 +16,7 @@
 //#include "mjm_tokenized_collections.h"
 #include "mjm_canned_methods.h"
 #include "mjm_dscope_sender.h"
+#include "mjm_dohscope_buffer.h"
 
 #include "mjm_pawnoff.h"
 #include "mjm_strings.h"
@@ -140,6 +141,7 @@ typedef mjm_block_matrix<D> Block;
 typedef mjm_datascope Sender;
 typedef std::vector<StrTy> ColTy;
 
+typedef mjm_dohscope_buffer<Tr> Buffer;
 
 class _point
 {
@@ -189,6 +191,7 @@ Myt & operator=(const Myt & that)
 MM_ERR(" assigning dscope_interface not define "<<MMPR(__FUNCTION__))
 return *this;
 }
+void load_fifo() { load(m_default_load,0); } 
 void load(const StrTy & sin,const IdxTy flags) {Init(sin,flags); }
 void load(const Ragged & r,const IdxTy start, const IdxTy first,const IdxTy flags ) {Init(r,start,first,flags);}
 void warn_fast_drop(const bool x ) { Set(m_state,DROPWARN,x); }
@@ -200,13 +203,18 @@ StrTy dump(const IdxTy flags=0) { return Dump(flags); }
 bool que_full() const { return m_sender.m_rawfifo.full();  } 
 bool que_empty() const { return m_sender.m_rawfifo.empty();  } 
 // WTF tis should not need to wait wtf????
-bool launch_default() {load("rawfifo launch  2",0); usleep(500000); return true;}
+bool launch_default() {load("rawfifo launch  2",0); usleep(100000); return true;}
 bool send( const Ragged & r, const Block & data, const IdxTy flags)
 { return Send(r,&data,flags); } 
 bool send( const Ragged & r,  const IdxTy flags)
 { return Send(r,NULL,flags); } 
 bool send_strip_chart( const Ragged & r,  const StrTy & src,const StrTy & params, const IdxTy flags)
 { return SendStripChart(r,src,params,flags); } 
+template <class Tp> 
+bool send_oscope(const Tp & _x, const Tp & _y,  const StrTy& src, const IdxTy line, const StrTy idn=StrTy(), const StrTy & etc=StrTy(),const StrTy & params=StrTy(), const StrTy & _ty="chunks", const IdxTy flags=0)
+{return  SendOscope( _x,  _y,  src, line, idn, etc, params,  _ty,flags); } 
+
+
 bool send_decorations( const Ragged & r,  const StrTy & src,const StrTy & params, const IdxTy flags)
 { return SendDecorations(r,src,params,flags); } 
 bool send_molecule( const Ragged & r,  const StrTy & src,const StrTy & params, const IdxTy flags)
@@ -236,6 +244,17 @@ IdxTy setup(Ragged & r, const StrTy & sid, const StrTy & ty,const StrTy & params
 { return Setup(r, sid, ty,params); } 
 
 StrTy angle_color(const D & t) const { return theta_color(t); } 
+// TODO call back or notifier on exit?
+bool wait_done(const IdxTy n, const IdxTy mu)
+{ IdxTy i=0;
+while (!que_empty()) { usleep(mu); ++i; if (i>=n) break; }
+if (false) { MM_ERR(" cmd "<<MMPR3(__FUNCTION__,i,que_empty())) }
+return que_empty();
+} // WaitDone
+
+
+
+
 ~mjm_dscope_interface() {}
 
 
@@ -347,6 +366,56 @@ m_sender.m_rawfifo.send(rh,r);
 return 0; 
 } //  SendHeatmap 
 
+
+#if 0
+
+
+Ragged r;
+{ Line l; l.push_back("#"); l.push_back("id"); l.push_back("test pattern chunks "); l.push_back(idn);  r.add(l); }
+{ Line l; l.push_back("#"); l.push_back("oscilloscope"); l.push_back("chunks"); r.add(l); }
+
+{ Line l; l.push_back("#"); l.push_back("trace"); Ss ss; ss<<line;  l.push_back(ss.str()); r.add(l); }
+
+for(IdxTy i=0; i<200; ++i)
+{
+
+#endif
+//} // Setup
+
+
+IdxTy SetupOscope(Ragged & r, const StrTy &  idn, const StrTy &sid, const IdxTy line, const StrTy & etc=StrTy(), const StrTy & _ty="chunks",const StrTy & params=StrTy())
+{
+
+/*
+Ss ss;
+ss<<"# id "<<sid<<CRLF;
+ss<<"# "<<ty<<CRLF;
+if (params.length()) { ss<<"# params "<<params<<CRLF; }
+r.load(ss,false);
+
+*/
+
+//const StrTy ty="oscilloscope";
+//const StrTy t2="chunks";
+//const StrTy idn="1";
+{ Line l; l.push_back("#"); l.push_back("id"); l.push_back(sid); if ( idn.length()) l.push_back(idn);  r.add(l); }
+{ Line l; l.push_back("#"); l.push_back("oscilloscope"); if (_ty.length()) l.push_back(_ty); r.add(l); }
+{ Line l; l.push_back("#"); l.push_back("trace"); Ss ss; ss<<line;  l.push_back(ss.str()); r.add(l); }
+//Ss ss;
+//ss<<"# id "<<sid<<" "<<idn<<CRLF;
+//ss<<"# "<<ty<<" "<<t2<<CRLF;
+//ss<<"# etc ntax "<<ntax;
+if (etc.length()) {Ss ss;  ss<<"# "<<etc; r.load(ss,false); }
+//ss<<CRLF;
+if (params.length()) { Ss ss;  ss<<"# params "<<params<<CRLF; r.load(ss,false);  } 
+//r.load(ss,false);
+MM_ERR(MMPR(r.dump()))
+return 0;
+} // SetupOscope
+
+
+
+
 IdxTy SendBlock( const Block & data, const StrTy & params, const ColTy & col_names,  const StrTy & src, const IdxTy flags)
 {
 Ss ss;
@@ -432,6 +501,48 @@ setup(h, src, "strip-chart",params );
 m_sender.m_rawfifo.send(h,r);
 return true; 
 }  // SendStripChart
+template <class Tp>
+bool  SendOscopeB(const Tp & _x, const Tp & _y,  const StrTy& src, const IdxTy line, const StrTy idn,  const StrTy & etc,const StrTy & params, const StrTy & _ty, const IdxTy flags)
+{
+if (SendGuard(flags)) return false;
+m_buf.samples(_x,_y,src,line,idn,etc,params,_ty,flags); 
+while (m_buf.traces())
+{
+Ragged h;
+ SetupOscope(h, idn, src, line, etc,  _ty, params);
+const Ragged & r=m_buf.trace();
+m_sender.m_rawfifo.send(h,r);
+m_buf.take();
+} // traces
+
+return true;
+} // SendOscopeB
+template <class Tp>
+bool  SendOscope(const Tp & _x, const Tp & _y,  const StrTy& src, const IdxTy line, const StrTy idn,  const StrTy & etc,const StrTy & params, const StrTy & _ty, const IdxTy flags)
+{
+if (true) return SendOscopeB(_x,_y,src,line,idn,etc,params,_ty,flags); 
+if (SendGuard(flags)) return false;
+//MM_ERR(MMPR3(data.nx(),data.ny(),pload.size()))
+Ragged h;
+ SetupOscope(h, idn, src, line, etc,  _ty, params);
+//setup(h, src, "strip-chart",params );
+//SetupOscope(h,ntax,etc,sid,ty,params);
+Ragged r;
+const IdxTy sz=_x.size();
+for(IdxTy i=0; i<sz; ++i)
+{
+Line l;
+D x=_x[i];
+D y=_y[i];
+{ Ss ss; ss<<x; l.push_back(ss.str()); }
+{ Ss ss; ss<<y; l.push_back(ss.str()); }
+r.add(l);
+//++m_line;
+} // i 
+m_sender.m_rawfifo.send(h,r);
+return true; 
+}  // SendOscope
+
 
 
 bool  SendDecorations( const Ragged & r, const StrTy& src, const StrTy & params, const IdxTy flags)
@@ -485,6 +596,7 @@ void Init()
 {
 m_fast_drop=0;
 m_state=0;
+m_default_load="rawfifo launch  2";
 } // Init
 
 
@@ -493,6 +605,8 @@ m_state=0;
 Sender m_sender;
 IdxTy m_fast_drop;
 IdxTy m_state;
+StrTy m_default_load;
+Buffer m_buf;
 }; // mjm_dscope_interface
 
 //////////////////////////////////////////////

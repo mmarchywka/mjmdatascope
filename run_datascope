@@ -120,7 +120,8 @@ x=$devinstalldir
 if [ "$x" != "" ]
 then
 echo cp "$DEST" "$x/$DEST"
-cp "$x/$DEST" "$x/$DEST."2023-03-16-1678965868
+#cp "$x/$DEST" "$x/$DEST."2023-03-16-1678965868
+cp "$x/$DEST" "$x/$DEST."`date +%Y-%m-%d-%s`
 cp "$DEST" "$x/$DEST"
 else
 echo no install dir $devinstalldir

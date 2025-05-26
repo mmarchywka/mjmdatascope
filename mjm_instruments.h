@@ -580,8 +580,9 @@ void parse_partial(Tv & words, const char * s,const char sep, const IdxTy pwords
 {
 const IdxTy sz=strlen(s);
 bool preserve_quotes=Bit(flags,0);
+const bool debug=false;
 bool deb=false;
-MM_ERR(MMPR3(sz,sep,s))
+if (debug) MM_ERR(MMPR3(sz,sep,s))
 const IdxTy mxsz=10*sz+1;
 char c[mxsz];
 IdxTy pc=0;

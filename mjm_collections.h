@@ -562,7 +562,8 @@ LiCItor begin() const { return m_lines.begin(); }
 LiCItor end() const { return m_lines.end(); } 
 LiItor begin()  { return m_lines.begin(); } 
 LiItor end()  { return m_lines.end(); } 
-
+const Line & back() const { return m_lines[m_lines.size()-1]; }
+ Line & back() { return m_lines[m_lines.size()-1]; }
 const StrTy&  name()const  { return m_name; } 
 const StrTy&  name( const StrTy & s )  {m_name=s;  return m_name; } 
 
