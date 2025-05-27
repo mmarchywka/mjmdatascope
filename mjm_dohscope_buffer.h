@@ -3,6 +3,7 @@
 
 #include "mjm_globals.h"
 #include "mjm_thread_util.h"
+#include "mjm_dohscope_samples.h"
 #include "mjm_dohscope_trigger.h"
 
 #include "mjm_block_matrix.h"
@@ -118,6 +119,7 @@ typedef std::map<StrTy, Ragged> RaggedMap;
 typedef std::vector<StrTy> Words;
 typedef mjm_string_base_params<Tr> BaseParams;
 typedef mjm_block_matrix<D> Buffer;
+typedef mjm_dohscope_samples<Tr> SampleBuf;
 typedef mjm_dohscope_trigger<Tr> Trigger;
 typedef std::deque<Ragged> RaggedStack;
 // API
@@ -197,9 +199,42 @@ const D x=m_buf(j,im);
 r.add(l);
 } // i 
 } // Add
+
 void inc(IdxTy & x, const IdxTy n, const IdxTy m) const { x=(x+n)%m; } 
 template <class Tp>
 bool Samples(const Tp & _x, const Tp & _y,  const StrTy& src, const IdxTy line, const StrTy idn=StrTy(), const StrTy & etc=StrTy(),const StrTy & params=StrTy(), const StrTy & _ty="chunks", const IdxTy flags=0)
+{
+//Ragged r;
+const IdxTy sz=_x.size();
+for(IdxTy i=0; i<sz; ++i)
+{
+m_sb.add(_x[i],_y[i]);
+if (int(m_loc)==BAD)
+{
+bool trig=m_trig.point(m_sb);
+if (trig)
+{
+m_loc=m_sb.newest();
+m_sb.add_trailing(m_r,m_prior);
+
+} // trig 
+} // loc
+else
+{
+m_sb.add_trailing(m_r,1);
+// if R big enough send it.... 
+if (m_r.size()>=m_trace) { m_loc=BAD;  m_traces.push_back(m_r);
+if (m_traces.size()>30) m_traces.pop_front(); 
+ m_r=Ragged(); 
+} // loc
+} // loc
+
+} // i 
+return 0; 
+} // Samples 
+
+template <class Tp>
+bool SamplesOld(const Tp & _x, const Tp & _y,  const StrTy& src, const IdxTy line, const StrTy idn=StrTy(), const StrTy & etc=StrTy(),const StrTy & params=StrTy(), const StrTy & _ty="chunks", const IdxTy flags=0)
 {
 //Ragged r;
 const IdxTy sz=_x.size();
@@ -211,6 +246,7 @@ D t=_x[i];
 D c1=_y[i];
 m_buf(0,m_newest)=t;
 m_buf(1,m_newest)=c1;
+//m_sb.add(t,c1);
 if (int(loc)==BAD)
 {
 bool trig=m_trig.point(m_buf,m_newest,m_oldest);
@@ -231,7 +267,9 @@ Add(m_r,m_newest,1,1);
 // if R big enough send it.... 
 if (m_r.size()>=m_trace) { m_loc=BAD;  m_traces.push_back(m_r);
 if (m_traces.size()>30) m_traces.pop_front(); 
- m_r=Ragged(); } 
+ m_r=Ragged(); 
+
+} 
 
 } 
 inc_newest(1);
@@ -244,7 +282,7 @@ inc_newest(1);
 
 } // i 
 
-return  0; } // Samples
+return  0; } // SamplesOld
 
 
 void Init(const Ragged & r, const IdxTy start=0, const IdxTy first=0, const IdxTy flags=0  )
@@ -271,6 +309,7 @@ void Init()
 
 m_channels=2;
 m_points=10000;
+m_sb.resize(m_channels,m_points); 
 m_buf = Buffer(1+m_channels,m_points);
 m_buf.zero();
 m_oldest=0;
@@ -283,6 +322,7 @@ m_loc=BAD;
 
 
 // MEMBERS
+SampleBuf m_sb;
 Buffer m_buf;
 IdxTy m_channels, m_points;
 IdxTy m_oldest,m_newest;
