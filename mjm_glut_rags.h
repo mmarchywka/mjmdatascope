@@ -238,7 +238,7 @@ void ExitSerial(const IdxTy i)const  {  m_mutex_vector.exit_serial(i ); }
 // maybe a delegate? 
 IdxTy Add(const input_type & r, const IdxTy flags) 
 {
-MM_ERR(" Adding "<<MMPR(r.dump(0,"|",6))) 
+if (Bit(m_debug,0)) MM_ERR(" Adding "<<MMPR(r.dump(0,"|",6))) 
 
 const IdxTy sz=r.size();
 if (sz<3)

@@ -133,6 +133,7 @@ bool point(const MyBlock & buf, const IdxTy newest, const IdxTy oldest)
 { return Trigger(buf,newest,oldest); }
 bool point( SampleBuf & sb ) { return Trigger(sb); } 
 
+void set(const StrTy & sin,const IdxTy flags=0) {Set(sin,flags); }
 void load(const StrTy & sin,const IdxTy flags) {Init(sin,flags); }
 void load(const Ragged & r,const IdxTy start, const IdxTy first,const IdxTy flags ) {Init(r,start,first,flags);}
 void save(const StrTy & fn,const StrTy &s) {Save(fn,s); }
@@ -148,7 +149,6 @@ static bool Bit(const IdxTy f, const IdxTy b) { return  ((f>>b)&1)!=0; }
 // should loop over map now 
 static void Set(IdxTy& f, const IdxTy b,const bool x) //const  
     { if (x) f|=(1<<b); else f&=((~1)<<b); }
-StrTy Dump(const IdxTy flags=0) {Ss ss;  return ss.str(); }
 typedef typename mjm_thread_util<Tr>::mutex_vector MutexVector;
 
 enum { MAP_MU=0 , MU_SZ};
@@ -172,17 +172,36 @@ return sout;
 } // XXX_test
 bool Trigger(SampleBuf & sb)
 { 
+if (m_free_run) return (sb.samples()>=m_min_samples);
+//if (m_free_run) return true;
 if (sb.samples()<4) return false;
 const IdxTy ch=1;
 D t1=sb.trail(0,ch);
 D t2=sb.trail(1,ch);
 D t3=sb.trail(2,ch);
 //D t4=trail(3,ch);
-if (t1<m_level) return false;
+
+if (m_archaic_audio_test)
+{if (t1<m_level) return false;
 if (t2>m_level) return false;
 if (t2>t1) return false;
 if (t3>t2) return false;
 return true; 
+}
+bool level_test=true;
+if (level_test)
+{
+bool up=!Bit(m_slope,0);
+const bool b1= (t1>m_level);
+const bool b2= (t2<m_level);
+if (up) return b2&&!b1;
+return b1&&!b2;
+}
+
+
+
+
+return true;
 
 } // Trigger
 
@@ -190,20 +209,34 @@ return true;
 bool Trigger(const MyBlock & buf, const IdxTy newest, const IdxTy oldest)
 { 
 IdxTy npoints=buf.nx();
+if (m_free_run) return (npoints>=m_min_samples);
 IdxTy nchannels=buf.ny();
 IdxTy samples=((newest+npoints)-oldest)%npoints;
 //MM_ERR(MMPR3(npoints,nchannels,samples))
 if (samples<3) return false;
 IdxTy n1=((newest+npoints)-1)%npoints;
 IdxTy n2=((newest+npoints)-2)%npoints;
+if (m_archaic_audio_test)
+{
 const bool b1= (buf(1,newest)>m_level);
 const bool b2= (buf(1,n2)<m_level);
 const bool b3= (buf(1,n2)<buf(1,n1));
 const bool b4= (buf(1,n1)<buf(1,newest));
 //MM_ERR(MMPR4(b1,b2,b3,b4))
 bool tr=b1&&b2&&b3&&b4;
+return tr;
+}
+bool level_test=true;
+if (level_test)
+{
+bool up=!Bit(m_slope,0);
+const bool b1= (buf(1,newest)>m_level);
+const bool b2= (buf(1,n2)<m_level);
+if (up) return b2&&!b1;
+return b1&&!b2;
+}
 
-return tr; 
+return true; 
 } // Trigger
 
 
@@ -225,19 +258,42 @@ void Init(const StrTy  & sin,const IdxTy flags =0  )
 Init();
 BaseParams kvp(sin);
 } // Init 
+void Set(const StrTy  & sin,const IdxTy flags =0  )
+{
+Init();
+BaseParams kvp(sin);
+kvp.get(m_level,"level");
+kvp.get(m_archaic_audio_test,"oldaudio");
+kvp.get(m_free_run,"freerun");
+kvp.get(m_slope,"slope");
+kvp.get(m_min_samples,"min");
+
+MM_ERR(MMPR(dump()))
+} // Set 
+
+StrTy Dump(const IdxTy flags=0) {Ss ss;  
+ss<<MMPR3(m_level,m_archaic_audio_test,m_free_run);
+ss<<MMPR(m_min_samples);
+ss<<std::hex<<MMPR(m_slope); 
+return ss.str(); }
 
 void Init()
 {
 m_level=200;
-
+m_archaic_audio_test=false;
+m_free_run=true;
+m_slope=0;
+m_min_samples=1000;
 } // Init
 
 
 
 // MEMBERS
 D m_level;
-
-
+IdxTy m_slope;
+bool m_archaic_audio_test;
+bool m_free_run;
+IdxTy m_min_samples;
 }; // mjm_dohscope_trigger
 
 //////////////////////////////////////////////

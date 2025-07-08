@@ -227,6 +227,13 @@ struct timeval last_idle_time;
 }; // _mjm_gl_status
 typedef _mjm_gl_status MyGLStatus;
 
+struct _mjm_con_warn
+{
+bool m_add=false;
+bool add() const { return m_add; } 
+
+}; // _mjm_con_warn
+typedef _mjm_con_warn MyErrMsgs;
 
 
 //typedef typename DrawInfo::hot_type::layout_type lt;
@@ -302,7 +309,7 @@ private:
 
 RagScene *  Add( RagScene * p, const StrTy name, const IdxTy flags) 
 { 
-MM_ERR(" adding "<<MMPR(name))
+if (m_msg.add()) MM_ERR(" adding "<<MMPR(name))
 EnterSerial(0);
 // TODO FIXME need a mutex here.. 
 //MM_ERR(" in Add  "<<MMPR2(this,p))
@@ -320,7 +327,7 @@ if (pold==0) BuildPopupMenu(); }
 // this is activated in Display now hopefully avoiding hazards 
 SeeRedisplay(); // if (m_alive) glutPostRedisplay();
 ExitSerial(0);
-MM_ERR(" dun adding "<<MMPR(name))
+if (m_msg.add()) MM_ERR(" dun adding "<<MMPR(name))
 return pold; 
 } // Add  
 void SeeRedisplay()
@@ -1276,6 +1283,7 @@ Sp m_save_params;
 GuiLayout m_gui;
 // tacked in
 SvgRender m_svg;
+MyErrMsgs m_msg;
 }; // mjm_glut_scope_ii
 
 //////////////////////////////////////////////

@@ -131,6 +131,9 @@ mjm_dohscope_buffer(const Ragged & r,const IdxTy start, const IdxTy first,const 
 
 // chennel zero is time base
 const D & p(const IdxTy channel, const IdxTy p ) { return  m_buf(channel,p) ; }
+void set_trigger(const StrTy & s, const IdxTy flags=0) { m_trig.set(s,flags); } 
+void set_samples(const StrTy & s, const IdxTy flags=0) { m_sb.set(s,flags); } 
+
 template <class Tp>
 bool samples(const Tp & _x, const Tp & _y,  const StrTy& src, const IdxTy line, const StrTy idn=StrTy(), const StrTy & etc=StrTy(),const StrTy & params=StrTy(), const StrTy & _ty="chunks", const IdxTy flags=0)
 {return  Samples( _x,  _y,  src, line, idn, etc, params,  _ty,flags); }
@@ -224,7 +227,7 @@ else
 m_sb.add_trailing(m_r,1);
 // if R big enough send it.... 
 if (m_r.size()>=m_trace) { m_loc=BAD;  m_traces.push_back(m_r);
-if (m_traces.size()>30) m_traces.pop_front(); 
+if (m_traces.size()>m_trace_que) m_traces.pop_front(); 
  m_r=Ragged(); 
 } // loc
 } // loc
@@ -317,6 +320,7 @@ m_newest=0;
 m_trace=1000;
 m_prior=100;
 m_loc=BAD;
+m_trace_que=30;
 } // Init
 
 
@@ -327,6 +331,7 @@ Buffer m_buf;
 IdxTy m_channels, m_points;
 IdxTy m_oldest,m_newest;
 IdxTy m_trace, m_prior;
+IdxTy m_trace_que;
 Ragged m_r; // partial trace
 Trigger m_trig;
 IdxTy m_loc;

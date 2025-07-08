@@ -125,6 +125,7 @@ public:
 mjm_dohscope_samples() {Init(); }
 mjm_dohscope_samples(const StrTy & sin,const IdxTy flags) {Init(sin,flags); }
 mjm_dohscope_samples(const Ragged & r,const IdxTy start, const IdxTy first,const IdxTy flags ) {Init(r,start,first,flags);}
+StrTy set(const StrTy & sin,const IdxTy flags) {return Set(sin,flags); }
 // channels numbered from 1 time base on zero 
 D trail(const IdxTy n, const IdxTy c) const { return m_buf(c,Trail(n)); } 
 void resize(const IdxTy nc, const IdxTy pts) { Resize( nc, pts); } 
@@ -236,7 +237,7 @@ IdxTy n=Trail(m_oldest); // (m_newest+m_points-m_oldest)%m_points;
 if (n<nlead) nlead=n;
 IdxTy plead=Trail(nlead); // (m_newest+m_points-nlead)%m_points;
 Add(r,plead,nlead,m_channels);
-MM_ERR(MMPR3(nlines,m_newest,m_oldest)<<MMPR3(plead,nlead,r.size()))
+if ( m_debug_trailing ) MM_ERR(MMPR3(nlines,m_newest,m_oldest)<<MMPR3(plead,nlead,r.size()))
 
 } // AddTrailing 
 void Add(const D & t, const D & y) 
@@ -258,7 +259,7 @@ MM_ILOOP(j,(nch+1))
 // re-make the time thing. 
 if (j==0)
 {
-{ Ss ss; ss<<r.size(); l.push_back(ss.str()); }
+{ Ss ss; ss<<SampleIntervalFix(r.size()); l.push_back(ss.str()); }
 }
 else {
 const D x=m_buf(j,im);
@@ -269,13 +270,31 @@ r.add(l);
 } // i 
 } // Add
 
+// the input time base has to be fixed to make user input sequential
+// to pick up trigger and make trace coherent. Using 1 for dt is
+// a problem 
+D SampleIntervalFix(const IdxTy n)
+{
+
+return m_sample_interval*n;
+
+} // SampleIntervalFix
+StrTy Set(const StrTy  & sin,const IdxTy flags =0  )
+{
+Init();
+BaseParams kvp(sin);
+kvp.get(m_sample_interval,"sample_interval");
+return StrTy();
+} // Init 
+
 
 
 void Clear() { m_oldest=0; m_newest=0; } 
 void Init()
 {
 Resize(2,10000);
-
+m_debug_trailing=false;
+m_sample_interval=1;
 } // Init
 
 
@@ -284,8 +303,8 @@ Resize(2,10000);
 Buffer m_buf;
 IdxTy m_channels, m_points;
 IdxTy m_oldest,m_newest;
-
-
+bool m_debug_trailing;
+D m_sample_interval;
 
 }; // mjm_dohscope_samples
 

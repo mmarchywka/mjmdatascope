@@ -210,9 +210,16 @@ bool send( const Ragged & r,  const IdxTy flags)
 { return Send(r,NULL,flags); } 
 bool send_strip_chart( const Ragged & r,  const StrTy & src,const StrTy & params, const IdxTy flags)
 { return SendStripChart(r,src,params,flags); } 
+// TODO this needs multiple instances now with tiggering and 
+// buffering on the source side. In most cases a name is included
+// to be sorted out by viewers. 
+StrTy set_oscope_trigger(const StrTy & scope, const StrTy & sin, const IdxTy flags) { m_bufs[scope].set_trigger(sin,flags);  return StrTy(); }  
+
+StrTy set_oscope_samples(const StrTy & scope, const StrTy & sin, const IdxTy flags) { m_bufs[scope].set_samples(sin,flags);  return StrTy(); }  
+
 template <class Tp> 
-bool send_oscope(const Tp & _x, const Tp & _y,  const StrTy& src, const IdxTy line, const StrTy idn=StrTy(), const StrTy & etc=StrTy(),const StrTy & params=StrTy(), const StrTy & _ty="chunks", const IdxTy flags=0)
-{return  SendOscope( _x,  _y,  src, line, idn, etc, params,  _ty,flags); } 
+bool send_oscope(const Tp & _x, const Tp & _y,  const StrTy& src, const IdxTy line, const StrTy & scope_name=StrTy(), const StrTy idn=StrTy(), const StrTy & etc=StrTy(),const StrTy & params=StrTy(), const StrTy & _ty="chunks", const IdxTy flags=0)
+{return  SendOscope( _x,  _y,  src, line, idn, etc, params,  _ty,flags,scope_name); } 
 
 
 bool send_decorations( const Ragged & r,  const StrTy & src,const StrTy & params, const IdxTy flags)
@@ -409,7 +416,7 @@ if (etc.length()) {Ss ss;  ss<<"# "<<etc; r.load(ss,false); }
 //ss<<CRLF;
 if (params.length()) { Ss ss;  ss<<"# params "<<params<<CRLF; r.load(ss,false);  } 
 //r.load(ss,false);
-MM_ERR(MMPR(r.dump()))
+if (false) MM_ERR(MMPR(r.dump()))
 return 0;
 } // SetupOscope
 
@@ -502,25 +509,29 @@ m_sender.m_rawfifo.send(h,r);
 return true; 
 }  // SendStripChart
 template <class Tp>
-bool  SendOscopeB(const Tp & _x, const Tp & _y,  const StrTy& src, const IdxTy line, const StrTy idn,  const StrTy & etc,const StrTy & params, const StrTy & _ty, const IdxTy flags)
+bool  SendOscopeB(const Tp & _x, const Tp & _y,  const StrTy& src, const IdxTy line, const StrTy idn,  const StrTy & etc,const StrTy & params, const StrTy & _ty, const IdxTy flags,const StrTy & scope_name)
 {
+Buffer& _buf=m_bufs[scope_name];
+_buf.samples(_x,_y,src,line,idn,etc,params,_ty,flags); 
 if (SendGuard(flags)) return false;
-m_buf.samples(_x,_y,src,line,idn,etc,params,_ty,flags); 
-while (m_buf.traces())
+while (_buf.traces())
 {
 Ragged h;
  SetupOscope(h, idn, src, line, etc,  _ty, params);
-const Ragged & r=m_buf.trace();
+const Ragged & r=_buf.trace();
 m_sender.m_rawfifo.send(h,r);
-m_buf.take();
+_buf.take();
 } // traces
 
 return true;
 } // SendOscopeB
 template <class Tp>
-bool  SendOscope(const Tp & _x, const Tp & _y,  const StrTy& src, const IdxTy line, const StrTy idn,  const StrTy & etc,const StrTy & params, const StrTy & _ty, const IdxTy flags)
+bool  SendOscope(const Tp & _x, const Tp & _y,  const StrTy& src, const IdxTy line, const StrTy idn,  const StrTy & etc,const StrTy & params, const StrTy & _ty, const IdxTy flags, const StrTy & scope_name)
 {
-if (true) return SendOscopeB(_x,_y,src,line,idn,etc,params,_ty,flags); 
+
+//if (true) return SendOscopeB(_x,_y,src,line,idn,etc,params,_ty,flags,scope_name); 
+if (scope_name.length()) 
+	return SendOscopeB(_x,_y,src,line,idn,etc,params,_ty,flags,scope_name); 
 if (SendGuard(flags)) return false;
 //MM_ERR(MMPR3(data.nx(),data.ny(),pload.size()))
 Ragged h;
@@ -606,7 +617,9 @@ Sender m_sender;
 IdxTy m_fast_drop;
 IdxTy m_state;
 StrTy m_default_load;
-Buffer m_buf;
+typedef std::map<StrTy,Buffer> ScopeBuffers;
+ScopeBuffers m_bufs;
+//Buffer m_buf;
 }; // mjm_dscope_interface
 
 //////////////////////////////////////////////
