@@ -130,8 +130,10 @@ _feature(const Line & l,  const IdxTy first ) { Init_feature(l,first); }
 _feature(const StrTy & s,  const IdxTy flags ) { Init_feature(s,flags); }
 _feature(const Ragged & r, const IdxTy first,const IdxTy i0, const IdxTy flags ) 
 {Init_feature(r,first,i0,flags); } 
+void set_fn(const StrTy & fn) { m_fn=fn; } 
 StrTy save( const IdxTy flags=0) const { return Save_feature(flags); } 
 StrTy dump( const IdxTy flags=0) const { return Dump_feature(flags); } 
+void add(const D & t, const D & x) { Add(t,x); } 
 private:
 void Init_feature(const StrTy & s,  const IdxTy flags ) 
 { Init_feature(); 
@@ -170,6 +172,31 @@ BaseParams kvp();
 //kcp,encode(s,"",);
 return s; 
 } // Dump 
+void Add(const D & t, const D & x) 
+{  
+
+D dx=0;
+D dt=0;
+if (m_n) { dx=x-m_x; dt=t-m_t; }
+// TODO eventually too slow doh  buffer... 
+if (m_fn.length())
+{
+if (m_n==0) 
+{ std::ofstream os(m_fn); // remove crap first
+if (m_wr_header) 
+{
+os<<"serial t x dt dx "<<CRLF;
+} // header
+}// m_n
+} // m_fn
+std::ofstream  os(m_fn,std::ios::app);
+os<<std::setprecision(m_precision); 
+os<<m_n<<" "<<t<<" "<<x<<" "<<dt<<" "<<dx<<CRLF; 
+m_x=x;
+m_t=t;
+++m_n;
+
+}  // Add
 
 
 
@@ -188,21 +215,30 @@ void Free_feature()
 
 void Init_feature()
 {
-
+m_x=0;
+m_t=9;
+m_n=0;
+m_fn="";
+m_wr_header=false;
+m_precision=10; 
 } // Init_feature
 
 // _featureMEMBERS
- 
+D m_x,m_t; // last values
+IdxTy m_n; // number proc 
+StrTy m_fn; // dest file  
+bool m_wr_header;
+IdxTy m_precision;
 }; // _feature
 
 typedef _feature Feature;
 // these need to be hierarchial with cool base clas...
 // hard code a few for now... 
-typedef std::vector<Feature> FeatureList;
+//typedef std::vector<Feature> FeatureList;
 // This is nice code but incredibly slow
 // Ideally linked lists in fixed shared block would be better
 /// with head and tail pointers.
-typedef std::map<StrTy,FeatureList> FeatureMap;
+//typedef std::map<StrTy,FeatureList> FeatureMap;
 
 
 
@@ -212,7 +248,6 @@ public:
 mjm_sig_anal() {Init(); }
 mjm_sig_anal(const StrTy & sin,const IdxTy flags) {Init(sin,flags); }
 mjm_sig_anal(const Ragged & r,const IdxTy start, const IdxTy first,const IdxTy flags ) {Init(r,start,first,flags);}
-
 void load(const StrTy & sin,const IdxTy flags) {Init(sin,flags); }
 void set(const StrTy & sin,const IdxTy flags) {Set(sin,flags); }
 void load(const Ragged & r,const IdxTy start, const IdxTy first,const IdxTy flags ) {Init(r,start,first,flags);}
@@ -307,18 +342,24 @@ if (alpha<3)
 {
 ++rc;
 D t1=sb.trail(0,0);
-D t2=sb.trail(0,0);
+D t2=sb.trail(1,0);
 if (alpha<0) { alpha=-alpha;}
 D t=(t2-t1)*alpha+t1;
+D x=(x2-x1)*alpha+x1;
 MM_ERR("zcross " << MMPR4(x1,x2,t1,t2)<<MMPR2(alpha,t))
-
+m_zed.add(t,x);
+++rc;
 } // alpha
 
 D gamma=minmax(x1,x2,x3);
 if (gamma<3)
 {
-D t2=sb.trail(0,0);
+D t2=sb.trail(1,0);
 MM_ERR("minmax " << MMPR4(x1,x2,x3,t2)<<MMPR(gamma))
+D  x=x2;
+D t=t2;
+if (gamma>0) m_extremap.add(t,x);
+else m_extreman.add(t,x);
 ++rc;
 } // gamma
 
@@ -363,6 +404,9 @@ m_points=10000;
 m_sb.resize(m_channels,m_points); 
 m_min_max=true;
 m_zed_cross=true;
+m_zed.set_fn("zed_cross.txt");
+m_extremap.set_fn("extremap.txt");
+m_extreman.set_fn("extreman.txt");
 } // Init
 
 /*grep m_sb mjm_dohscope_buffer.h
@@ -381,7 +425,10 @@ SampleBuf m_sb;
 
 // MEMBERS
 Samples m_sb;
-FeatureMap m_ma;
+//FeatureMap m_ma;
+Feature m_zed;
+Feature m_extreman;
+Feature m_extremap;
 IdxTy m_points,m_channels;
 bool m_min_max;
 bool m_zed_cross;
