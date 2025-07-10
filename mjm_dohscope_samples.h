@@ -281,7 +281,7 @@ return m_sample_interval*n;
 } // SampleIntervalFix
 StrTy Set(const StrTy  & sin,const IdxTy flags =0  )
 {
-Init();
+//Init();
 BaseParams kvp(sin);
 kvp.get(m_sample_interval,"sample_interval");
 return StrTy();

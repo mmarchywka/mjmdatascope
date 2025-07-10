@@ -133,7 +133,10 @@ mjm_dohscope_buffer(const Ragged & r,const IdxTy start, const IdxTy first,const 
 const D & p(const IdxTy channel, const IdxTy p ) { return  m_buf(channel,p) ; }
 void set_trigger(const StrTy & s, const IdxTy flags=0) { m_trig.set(s,flags); } 
 void set_samples(const StrTy & s, const IdxTy flags=0) { m_sb.set(s,flags); } 
-
+void set_params(const StrTy & s, const IdxTy flags=0) { 
+m_trig.set(s,flags);  
+Set(s,flags);  
+m_sb.set(s,flags); } 
 template <class Tp>
 bool samples(const Tp & _x, const Tp & _y,  const StrTy& src, const IdxTy line, const StrTy idn=StrTy(), const StrTy & etc=StrTy(),const StrTy & params=StrTy(), const StrTy & _ty="chunks", const IdxTy flags=0)
 {return  Samples( _x,  _y,  src, line, idn, etc, params,  _ty,flags); }
@@ -215,8 +218,10 @@ m_sb.add(_x[i],_y[i]);
 if (int(m_loc)==BAD)
 {
 bool trig=m_trig.point(m_sb);
+//MM_ERR("  branck"<<MMPR(trig)) 
 if (trig)
 {
+//MM_ERR(" 4 branck") 
 m_loc=m_sb.newest();
 m_sb.add_trailing(m_r,m_prior);
 
@@ -224,6 +229,7 @@ m_sb.add_trailing(m_r,m_prior);
 } // loc
 else
 {
+//MM_ERR(" dumb branck") 
 m_sb.add_trailing(m_r,1);
 // if R big enough send it.... 
 if (m_r.size()>=m_trace) { m_loc=BAD;  m_traces.push_back(m_r);
@@ -304,8 +310,23 @@ for(IdxTy i=start; i<sz; ++i)
 void Init(const StrTy  & sin,const IdxTy flags =0  )
 {
 Init();
-BaseParams kvp(sin);
+//BaseParams kvp(sin);
+Set(sin,flags);
 } // Init 
+void Set(const StrTy  & sin,const IdxTy flags =0  )
+{
+BaseParams kvp(sin);
+kvp.get(m_prior,"prior");
+// points to save 
+kvp.get(m_points,"points");
+// trace size
+kvp.get(m_trace,"trace");
+// number of traces to save before discarding oldests.
+kvp.get(m_trace_que,"que");
+kvp.get(m_channels,"channels");
+
+} // Set 
+
 
 void Init()
 {

@@ -217,6 +217,8 @@ StrTy set_oscope_trigger(const StrTy & scope, const StrTy & sin, const IdxTy fla
 
 StrTy set_oscope_samples(const StrTy & scope, const StrTy & sin, const IdxTy flags) { m_bufs[scope].set_samples(sin,flags);  return StrTy(); }  
 
+StrTy set_oscope(const StrTy & scope, const StrTy & sin, const IdxTy flags) { m_bufs[scope].set_params(sin,flags);  return StrTy(); }  
+
 template <class Tp> 
 bool send_oscope(const Tp & _x, const Tp & _y,  const StrTy& src, const IdxTy line, const StrTy & scope_name=StrTy(), const StrTy idn=StrTy(), const StrTy & etc=StrTy(),const StrTy & params=StrTy(), const StrTy & _ty="chunks", const IdxTy flags=0)
 {return  SendOscope( _x,  _y,  src, line, idn, etc, params,  _ty,flags,scope_name); } 
