@@ -1476,7 +1476,7 @@ return 0;
 
 void Init()
 {
-m_debug=0;
+m_debug=-1;
 m_grat_changed=0;
 m_data_idx.set_size(10);
   m_mutex_vector= MutexVector(3);;

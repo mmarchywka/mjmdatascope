@@ -5,6 +5,7 @@
 #include "mjm_thread_util.h"
 
 #include "mjm_tokenized_points.h"
+#include "mjm_colors_2023.h"
 
 
 //#include "mjm_block_matrix.h"
@@ -134,7 +135,9 @@ typedef typename Shapes::shape_t Shape;
 typedef typename Shapes::point_t Point;
 
 typedef std::map<IdxTy, TokPoints> ChartMap;
- class _chart_info  
+ 
+typedef mjm_colors_2023<Tr> ColorTable;
+class _chart_info  
 {
 
 public:
@@ -157,6 +160,16 @@ _chart_info(const Ragged & r, const IdxTy first,const IdxTy i0, const IdxTy flag
 const D & r() const { return m_r; } 
 const D & g() const { return m_g; } 
 const D & b() const { return m_b; } 
+IdxTy color(const StrTy &v)
+{
+static ColorTable ct;
+const auto x=ct.color(v); 
+m_r=D(x.r())/255.0;
+m_g=D(x.g())/255.0;
+m_b=D(x.b())/255.0;
+MM_ERR(MMPR3(m_r,m_g,m_b))
+return 0;
+} // color
 void color( const D & r, const D & g, const D & b) 
 { m_r=r; m_g=g; m_b=b; }
 void color(const IdxTy n) 
@@ -224,6 +237,7 @@ StrTy Dump_chart_info( const IdxTy flags=0) const
 {
 Ss ss;
 // ss<<MMPR4(); 
+ ss<<MMPR3(m_r,m_g,m_b); 
 return ss.str(); 
 } // Dump 
 
@@ -248,7 +262,7 @@ D m_r,m_g,m_b;
 typedef _chart_info Info;
 
 typedef std::map<IdxTy, Info> InfoMap;
-
+typedef std::map<StrTy,StrTy> Parameters;
 
 
 
@@ -274,6 +288,7 @@ const D & ymax() const { return m_y1; }
 
 
 void append(const Ragged & r, const IdxTy flags) { Append(r,flags); } 
+template <class Tm> void append(const Ragged & r, Tm & mi, const IdxTy flags) { Append(r,mi,flags); } 
 void append(const Myt & that, const IdxTy flags) { Append(that,flags); } 
 void save(const StrTy & fn,const StrTy &s) {Save(fn,s); }
 
@@ -378,13 +393,19 @@ void Save(const StrTy & fn,const StrTy &s) {
 // std::ofstream ofs(fn);
 
  } // Save
-void Append(const Ragged & r, const IdxTy flags)
-{
-LoadXNY(r,"",flags);
+void Append(const Ragged & r, const IdxTy flags) { m_params.clear();  LoadXNY(r,"",flags); } 
+template <class Tm> 
+void Append(const Ragged & r, Tm & mi, const IdxTy flags) { 
+m_params=mi.params();
+Ss ss; MM_LOOP(ii,m_params) { ss<<MMPR2((*ii).first,(*ii).second); } 
+MM_ERR(MMPR2(m_params.size(),ss.str()))
+LoadXNY(r,"",flags); 
 } 
 // these all have different m_st values doh... 
 void Append(const Myt & that, const IdxTy flags)
 {
+m_params.clear();
+// needs to sort out groups... 
 MM_LOOP(ii,that.m_map)
 {
 const IdxTy oldkey=(*ii).first;
@@ -409,11 +430,11 @@ MM_LOOP(jj,old)
 //auto
 tnew.load((*jj).x(),(*jj).y(),(*jj).z(),ci.r(),ci.g(),ci.b(),0);
 } // jj 
-
+//tnew.next_group();
 
 } // ii 
 
-
+//m_groups+=that.m_groups;
 }  // Append 
 
 void LoadXNY(const Ragged & r, const StrTy & sin, const IdxTy flags)
@@ -425,6 +446,19 @@ const IdxTy start=0;
 D red=1;
 D g=1;
 D b=1;
+IdxTy oldchart=BAD;
+TokPoints * pp=NULL;
+Info * pi=NULL;
+std::map<IdxTy,IdxTy> hits;
+auto ii=m_params.find("color");
+bool have_color=(ii!=m_params.end());
+Info def;
+if (have_color)
+{
+def.color((*ii).second);
+MM_ERR("have color "<< MMPR3(sin,(*ii).second,def.dump()))
+
+}
 for(IdxTy i=start; i<sz; ++i)
 {
 const Line & l=r[i];
@@ -432,13 +466,24 @@ const IdxTy len=l.size();
 if (len==0)  continue;
 if (l[0].c_str()[0]=='#') continue;
 if (len!=3) { MM_ERR(" ignoring line "<<MMPR2(i,l[0])) continue; }
+// FIXME this is incredibly slow per-point need a differnet format...
 const IdxTy chart=m_st(l[1]);
 const D x=atof(l[0].c_str());
 const D y=atof(l[2].c_str());
-if (m_info.find(chart)==m_info.end())
-{ m_info[chart].color(chart); } 
-const auto & ci=m_info[chart];
-m_map[chart].load(x,y,0,ci.r(),ci.g(),ci.b(),0);
+if (chart!=oldchart)
+{
+if (m_info.find(chart)==m_info.end()) { m_info[chart].color(chart); } 
+pi=&(m_info[chart]);
+pp=&(m_map[chart]);
+++hits[chart];
+oldchart=chart;
+if (hits[chart]==1) (*pp).next_group(); 
+}
+const auto & ci=have_color?def:(*pi); // m_info[chart];
+MM_ERR(MMPR2(have_color,ci.dump()))
+//m_map[chart].load(x,y,0,ci.r(),ci.g(),ci.b(),0);
+(*pp).load(x,y,0,ci.r(),ci.g(),ci.b(),0);
+
 Bounds(x,y);
 ++m_size;
 }  // i 
@@ -481,7 +526,7 @@ m_x0=0;
 m_x1=0;
 m_y0=0;
 m_y1=0;
-
+//m_groups=0;
 } // Init
 
 StrTy Show(const IdxTy flags=0)const {Ss ss;  
@@ -500,7 +545,9 @@ St m_st;
 ChartMap m_map;
 InfoMap m_info;
 IdxTy m_size;
+//IdxTy m_groups;
 D m_x0,m_x1,m_y0,m_y1;
+Parameters m_params;
 }; // mjm_strip_chart
 
 //////////////////////////////////////////////

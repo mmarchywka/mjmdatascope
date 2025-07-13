@@ -146,7 +146,12 @@ Init_point_entry();
 m_x=x; m_y=y; m_z=z; m_r=r; m_g=g; m_b=b;
 m_shapep=0;
 } 
-
+// really should use containers for this but may become
+// much more granular hard to know how... 
+IdxTy flags() const { return m_flags; }
+IdxTy flags(const IdxTy n)  {m_flags=n;  return m_flags; }
+IdxTy group() const { return m_group; }
+IdxTy group(const IdxTy n)  {m_group=n;  return m_group; }
 
 
 StrTy save( const IdxTy flags=0) const { return Save_point_entry(flags); } 
@@ -257,6 +262,8 @@ m_shape=0;
 // should kill copy ctor etc lol 
 m_shapep=this; // invalud lol 
 m_ri=0; m_gi=0; m_bi=0; m_b=0; m_g=0; m_r=0; 
+m_flags=0;
+m_group=0;
 } // Init_point_entry
 
 // _point_entryMEMBERS
@@ -268,6 +275,7 @@ void * m_shapep;
 // moved to shape 
 IdxTy m_ri,m_gi,m_bi;
 D m_r,m_g,m_b;
+IdxTy m_flags,m_group;
 }; // _point_entry
 
 
@@ -290,6 +298,8 @@ Ci end() const { return  m_points.end(); }
 Ii begin()  { return m_points.begin(); } 
 Ii end(){ return  m_points.end(); } 
 
+void next_group() { ++m_groups;}
+IdxTy groups() const { return m_groups;}
 
 IdxTy size() const { return m_points.size(); } 
 void load(const StrTy & sin,const IdxTy flags) {Init(sin,flags); }
@@ -298,12 +308,14 @@ void load(const Ragged & r,const IdxTy start, const IdxTy first,const IdxTy flag
 void load( const D &x, const D &y, const D &z, const IdxTy flags)  
 {
 _point_entry p(x, y, z, flags) ;
+p.group(m_groups);
 m_points.push_back(p);
 }
 void load( const D &x, const D &y, const D &z,  
  const D &r, const D &g, const D &b, const IdxTy flags)  
 {
 _point_entry p(x, y, z, r,g,b,flags) ;
+p.group(m_groups);
 m_points.push_back(p);
 }
 IdxTy append(const Myt & that, const IdxTy flags)
@@ -420,7 +432,7 @@ BaseParams kvp(sin);
 void Init()
 {
 m_shapes.load(StrTy(),0);
-
+m_groups=0;
 } // Init
 
 IdxTy Append(const Myt & that, const IdxTy flags)
@@ -433,7 +445,7 @@ return 0;
 Tokenizer m_st;
 Shapes m_shapes;
 PointVector m_points;
-
+IdxTy m_groups;
 }; // mjm_tokenized_points
 
 //////////////////////////////////////////////

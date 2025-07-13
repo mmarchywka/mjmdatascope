@@ -127,12 +127,45 @@ _color_desc(const Line & l,  const IdxTy first ) { Init_color_desc(l,first); }
 _color_desc(const StrTy & s,  const IdxTy flags ) { Init_color_desc(s,flags); }
 _color_desc(const Ragged & r, const IdxTy first,const IdxTy i0, const IdxTy flags ) 
 {Init_color_desc(r,first,i0,flags); } 
+const D r() const { return m_r; } 
+const D g() const { return m_g; } 
+const D b() const { return m_b; } 
+
+
+void color(const StrTy & s)
+{
+
+HexColor(s);
+} // color 
 StrTy save( const IdxTy flags=0) const { return Save_color_desc(flags); } 
 StrTy dump( const IdxTy flags=0) const { return Dump_color_desc(flags); } 
 private:
+IdxTy HexColor(const StrTy & s) 
+{
+const char * p=s.c_str();
+while (*p) { if (*p=='#') break; ++p; }
+if (!*p) return BAD;
+++p;
+Ss ss; ss<<p;
+IdxTy x;
+ss>>std::hex>>x;
+MM_ERR(MMPR3(x,p,ss.str()));
+m_r=((x&(255<<16))>>16);
+m_g=((x&(255<<8))>>8);
+m_b=(x&(255<<0));
+return x; 
+} // HexColor
 void Init_color_desc(const StrTy & s,  const IdxTy flags ) 
 { Init_color_desc(); 
 BaseParams kvp(s);
+// ss<<"r=93;g=138;b=168;hex=#5D8AA8;name=Air_Force_Blue;lum=53;hue=204;sat=30;lig=51"<<CRLF;
+kvp.get(m_r,"r");
+kvp.get(m_g,"g");
+kvp.get(m_b,"b");
+kvp.get(m_hex,"hex");
+kvp.get(m_name,"hame");
+
+
 
 }
 void Init_color_desc(const Line & l,  const IdxTy first ) 
@@ -175,6 +208,9 @@ StrTy Dump_color_desc( const IdxTy flags=0) const
 {
 Ss ss;
 // ss<<MMPR4(); 
+ss<<MMPR3( m_r,m_g,m_b);
+ss<<MMPR2( m_hex, m_name);
+ss<<MMPR3( m_lum,m_hue,m_sat);
 return ss.str(); 
 } // Dump 
 
@@ -186,10 +222,24 @@ void Free_color_desc()
 
 void Init_color_desc()
 {
-
+m_r=255;
+m_g=255;
+m_b=255;
+m_hex="XXX";
+m_name="blank";
+m_hue=255;
+m_lum=255;
+m_sat=255;
 } // Init_color_desc
 
+// ss<<"r=93;g=138;b=168;hex=#5D8AA8;name=Air_Force_Blue;lum=53;hue=204;sat=30;lig=51"<<CRLF;
+//ss<<"r=240;g=248;b=255;hex=#F0F8FF;name=Alice_Blue;lum=97;hue=208;sat=100;lig=97"<<CRLF;
+
 // _color_descMEMBERS
+D m_r,m_g,m_b;
+StrTy m_hex;
+StrTy m_name;
+D m_lum,m_hue,m_sat;
  
 }; // _color_desc
 
@@ -207,7 +257,13 @@ mjm_colors_2023(const Ragged & r,const IdxTy start, const IdxTy first,const IdxT
 void load(const StrTy & sin,const IdxTy flags) {Init(sin,flags); }
 void load(const Ragged & r,const IdxTy start, const IdxTy first,const IdxTy flags ) {Init(r,start,first,flags);}
 void save(const StrTy & fn,const StrTy &s) {Save(fn,s); }
-
+color_desc_t color(const StrTy & s)
+{
+color_desc_t x;
+// first try name lookup in aloaded table. 
+x.color(s);
+return x; 
+}
 ~mjm_colors_2023() {}
 StrTy dump(const IdxTy flags=0) { return Dump(flags); }
 private:

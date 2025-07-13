@@ -177,6 +177,7 @@ void Add(const D & t, const D & x)
 
 D dx=0;
 D dt=0;
+m_hist.add(t,x);
 if (m_n) { dx=x-m_x; dt=t-m_t; }
 // TODO eventually too slow doh  buffer... 
 if (m_fn.length())
@@ -185,13 +186,18 @@ if (m_n==0)
 { std::ofstream os(m_fn); // remove crap first
 if (m_wr_header) 
 {
-os<<"serial t x dt dx "<<CRLF;
+os<<"serial t x dt dx ";
+os<<" dt100 dx100";
+os<<CRLF;
 } // header
 }// m_n
 } // m_fn
 std::ofstream  os(m_fn,std::ios::app);
 os<<std::setprecision(m_precision); 
-os<<m_n<<" "<<t<<" "<<x<<" "<<dt<<" "<<dx<<CRLF; 
+os<<m_n<<" "<<t<<" "<<x<<" "<<dt<<" "<<dx;
+if (m_hist.samples()>100) os<<" "<<(m_hist.trail(100,0)-t)<<" "<<(m_hist.trail(100,1)-x);
+else os<<" 0 0";
+os<<CRLF; 
 m_x=x;
 m_t=t;
 ++m_n;
@@ -221,6 +227,8 @@ m_n=0;
 m_fn="";
 m_wr_header=false;
 m_precision=10; 
+m_events=1000;
+ m_hist.resize(2,m_events); 
 } // Init_feature
 
 // _featureMEMBERS
@@ -229,6 +237,8 @@ IdxTy m_n; // number proc
 StrTy m_fn; // dest file  
 bool m_wr_header;
 IdxTy m_precision;
+IdxTy m_events;
+Samples m_hist;
 }; // _feature
 
 typedef _feature Feature;

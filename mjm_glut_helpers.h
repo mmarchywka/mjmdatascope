@@ -836,9 +836,33 @@ void add_strip( const Ragged & r, const IdxTy flags)
 {
 //if (m_pstrip==0) m_pstrip= new strip_t();
 //m_pstrip->append(r,flags); 
-strip().append(r,flags); 
+add_common_hdr(r,flags);
+//strip().append(r,flags); 
+strip().append(r,*this,flags); 
 } // add_strip
 
+void add_common_hdr( const Ragged & r, const IdxTy flags)
+{
+
+MM_ILOOP(i,r.size())
+{
+const Line & l=r[i];
+const IdxTy len=l.size();
+if (l[0]=="#")
+{
+if (len<2) continue;
+const StrTy & cmd=l[1];
+if (cmd=="params"){   add_params(l,2, len); continue; }
+//mi.add_params(l,2,len);
+if (cmd=="etc"){  add_etc(l,2,len);  continue; }
+//if (cmd=="names") {  AddNames(mi,l,len); continue; }
+//MM_ONCE(" silently ignoring future comments like  "<<MMPR(cmd),)
+//continue;
+}  // # 
+else break; // should be contig header for now doh 
+} // i 
+
+} // add_common_hdr
 
 void add_decorations( const Ragged & r, const IdxTy flags)
 { decorations().append(r,flags); 

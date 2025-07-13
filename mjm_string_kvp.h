@@ -80,6 +80,9 @@ IdxTy parse(Map & m, const StrTy & s, const IdxTy flags=0)
 IdxTy parse(Vector & v,Map & m, const StrTy & s, const IdxTy flags=0)
 { return Parse(v,m,s,flags); } 
 
+//StrTy make_string(Vector & v,Map & m, const StrTy & s, const IdxTy flags=0)
+//{ return Parse(v,m,s,flags); } 
+
 
 
 //IdxTy parse(Ragged & m, const StrTy & s, const IdxTy flags=0)
@@ -579,7 +582,13 @@ else {p[i]=0; int n=myatoi(p+start); r=true; prior=n; start=i+1; }
 return r;
 } //EvaluateRange 
 
+// this needs to go with the parser but tack in here for now... 
+//StrTy MakeString() const
+//{
+//StrKvp kvp;
+//return kvp.make_string(m_vector,m_map,m_s);
 
+//} // MakeString
 
 void Init()
 {
