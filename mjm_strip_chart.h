@@ -156,7 +156,7 @@ _chart_info(const Ragged & r, const IdxTy first,const IdxTy i0, const IdxTy flag
 //_chart_info & operator++() const { return *this;}
 //_chart_info & operator+=(const _chart_info & that ) { return *this;}
 //_chart_info & operator=(const _chart_info & that ) { return *this;}
-
+bool blank() const { return m_r+m_g+m_b==0; }
 const D & r() const { return m_r; } 
 const D & g() const { return m_g; } 
 const D & b() const { return m_b; } 
@@ -343,13 +343,24 @@ MM_LOOP(jj,m_map)
 {
 if (as_points) glBegin(GL_POINTS);
 else glBegin(GL_LINE_STRIP);
+
 auto& p=(*jj).second; // m.m_ornate_points;
 //MM_ERR(MMPR(p.size()))
+IdxTy oldgroup=BAD;
 MM_LOOP(ii,p)
 {
 //MM_ERR(" point ")
 // this is a tokenized_point
 const PointEntry& pi=(*ii);
+const IdxTy group=pi.group();
+const IdxTy pflags=pi.flags();
+if (pflags){ MM_ERR(MMPR3(pflags,group,oldgroup)) }
+if (group!=oldgroup)
+{
+glEnd();
+if (as_points) glBegin(GL_POINTS);
+else glBegin(GL_LINE_STRIP);
+} // group 
 glColor3f(pi.r(),pi.g(),pi.b() );//
 // these need to be translated internally.
 const StrTy & shape=p(pi.shape());
@@ -365,6 +376,7 @@ if (pshape==NULL)
 //MM_ERR(MMPR(pi.dump()))
 //DrawOrnateShape(pi,pshape,v,sdp);
 if (false) v.draw_ornate_shape(pi,pshape,sdp);
+oldgroup=group;
 } // ii 
 glEnd();
 } // jj 
@@ -402,6 +414,7 @@ MM_ERR(MMPR2(m_params.size(),ss.str()))
 LoadXNY(r,"",flags); 
 } 
 // these all have different m_st values doh... 
+// ASSFUCK now this is called fucking later fuck
 void Append(const Myt & that, const IdxTy flags)
 {
 m_params.clear();
@@ -453,10 +466,13 @@ std::map<IdxTy,IdxTy> hits;
 auto ii=m_params.find("color");
 bool have_color=(ii!=m_params.end());
 Info def;
+bool rainbow=false;
 if (have_color)
 {
-def.color((*ii).second);
-MM_ERR("have color "<< MMPR3(sin,(*ii).second,def.dump()))
+const StrTy & colspec=(*ii).second;
+if (colspec!="rainbow") def.color(colspec);
+else rainbow=true;
+MM_ERR("have color "<< MMPR3(sin,colspec,def.dump()))
 
 }
 for(IdxTy i=start; i<sz; ++i)
@@ -478,9 +494,12 @@ pp=&(m_map[chart]);
 ++hits[chart];
 oldchart=chart;
 if (hits[chart]==1) (*pp).next_group(); 
+MM_ERR(MMPR2((*pp).groups(),(*pp).size()))
 }
+if (rainbow) def.color((*pp).groups());
+//MM_ERR(MMPR2((*pp).groups(),def.dump()))
 const auto & ci=have_color?def:(*pi); // m_info[chart];
-MM_ERR(MMPR2(have_color,ci.dump()))
+//MM_ERR(MMPR2(have_color,ci.dump()))
 //m_map[chart].load(x,y,0,ci.r(),ci.g(),ci.b(),0);
 (*pp).load(x,y,0,ci.r(),ci.g(),ci.b(),0);
 

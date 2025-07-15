@@ -265,6 +265,7 @@ void screenshot_ppm(const char *filename, unsigned int width,
     FILE *f = fopen(filename, "w");
     fprintf(f, "P3\n%d %d\n%d\n", width, height, 255);
     *pixels = (GLubyte*)realloc((GLubyte*)*pixels, format_nchannels * sizeof(GLubyte) * width * height);
+	glReadBuffer(GL_BACK);
     glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, *pixels);
     for (i = 0; i < height; i++) {
         for (j = 0; j < width; j++) {
@@ -289,6 +290,7 @@ void screenshot_ppm(const char *filename, unsigned int width,
     *pixels =(GLubyte*) realloc(*pixels, nvals * sizeof(GLubyte));
     *png_bytes =(png_byte*) realloc(*png_bytes, nvals * sizeof(png_byte));
     *png_rows = (png_byte**) realloc(*png_rows, height * sizeof(png_byte*));
+	glReadBuffer(GL_BACK);
     glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, *pixels);
     for (i = 0; i < nvals; i++)
         (*png_bytes)[i] = (*pixels)[i];
@@ -490,6 +492,7 @@ void ffmpeg_encoder_glread_rgb(uint8_t **rgb, GLubyte **pixels, unsigned int wid
     *pixels =(GLubyte*) realloc(*pixels, nvals * sizeof(GLubyte));
     *rgb =( GLubyte*) realloc(*rgb, nvals * sizeof(uint8_t));
     /* Get RGBA to align to 32 bits instead of just 24 for RGB. May be faster for FFmpeg. */
+	glReadBuffer(GL_BACK);
     glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, *pixels);
     for (i = 0; i < height; i++) {
         for (j = 0; j < width; j++) {

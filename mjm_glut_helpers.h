@@ -876,7 +876,7 @@ molecule().append(r,flags);
 // alled by rges for strip chart
 // usually one entity gets updated along with params and etc. 
 // this gets the data but maintains our current view etc. 
-void append(const _junk_bin  & that,const IdxTy flags=0)
+void append_asfck(const _junk_bin  & that,const IdxTy flags=0)
 {
 //MM_ERR(" append not complete")
 MM_ERR(" model append "<<MMPR2(usages(), that.usages()))

@@ -636,7 +636,30 @@ return 0;
 
 
 
+// paradigm is to make a new one and add it to existing ones
+// at the end. This screws up point grouping but maybe is cleaner
+// and avoids some lock times although more moving etc.
+// try this intergrated approachhereh.. 
 IdxTy AddStripChart(const input_type & r, const IdxTy flags) 
+{
+// using append is ok but it would just be cleaner to do that
+//here... 
+ModelInfo* mip=0;
+bool new_model=false;
+const IdxTy szd=m_data_idx.used();
+if (szd==0) { mip=new ModelInfo(); new_model=true;}
+else { mip=&m_data_idx(0); } 
+ModelInfo & mi=*mip;
+if (szd>1) { MM_ERR(" should only have one to append "<<MMPR2(szd,m_src))}
+mi.m_src=m_src;
+mi.m_type="strip-chart";
+mi.add_strip(r,flags);
+if (new_model){  m_data_idx.push_back(mi); delete mip; } 
+//AppendModel(mi,flags);
+return 0;
+} // AddStripChart
+
+IdxTy AddStripChartOld(const input_type & r, const IdxTy flags) 
 {
 // using append is ok but it would just be cleaner to do that
 //here... 
@@ -658,7 +681,7 @@ mi.add_point(x,y,z);
 */
 AppendModel(mi,flags);
 return 0;
-} // AddStripChart
+} // AddStripChartOld
 
 IdxTy AddOscilloscope(const input_type & r, const IdxTy flags) 
 {
@@ -702,7 +725,9 @@ const IdxTy szd=m_data_idx.used();
 if (szd==0) { return AddNewModel(mi,flags); }
 if (szd>1) { MM_ERR(" should only have one to append "<<MMPR2(szd,m_src))}
 ModelInfo&  m=m_data_idx(0);
-m.append(mi);
+// the new strips etc have no idea how to integrate with the old
+// only too fcking late
+m.append_asfck(mi);
 
 
 return 0;
