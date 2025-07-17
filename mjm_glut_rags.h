@@ -181,6 +181,9 @@ return UNHANDLED;
 //HAPIRC keyboard(unsigned char key, int x, int y) {return 0; }
 
 
+const IdxTy nmodels() const { return m_data_idx.used(); }
+ModelInfo &amodel(const IdxTy n )  { return m_data_idx(n); }
+
 ModelInfo &amodel()
 {
 const IdxTy szd=m_data_idx.used();
@@ -642,6 +645,7 @@ return 0;
 // try this intergrated approachhereh.. 
 IdxTy AddStripChart(const input_type & r, const IdxTy flags) 
 {
+//MM_ERR(MMPR(__FUNCTION__))
 // using append is ok but it would just be cleaner to do that
 //here... 
 ModelInfo* mip=0;
@@ -682,10 +686,15 @@ mi.add_point(x,y,z);
 AppendModel(mi,flags);
 return 0;
 } // AddStripChartOld
-
+// this is called with lock zero 
 IdxTy AddOscilloscope(const input_type & r, const IdxTy flags) 
 {
+const IdxTy szd=m_data_idx.used();
+//ExitSerial(0);
+//MM_ERR(MMPR2(szd,__FUNCTION__))
+//EnterSerial(0);
 ModelInfo mi;
+mi.add_common_hdr(r,flags);
 D xbase=0;
 bool setx=false;
 //  This needs to be locked if used.. 
@@ -1501,7 +1510,7 @@ return 0;
 
 void Init()
 {
-m_debug=-1;
+m_debug=-0;
 m_grat_changed=0;
 m_data_idx.set_size(10);
   m_mutex_vector= MutexVector(3);;

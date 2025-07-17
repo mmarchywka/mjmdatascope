@@ -223,6 +223,7 @@ Clear();
 
 }// Resize 
 IdxTy Trail(const IdxTy n) const 
+//{ return (m_newest+m_points-1-n)%m_points; } // Trail 
 { return (m_newest+m_points-1-n)%m_points; } // Trail 
 void Inc(IdxTy & x, const IdxTy n, const IdxTy m) const { x=(x+n)%m; }
 void Inc_newest(const IdxTy n)  {
@@ -259,6 +260,7 @@ MM_ILOOP(j,(nch+1))
 // re-make the time thing. 
 if (j==0)
 {
+// TODO want to save time origin in a parameter... 
 { Ss ss; ss<<SampleIntervalFix(r.size()); l.push_back(ss.str()); }
 }
 else {

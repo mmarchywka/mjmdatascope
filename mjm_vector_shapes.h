@@ -374,7 +374,7 @@ typedef std::map<const void*,void*> copy_map_t;
 mjm_vector_shapes() {Init(); }
 mjm_vector_shapes(const StrTy & sin,const IdxTy flags) {Init(sin,flags); }
 mjm_vector_shapes(const Ragged & r,const IdxTy start, const IdxTy first,const IdxTy flags ) {Init(r,start,first,flags);}
-
+void clear() { m_shapes.clear(); } 
 void load(const StrTy & sin,const IdxTy flags) {Init(sin,flags); }
 void load(const Ragged & r,const IdxTy start, const IdxTy first,const IdxTy flags ) {Init(r,start,first,flags);}
 void save(const StrTy & fn,const StrTy &s) {Save(fn,s); }

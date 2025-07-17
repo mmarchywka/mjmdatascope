@@ -122,6 +122,93 @@ typedef mjm_block_matrix<D> Buffer;
 typedef mjm_dohscope_samples<Tr> SampleBuf;
 typedef mjm_dohscope_trigger<Tr> Trigger;
 typedef std::deque<Ragged> RaggedStack;
+
+ class _trace  
+{
+
+public:
+_trace() {Init_trace(); } 
+~_trace() {Free_trace(); } 
+
+_trace(const Ragged & r ) { Init_trace(); m_r=r; }
+_trace(const Line & l,  const IdxTy first ) { Init_trace(l,first); }
+_trace(const StrTy & s,  const IdxTy flags ) { Init_trace(s,flags); }
+_trace(const Ragged & r, const IdxTy first,const IdxTy i0, const IdxTy flags ) 
+{Init_trace(r,first,i0,flags); } 
+Ragged & r() {return m_r;}
+D time() const { return m_time;}
+D time(const D &t )  { m_time=t; return m_time;}
+StrTy save( const IdxTy flags=0) const { return Save_trace(flags); } 
+StrTy dump( const IdxTy flags=0) const { return Dump_trace(flags); } 
+private:
+void Init_trace(const StrTy & s,  const IdxTy flags ) 
+{ Init_trace(); 
+BaseParams kvp(s);
+
+}
+void Init_trace(const Line & l,  const IdxTy first ) 
+{ 
+Init_trace();
+const IdxTy len=l.size();
+for(IdxTy i=first; i<len; ++i)
+{
+
+
+} // i 
+
+} // Init_trace
+
+void Init_trace(const Ragged & r, const IdxTy first,const IdxTy i0,const IdxTy flags ) 
+{
+Init_trace();
+const IdxTy sz=r.size();
+for(IdxTy i=i0; i<sz; ++i)
+{
+const Line & l=r[i];
+const IdxTy len=l.size();
+
+} // i 
+
+} // Init_trace
+
+StrTy Save_trace( const IdxTy flags=0) const  
+{
+StrTy s;
+BaseParams kvp();
+//kcp,encode(s,"",);
+return s; 
+} // Dump 
+
+
+
+StrTy Dump_trace( const IdxTy flags=0) const  
+{
+Ss ss;
+// ss<<MMPR4(); 
+return ss.str(); 
+} // Dump 
+
+
+void Free_trace()
+{
+
+} // Free_trace
+
+void Init_trace()
+{
+m_time=0;
+} // Init_trace
+
+// _traceMEMBERS
+Ragged m_r;
+D m_time; 
+}; // _trace
+
+
+
+typedef _trace Trace;
+
+typedef std::deque<Trace> TraceStack;
 // API
 
 public:
@@ -142,8 +229,9 @@ bool samples(const Tp & _x, const Tp & _y,  const StrTy& src, const IdxTy line, 
 {return  Samples( _x,  _y,  src, line, idn, etc, params,  _ty,flags); }
 IdxTy traces() const { return m_traces.size(); } 
 void take() { m_traces.pop_front(); } 
-const Ragged & trace() const { return m_traces.front(); } 
-
+const Ragged & trace() const { return m_traces.front().r(); } 
+time(const IdxTy n=0) const 
+{ if (n>=traces()) return 0; return m_traces[n].time(); }
 void load(const StrTy & sin,const IdxTy flags) {Init(sin,flags); }
 void load(const Ragged & r,const IdxTy start, const IdxTy first,const IdxTy flags ) {Init(r,start,first,flags);}
 void save(const StrTy & fn,const StrTy &s) {Save(fn,s); }
@@ -223,18 +311,19 @@ if (trig)
 {
 //MM_ERR(" 4 branck") 
 m_loc=m_sb.newest();
-m_sb.add_trailing(m_r,m_prior);
+m_sb.add_trailing(m_tr.r(),m_prior);
 
 } // trig 
 } // loc
 else
 {
 //MM_ERR(" dumb branck") 
-m_sb.add_trailing(m_r,1);
+m_sb.add_trailing(m_tr.r(),1);
 // if R big enough send it.... 
-if (m_r.size()>=m_trace) { m_loc=BAD;  m_traces.push_back(m_r);
+if (m_rr.r().size()>=m_trace) { m_loc=BAD;  m_traces.push_back(m_tr);
 if (m_traces.size()>m_trace_que) m_traces.pop_front(); 
- m_r=Ragged(); 
+m_tr=Trace();
+// m_r=Ragged(); 
 } // loc
 } // loc
 
@@ -266,18 +355,18 @@ IdxTy nlead=m_prior;
 IdxTy n=(m_newest+m_points-m_oldest)%m_points;
 if (n<nlead) nlead=n;
 IdxTy plead=(m_newest+m_points-nlead)%m_points;
-Add(m_r,plead,nlead,1);
-MM_ERR(MMPR3(m_prior,m_newest,m_oldest)<<MMPR3(plead,nlead,m_r.size()))
+Add(m_tr.r(),plead,nlead,1);
+MM_ERR(MMPR3(m_prior,m_newest,m_oldest)<<MMPR3(plead,nlead,m_tr.r().size()))
 }
 }
 else
 { // Add to R 
-Add(m_r,m_newest,1,1);
+Add(m_tr.r(),m_newest,1,1);
 // if R big enough send it.... 
-if (m_r.size()>=m_trace) { m_loc=BAD;  m_traces.push_back(m_r);
+if (m_tr.r().size()>=m_trace) { m_loc=BAD;  m_traces.push_back(m_tr);
 if (m_traces.size()>30) m_traces.pop_front(); 
- m_r=Ragged(); 
-
+// m_r=Ragged(); 
+m_tr=Trace();
 } 
 
 } 
@@ -353,10 +442,12 @@ IdxTy m_channels, m_points;
 IdxTy m_oldest,m_newest;
 IdxTy m_trace, m_prior;
 IdxTy m_trace_que;
-Ragged m_r; // partial trace
+Trace m_tr;
+//Ragged m_r; // partial trace
 Trigger m_trig;
 IdxTy m_loc;
-RaggedStack m_traces;
+//RaggedStack m_traces;
+TraceStack m_traces;
 }; // mjm_dohscope_buffer
 
 //////////////////////////////////////////////

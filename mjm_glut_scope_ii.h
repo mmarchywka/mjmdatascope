@@ -903,6 +903,13 @@ if (start) m_psaver->start_capture();
 if (pause) m_psaver->pause_capture(); 
 ExitSerial(0);
 }
+IdxTy Screenshot(const StrTy & sin, const IdxTy flags)
+{
+if (!m_psaver) return -1;
+return m_psaver->save_tiff(sin,flags); 
+} // Screenshot
+
+
 void Style(const IdxTy act=0)
 {
 switch (act)
@@ -1061,6 +1068,7 @@ MyGLStatus & gls= m_gl_status;
 case 'l':  { Style(0); break; }  // Stop
 case 'd':  { MM_ERR(dump()) break; }  // Start
 case 'v':  { Capture(1); break; }  // Start
+case 'T':  { Screenshot(m_tiff_params,0); break; }  // Start
 case '-':  { Capture(2); break; }  // Pause 
 case '|':  { Capture(4); break; }  // Stop
   case 'X': { ZoomX(1.1); break; } 
@@ -1100,6 +1108,7 @@ case 'S': { Unsnap(); break; }
 
 //////////////////////////////////
 case ' ' : { ResetView(0); break; } 
+case 'c' : { ClearData(0); break; } 
 case 'b' : { BoundBox(0); break; } 
 
 
@@ -1107,6 +1116,26 @@ case 'b' : { BoundBox(0); break; }
 //  glutPostRedisplay();
 SeeRedisplay(); // if (m_alive) glutPostRedisplay();
 } // Keyboardj
+
+// #define FOREACHA(x)  MM_LOOP(ii,m_actives){ auto & act=(*ii).second;  auto & v=(*ii).second->view();  x } 
+
+IdxTy  ClearData(const IdxTy flags)
+{
+EnterSerial(0);
+FOREACHA( 
+IdxTy n=act->nmodels();
+MM_ILOOP(i,n) { act->amodel(i).clear_data(); } 
+//act->amodel().clear_data(); 
+
+
+//v.reset(); 
+/// holding a lock doh... 
+//MM_ERR(MMPR2(__FUNCTION__,v.dump())) 
+)
+ExitSerial(0);
+return 1; 
+} // ClearData 
+
 
 IdxTy  ResetView(const IdxTy flags)
 {
@@ -1123,6 +1152,8 @@ MM_ERR(MMPR2(__FUNCTION__,v.dump()))
 ExitSerial(0);
 return 1; 
 } // ResetView 
+
+// need to clear data but keep view rectangle too?
 
 IdxTy  ClearViews(const IdxTy flags)
 {
@@ -1254,6 +1285,7 @@ m_p_app=0;
 //m_submenu=BAD;
 m_vismenu=BAD;
 m_selmenu=BAD;
+m_tiff_params="";
 const StrTy svgstr="";
 // merely for testing stuff can remove m_svg etc or use for bakcground 
 if (false) { m_svg.render(svgstr,0); }
@@ -1279,6 +1311,7 @@ app_t* m_p_app;
 RagSceneMap m_scenes,m_actives,m_deactive,m_select,m_deselect;
 MyGLStatus m_gl_status;
 Saver * m_psaver;
+StrTy m_tiff_params;
 Sp m_save_params;
 GuiLayout m_gui;
 // tacked in

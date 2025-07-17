@@ -61,6 +61,8 @@ g++ -fpermissive -x c++  movie_Example.h -lGL  -lGLU -lglut  -lpng  -lavcodec-ff
 #define FFMPEG 1
 #endif
 
+#define MJMTIFF 1
+
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -71,6 +73,9 @@ g++ -fpermissive -x c++  movie_Example.h -lGL  -lGLU -lglut  -lpng  -lavcodec-ff
 #include <GL/glu.h>
 #include <GL/glut.h>
 #include <GL/glext.h>
+#if MJMTIFF
+#include <tiffio.h>
+#endif
 
 #if LIBPNG
 #include <png.h>
@@ -137,6 +142,7 @@ static unsigned int width = 128;
 #define PPM_BIT (1 << 0)
 #define LIBPNG_BIT (1 << 1)
 #define FFMPEG_BIT (1 << 2)
+#define TIFF_BIT (1 << 3)
 
 
 
@@ -192,6 +198,7 @@ sk.get(m_stuffer,"stuffer");
 { bool x=false; sk.get(x,"mpeg"); if (x) output_formats|=FFMPEG_BIT; } 
 { bool x=false; sk.get(x,"ppm"); if (x) output_formats|=LIBPNG_BIT; } 
 { bool x=false; sk.get(x,"png"); if (x) output_formats|=PPM_BIT; } 
+{ bool x=false; sk.get(x,"tiff"); if (x) output_formats|=TIFF_BIT; } 
 sk.get(offscreen,"offscreen");
 }
 
@@ -200,7 +207,7 @@ _save_params()
 offscreen=0;
   output_formats=0;
 manual_start=false;
- output_formats = PPM_BIT | LIBPNG_BIT | FFMPEG_BIT;
+ output_formats = PPM_BIT | LIBPNG_BIT | FFMPEG_BIT|TIFF_BIT;
 m_codec_id=BAD;
 m_fps=30;
 m_width=128;
@@ -218,6 +225,7 @@ StrTy m_fn_mpeg;
 IdxTy m_codec_id,m_fps,m_width,m_height,m_stuffer;
 bool manual_start;
 }; // _save_params  
+// API
 public:
 mjm_glut_saver() {Init();}
 ~mjm_glut_saver() {}
@@ -226,8 +234,11 @@ typedef _save_params  save_params_type;
 enum SIGNALS {STOP_CAPTURE=0, START_CAPTURE=1,PAUSE_CAPTURE };
 // non functrional easy way to get linker to look for everything 
 int main(int argc, char **argv) { return  Main(argc, argv);} 
-
 IdxTy display(const save_params_type & sp){ return Display(sp); } 
+#if MJMTIFF 
+IdxTy save_tiff(const StrTy & sin, const IdxTy flags)
+{ return SaveTiff(sin,flags); } 
+#endif
 void start_capture(){ signal(Sig(START_CAPTURE));  } 
 void stop_capture(){ signal(Sig(STOP_CAPTURE));  } 
 void pause_capture(){ signal(Sig(PAUSE_CAPTURE),1);  } 
@@ -265,7 +276,8 @@ void screenshot_ppm(const char *filename, unsigned int width,
     FILE *f = fopen(filename, "w");
     fprintf(f, "P3\n%d %d\n%d\n", width, height, 255);
     *pixels = (GLubyte*)realloc((GLubyte*)*pixels, format_nchannels * sizeof(GLubyte) * width * height);
-	glReadBuffer(GL_BACK);
+	//glReadBuffer(GL_BACK);
+	glReadBuffer(GL_FRONT);
     glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, *pixels);
     for (i = 0; i < height; i++) {
         for (j = 0; j < width; j++) {
@@ -277,6 +289,89 @@ void screenshot_ppm(const char *filename, unsigned int width,
     fclose(f);
 }
 #endif
+
+
+#if MJMTIFF 
+// int w=glutGet(GLUT_WINDOW_WIDTH);
+
+void GetPixels()
+{
+    const size_t format_nchannels = 3;
+ int w=glutGet(GLUT_WINDOW_WIDTH);
+ int h=glutGet(GLUT_WINDOW_HEIGHT);
+   pixels = (GLubyte*)realloc((GLubyte*)pixels, format_nchannels * sizeof(GLubyte) * w * h);
+
+	glReadBuffer(GL_FRONT);
+    glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+
+} // GetPixels
+
+IdxTy SaveTiff(const StrTy & sin, const IdxTy flags)
+{ 
+GetPixels();
+
+
+return 0; 
+}  //SaveTiff
+
+void screenshot_tiff(const char *filename, unsigned int width,
+        unsigned int height, GLubyte **pixels) {
+    size_t i, j, cur;
+    const size_t format_nchannels = 3;
+    //FILE *f = fopen(filename, "w");
+//    fprintf(f, "P3\n%d %d\n%d\n", width, height, 255);
+    *pixels = (GLubyte*)realloc((GLubyte*)*pixels, format_nchannels * sizeof(GLubyte) * width * height);
+	//glReadBuffer(GL_BACK);
+	glReadBuffer(GL_FRONT);
+    glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, *pixels);
+
+    TIFF *tif = TIFFOpen(filename, "w");
+// goog ai generated.. 
+   if (!tif) {
+        // Handle error: file could not be opened
+		MM_ERR(" cant open tiff "<<MMPR(filename))
+        return ;
+    } 
+int bitsPerSample=8; // 24;
+int samplesPerPixel=3; // 1;
+    // Set essential TIFF tags
+    TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, width);
+    TIFFSetField(tif, TIFFTAG_IMAGELENGTH, height);
+    TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, bitsPerSample);
+    TIFFSetField(tif, TIFFTAG_SAMPLESPERPIXEL, samplesPerPixel);
+//    TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, photometric);
+    TIFFSetField(tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT); // Top-left origin
+    TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG); // Chunky organization
+    TIFFSetField(tif, TIFFTAG_COMPRESSION, COMPRESSION_NONE); // No compression
+
+    // Create sample pixel data (e.g., a simple gradient)
+const IdxTy bw=width*samplesPerPixel;
+    uint8* scanline = new uint8[bw]; // width * samplesPerPixel];
+    for (uint32 y = 0; y < height; ++y) {
+        for (uint32 x = 0; x < bw; ++x) {
+            scanline[x] = (*pixels)[x+bw*y] ; //  static_cast<uint8>((x + y) / 2); // Simple gradient
+        }
+        // Write the scanline to the TIFF file
+        if (TIFFWriteScanline(tif, scanline, y, 0) < 0) {
+            // Handle error: scanline could not be written
+			MM_ERR(" writing tiff error "<<MMPR4(y,filename,width,height))
+            TIFFClose(tif);
+            delete[] scanline;
+            return ;
+        }
+    }
+
+    // Close the TIFF file and free resources
+    TIFFClose(tif);
+    delete[] scanline;
+
+
+}
+#endif // MJmTIFF
+
+
+
+
 
 #if LIBPNG
 /* Adapted from https://github.com/cirosantilli/cpp-cheat/blob/19044698f91fefa9cb75328c44f7a487d336b541/png/open_manipulate_write.c */
@@ -290,7 +385,8 @@ void screenshot_ppm(const char *filename, unsigned int width,
     *pixels =(GLubyte*) realloc(*pixels, nvals * sizeof(GLubyte));
     *png_bytes =(png_byte*) realloc(*png_bytes, nvals * sizeof(png_byte));
     *png_rows = (png_byte**) realloc(*png_rows, height * sizeof(png_byte*));
-	glReadBuffer(GL_BACK);
+	//glReadBuffer(GL_BACK);
+	glReadBuffer(GL_FRONT);
     glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, *pixels);
     for (i = 0; i < nvals; i++)
         (*png_bytes)[i] = (*pixels)[i];
@@ -492,7 +588,7 @@ void ffmpeg_encoder_glread_rgb(uint8_t **rgb, GLubyte **pixels, unsigned int wid
     *pixels =(GLubyte*) realloc(*pixels, nvals * sizeof(GLubyte));
     *rgb =( GLubyte*) realloc(*rgb, nvals * sizeof(uint8_t));
     /* Get RGBA to align to 32 bits instead of just 24 for RGB. May be faster for FFmpeg. */
-	glReadBuffer(GL_BACK);
+	glReadBuffer(GL_FRONT);
     glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, *pixels);
     for (i = 0; i < height; i++) {
         for (j = 0; j < width; j++) {
@@ -607,6 +703,15 @@ return 1;
         screenshot_ppm(filename, sp.m_width, sp.m_height, &pixels);
     }
 #endif
+#if MJMTIFF 
+    if (sp.output_formats & TIFF_BIT) {
+        snprintf(filename, SCREENSHOT_MAX_FILENAME, "tmp.%d.tiff", nframes);
+        screenshot_tiff(filename, sp.m_width, sp.m_height, &pixels);
+    }
+#endif
+
+
+
 #if LIBPNG
     if (sp.output_formats & LIBPNG_BIT) {
         snprintf(filename, SCREENSHOT_MAX_FILENAME, "tmp.%d.png", nframes);

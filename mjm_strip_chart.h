@@ -273,6 +273,7 @@ mjm_strip_chart() {Init(); }
 mjm_strip_chart(const StrTy & sin,const IdxTy flags) {Init(sin,flags); }
 mjm_strip_chart(const Ragged & r,const IdxTy start, const IdxTy first,const IdxTy flags ) {Init(r,start,first,flags);}
 const IdxTy size() const { return m_size; } 
+void clear() { Clear(); } 
 void load(const StrTy & sin,const IdxTy flags) {Init(sin,flags); }
 void load(const Ragged & r,const IdxTy start, const IdxTy first,const IdxTy flags ) {Init(r,start,first,flags);}
 template <class ModelInfo, class ViewInfo, class DrawInfo>
@@ -557,7 +558,11 @@ ss<<CRLF;
 MM_LOOP(ii,m_info) { const IdxTy tok=(*ii).first; const StrTy nm=m_st(tok);   ss<<MMPR2(tok,nm)<<" ";  }
 
 return ss.str(); }
-
+void Clear()
+{
+MM_LOOP(ii,m_map) { (*ii).second.clear(); }  // TokPoints
+Init();
+} // Cleap 
 
 // MEMBERS
 St m_st;

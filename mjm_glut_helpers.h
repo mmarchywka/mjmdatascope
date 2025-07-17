@@ -718,8 +718,22 @@ public:
 _junk_bin(): m_code(0),m_szlim(10)  {}
 //~_junk_bin() {delete m_pstrip; }
 ~_junk_bin() { }
+// oscilloscope data goe here kind of a mess... 
 void add_point(const D & x, const D & y, const D & z=0)
 { _point_desc p(x,y,z); m_points.push_back(p); } 
+void _Bounds( const D& x, const D & y)
+{
+if (m_size==0) { m_x0=x; m_x1=x; m_y0=y; m_y1=y; return; }
+if (x>m_x1) m_x1=x; if (x<m_x0) m_x0=x;
+if (y>m_y1) m_y1=y; if (y<m_y0) m_y0=y;
+
+} // _Bounds 
+
+
+
+
+
+
 void add_svg(const StrTy& s)
 {
 SvgRender x;
@@ -988,6 +1002,12 @@ ss<<CRLF;
 } // ii 
 return ss.str();
 } // show
+void clear_data()
+{
+MM_ERR(" data clear ")
+m_strip.clear();
+m_points.clear();
+} // clear_data
 // junk_MEMBERS
 
 // operator += designed to add a new update existing entry.
@@ -1005,10 +1025,15 @@ IdxTy m_code;
 IdxTy m_szlim;
 private:
 
+// for bounds, move to oscilliscope object soon doh 
+IdxTy m_size; 
+D  m_x0,m_x1, m_y0, m_y1;
+
 Umap m_usage_map;
 SegVec m_segs;
 SvgVec m_svgs;
 StrVec m_strings;
+// the oscilliscope data live here, should just make a new object?
 PointVec m_points;
 TokPoints m_ornate_points;
 
@@ -1205,7 +1230,7 @@ mutable MutexVector m_mutex_vector;
 void EnterSerial(const IdxTy i)const  {  m_mutex_vector.enter_serial(i ); }
 void ExitSerial(const IdxTy i)const  {  m_mutex_vector.exit_serial(i ); }
 //m_mutex_vector = MutexVector(MU_SZ);
-static IdxTy Display(const junk_bin_t & bin, const view_info_t & view, const IdxTy flags)
+static IdxTy xxxDisplay(const junk_bin_t & bin, const view_info_t & view, const IdxTy flags)
 {
 MM_LOOP(ii,bin.m_strings) { DisplayString((*ii),view,flags); } 
 MM_LOOP(ii,bin.segs_d()) { DisplaySeg((*ii),view,flags); } 

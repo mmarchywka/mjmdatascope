@@ -22,6 +22,7 @@ mjm_strip_chart.out: mjm_strip_chart.h ../../mjm/hlib/mjm_globals.h \
  ../../mjm/hlib/mjm_svg_writer.h ../../mjm/hlib/mjm_taxonomy_stuff.h \
  ../../mjm/hlib/mjm_gen_viz.h ../../mjm/hlib/mjm_part_iterators.h \
  ../../mjm/hlib/mjm_iterator_base.h ../../mjm/hlib/mjm_pawnoff.h \
- ../../mjm/hlib/mjm_blob.h ../../mjm/hlib/mjm_generic_iterators.h \
- color_table1_stream.h ../../mjm/hlib/mjm_string_tokenizer.h \
- ../../mjm/hlib/mjm_cli_ui.h
+ ../../mjm/hlib/mjm_blob.h ../../mjm/hlib/mjm_str_2_num.h \
+ ../../mjm/hlib/mjm_worm_blob.h ../../mjm/hlib/mjm_canned_methods.h \
+ ../../mjm/hlib/mjm_generic_iterators.h color_table1_stream.h \
+ ../../mjm/hlib/mjm_string_tokenizer.h ../../mjm/hlib/mjm_cli_ui.h

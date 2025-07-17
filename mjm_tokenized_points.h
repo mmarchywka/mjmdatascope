@@ -292,6 +292,7 @@ mjm_tokenized_points(const Ragged & r,const IdxTy start, const IdxTy first,const
 //void load(const Ragged & r,const IdxTy start, const IdxTy first,const IdxTy flags ) {Init(r,start,first,flags);}
 // need to add to a vector wrf lol 
 mjm_tokenized_points(const Myt & that  ) {*this=that;}
+void clear() { m_points.clear(); m_shapes.clear(); } 
 Ci begin() const { return m_points.begin(); } 
 Ci end() const { return  m_points.end(); } 
 

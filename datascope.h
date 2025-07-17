@@ -389,6 +389,7 @@ MM_ERR(" app clearing ")
 // this does nothing alone
 //m_scenes.clear();
 m_glut.clear(flags);
+MM_ERR(" scenese clearing ")
 
 m_scenes.clear();
 } // clear
