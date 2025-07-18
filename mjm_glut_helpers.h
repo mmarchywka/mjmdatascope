@@ -6,6 +6,7 @@
 
 #include "mjm_glut_graticule.h"
 #include "mjm_strip_chart.h"
+#include "mjm_doscilloscope.h"
 #include "mjm_tokenized_points.h"
 #include "mjm_svg_render.h"
 
@@ -77,6 +78,7 @@ typedef mjm_glut_elements<Tr> Elements;
 typedef  typename Elements::Element Element ;
 
 typedef mjm_strip_chart<Tr> strip_t;
+typedef mjm_doscilloscope<Tr> oscope_t;
 
 typedef mjm_glut_decorations<Tr> decorations_t;
 typedef mjm_glut_molecule<Tr> mole_t; 
@@ -854,6 +856,15 @@ add_common_hdr(r,flags);
 //strip().append(r,flags); 
 strip().append(r,*this,flags); 
 } // add_strip
+void add_oscope( const Ragged & r, const IdxTy flags)
+{
+//if (m_pstrip==0) m_pstrip= new strip_t();
+//m_pstrip->append(r,flags); 
+add_common_hdr(r,flags);
+//strip().append(r,flags); 
+oscope().append(r,*this,flags); 
+} // add_oscope
+
 
 void add_common_hdr( const Ragged & r, const IdxTy flags)
 {
@@ -916,7 +927,7 @@ if (that.used(M_MOLECULE)) m_molecule.append(that.m_molecule,flags);
 // new accessors to account for usage...
 // cat pieces.txt| sed -e 's/;//g'  | while read ; do t=`echo $REPLY | awk '{print $1}' `; v=`echo $REPLY | awk '{print $2}'`; e=`echo $v | tr "[a-z]" "[A-Z]" `;n=`echo $v| sed -e 's/m_//' `;  enum="$enum,$e" ; echo $v $t $e $enum; echo -e "$t & $n() { ++m_usage_map[$e];  return $v; } "  ; done | grep "()"
 
-enum { M_STRINGS,M_POINTS,M_ORNATE_POINTS,M_SEGS,M_SVGS,M_CODE,M_SZLIM,M_PARAMS,M_ETC,M_HEATMAP,M_FF_MESH,M_STRIP,M_GRATICULE,M_DECORATIONS,M_MOLECULE};
+enum { M_STRINGS,M_POINTS,M_ORNATE_POINTS,M_OSCOPE,M_SEGS,M_SVGS,M_CODE,M_SZLIM,M_PARAMS,M_ETC,M_HEATMAP,M_FF_MESH,M_STRIP,M_GRATICULE,M_DECORATIONS,M_MOLECULE};
 
 
 SegVec & segs() { ++m_usage_map[M_SEGS];  return m_segs; } 
@@ -942,6 +953,12 @@ _ff_mesh_t & ff_mesh() { ++m_usage_map[M_FF_MESH];  return m_ff_mesh; }
 const _ff_mesh_t & ff_mesh_d() const  {  return m_ff_mesh; } 
 strip_t & strip() { ++m_usage_map[M_STRIP];  return m_strip; } 
 const strip_t & strip_d() const  {  return m_strip; } 
+
+oscope_t & oscope() { ++m_usage_map[M_OSCOPE];  return m_oscope; } 
+const oscope_t & oscope_d() const  {  return m_oscope; } 
+
+
+
 graticule_t & graticule() { ++m_usage_map[M_GRATICULE];  return m_graticule; } 
 graticule_t & graticule_d() {  return m_graticule; } 
 decorations_t & decorations() { ++m_usage_map[M_DECORATIONS];  return m_decorations; } 
@@ -964,6 +981,7 @@ m[M_SEGS]="M_SEGS";
 m[M_SVGS]="M_SVGS";
 m[M_CODE]="M_CODE";
 m[M_SZLIM]="M_SZLIM";
+m[M_OSCOPE]="M_OSCOPE";
 m[M_PARAMS]="M_PARAMS";
 m[M_ETC]="M_ETC";
 m[M_HEATMAP]="M_HEATMAP";
@@ -1006,6 +1024,7 @@ void clear_data()
 {
 MM_ERR(" data clear ")
 m_strip.clear();
+m_oscope.clear();
 m_points.clear();
 } // clear_data
 // junk_MEMBERS
@@ -1042,6 +1061,7 @@ Parameters m_etc;
 Heatmap m_heatmap;
 _ff_mesh_t m_ff_mesh;
 strip_t  m_strip;
+oscope_t m_oscope;
 graticule_t m_graticule;
 decorations_t m_decorations;
 mole_t m_molecule; 

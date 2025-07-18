@@ -278,7 +278,8 @@ return 0;
 } // Add
 void MakeAddMap()
 {
-m_add_map["oscilloscope"]=&Myt::AddOscilloscope;
+m_add_map["oldoscilloscope"]=&Myt::AddOscilloscope;
+m_add_map["oscilloscope"]=&Myt::AddNewOscilloscope;
 m_add_map["strip-chart"]=&Myt::AddStripChart;
 m_add_map["ornate-points"]=&Myt::AddOrnate;
 m_add_map["ffmesh"]=&Myt::AddFFmesh;
@@ -713,6 +714,32 @@ AddNewModel(mi);
 
 return 0;
 } // AddOscilloscope
+IdxTy AddNewOscilloscope(const input_type & r, const IdxTy flags) 
+{
+
+ModelInfo* mip=0;
+bool new_model=false;
+const IdxTy szd=m_data_idx.used();
+if (szd==0) { mip=new ModelInfo(); new_model=true;}
+else { mip=&m_data_idx(0); } 
+ModelInfo & mi=*mip;
+if (szd>1) { MM_ERR(" should only have one to append "<<MMPR2(szd,m_src))}
+mi.m_src=m_src;
+mi.m_type="strip-chart";
+mi.add_common_hdr(r,flags);
+mi.add_oscope(r,flags);
+if (new_model){  m_data_idx.push_back(mi); delete mip; } 
+//AppendModel(mi,flags);
+
+
+
+
+
+
+
+return 0;
+} // AddNewOscilloscope
+
 
 // models are mde outside of queue and then added
 // when done although this requires a copy it keeps
@@ -908,6 +935,17 @@ m.graticule_d().draw(m,v,sdp);
 
 return 0;
 } // DrawStrip
+IdxTy DrawOscope(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
+{
+m.oscope().draw_points(m,v,sdp);
+// need lock on the changed flag 
+if (m_grat_changed) 
+{ m_grat_changed=0; m.graticule_d().config(m_grat_config); }
+m.graticule_d().draw(m,v,sdp);
+
+return 0;
+} // DrawStrip
+
 
 IdxTy DrawOrnatePoints(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
 {
@@ -1058,12 +1096,16 @@ ModelInfo&  m=m_data_idx(i);
 if (i==(szd-1)) {  DrawHeat(m,v,sdp);  }
 // TOFO fix this... 
 if (m.segs_d().size()) DrawRealSeg(m,v,sdp); 
- DrawLine(m,v,sdp); 
- DrawTri(m,v,sdp); 
+// FIXME 2025-07-17 line,tri, and seg all use the same points with no
+// conditionals ....  
+DrawLine(m,v,sdp); 
+if (false)  DrawTri(m,v,sdp); 
  DrawMesh(m,v,sdp); 
-DrawSeg(m,v,sdp); 
+if (false) DrawSeg(m,v,sdp); 
+
 DrawOrnatePoints(m,v,sdp); 
 DrawStrip(m,v,sdp); 
+DrawOscope(m,v,sdp); 
 DrawMolecule(m,v,sdp);
 DrawDecorations(m,v,sdp);
 //ExitSerial(0);

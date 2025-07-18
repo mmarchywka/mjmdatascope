@@ -415,7 +415,7 @@ MM_ERR(MMPR2(m_params.size(),ss.str()))
 LoadXNY(r,"",flags); 
 } 
 // these all have different m_st values doh... 
-// ASSFUCK now this is called fucking later fuck
+// ASFCK now this is called fcking later fk
 void Append(const Myt & that, const IdxTy flags)
 {
 m_params.clear();

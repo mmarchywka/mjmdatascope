@@ -140,7 +140,7 @@ m_shapep=0;
 } 
 _point_entry( const D &x, const D &y, const D &z, 
  const D &r, const D &g, const D &b, 
-const IdxTy flags)  
+const IdxTy flags=0)  
 {
 Init_point_entry();  
 m_x=x; m_y=y; m_z=z; m_r=r; m_g=g; m_b=b;
@@ -305,7 +305,7 @@ IdxTy groups() const { return m_groups;}
 IdxTy size() const { return m_points.size(); } 
 void load(const StrTy & sin,const IdxTy flags) {Init(sin,flags); }
 void load(const Ragged & r,const IdxTy start, const IdxTy first,const IdxTy flags ) {Init(r,start,first,flags);}
-
+const PointEntry & operator[](const IdxTy n) const { return m_points[n]; } 
 void load( const D &x, const D &y, const D &z, const IdxTy flags)  
 {
 _point_entry p(x, y, z, flags) ;

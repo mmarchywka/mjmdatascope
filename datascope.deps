@@ -298,7 +298,7 @@ datascope.out: datascope.h /home/documents/cpp/mjm/hlib/mjm_globals.h \
  /home/documents/cpp/mjm/hlib/mjm_generic_iterators.h mjm_glut_helpers.h \
  mjm_glut_graticule.h mjm_strip_chart.h mjm_tokenized_points.h \
  mjm_vector_shapes.h mjm_colors_2023.h color_table1_stream.h \
- /home/documents/cpp/mjm/hlib/mjm_string_tokenizer.h \
+ /home/documents/cpp/mjm/hlib/mjm_string_tokenizer.h mjm_doscilloscope.h \
  mjm_glut_decorations.h mjm_glut_molecule.h mjm_hot_zones.h \
  ../freefem/mjm_affine_mesh_hood.h \
  /home/documents/cpp/mjm/hlib/mjm_tokenized_collections.h \
