@@ -296,7 +296,7 @@ void Init()
 {
 Resize(2,10000);
 m_debug_trailing=false;
-m_sample_interval=1;
+m_sample_interval=.1;
 } // Init
 
 

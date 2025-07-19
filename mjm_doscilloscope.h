@@ -158,7 +158,7 @@ void add_point(const D &x, const D &y, const D &z=0)
 {
 D r=1;
 D g=1;
-D b=0;
+D b=1;
 //PointEntry p(x,y,z,r,g,b);
 
 m_points.load(x,y,z,r,g,b,0);
@@ -166,9 +166,9 @@ m_points.load(x,y,z,r,g,b,0);
 } // add_point
 
 template <class ModelInfo, class ViewInfo, class DrawInfo>
-IdxTy draw_points(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
+IdxTy draw_points(ModelInfo & m, ViewInfo & v, DrawInfo * sdp, const IdxTy i, const IdxTy sz)
 {
-return DrawPoints(m,v,sdp);
+return DrawPoints(m,v,sdp,i,sz);
 }
 
 
@@ -177,7 +177,8 @@ StrTy save( const IdxTy flags=0) const { return Save_scope_trace(flags); }
 StrTy dump( const IdxTy flags=0) const { return Dump_scope_trace(flags); } 
 private:
 template <class ModelInfo, class ViewInfo, class DrawInfo>
-IdxTy DrawPoints(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
+// i is "1" based doh ... 
+IdxTy DrawPoints(ModelInfo & m, ViewInfo & v, DrawInfo * sdp, const IdxTy i, const IdxTy sz)
 {
 
     glBegin(GL_LINE_STRIP); //starts drawing of points
@@ -190,7 +191,9 @@ const auto & pj=p[j];
 Gf r=pj.r();
 Gf g=pj.g();
 Gf b=pj.b();
-  glColor3f(r,g,b);     // Green
+if (i==sz)   glColor3f(1,0,0);     // Green
+else if (i==1)   glColor3f(0,1,0);     // Green
+else  glColor3f(r,g,b);     // Green
 // fng distance doesn't fing work with fug line
 Gf fukx=(pj.x()); // -v.m_c[0])*fu;
 Gf fuky=(pj.y()); // -v.m_c[1])*fu;
@@ -428,7 +431,7 @@ MM_LOOP(ii,m_map) {
 if (i==1) glLineWidth(lwone);
 else if (i==sz) glLineWidth(lwend);
 else  glLineWidth(lw);
- (*ii).second.draw_points(m,v,sdp); 
+ (*ii).second.draw_points(m,v,sdp,i,sz); 
 } 
 return 0;
 } // DrawPoints
@@ -559,6 +562,7 @@ ss<<CRLF;
 return ss.str(); }
 void Clear()
 {
+m_map.clear();
 //MM_LOOP(ii,m_map) { (*ii).second.clear(); }  // TokPoints
 Init();
 } // Cleap 

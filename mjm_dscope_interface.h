@@ -220,7 +220,7 @@ StrTy set_oscope_samples(const StrTy & scope, const StrTy & sin, const IdxTy fla
 StrTy set_oscope(const StrTy & scope, const StrTy & sin, const IdxTy flags) { m_bufs[scope].set_params(sin,flags);  return StrTy(); }  
 
 template <class Tp> 
-bool send_oscope(const Tp & _x, const Tp & _y,  const StrTy& src, const IdxTy line, const StrTy & scope_name=StrTy(), const StrTy idn=StrTy(), const StrTy & etc=StrTy(),const StrTy & params=StrTy(), const StrTy & _ty="chunks", const IdxTy flags=0)
+IdxTy  send_oscope(const Tp & _x, const Tp & _y,  const StrTy& src, const IdxTy line, const StrTy & scope_name=StrTy(), const StrTy idn=StrTy(), const StrTy & etc=StrTy(),const StrTy & params=StrTy(), const StrTy & _ty="chunks", const IdxTy flags=0)
 {return  SendOscope( _x,  _y,  src, line, idn, etc, params,  _ty,flags,scope_name); } 
 
 
@@ -511,13 +511,15 @@ m_sender.m_rawfifo.send(h,r);
 return true; 
 }  // SendStripChart
 template <class Tp>
-bool  SendOscopeB(const Tp & _x, const Tp & _y,  const StrTy& src, const IdxTy line, const StrTy idn,  const StrTy & etc,const StrTy & params, const StrTy & _ty, const IdxTy flags,const StrTy & scope_name)
+IdxTy  SendOscopeB(const Tp & _x, const Tp & _y,  const StrTy& src, const IdxTy line, const StrTy idn,  const StrTy & etc,const StrTy & params, const StrTy & _ty, const IdxTy flags,const StrTy & scope_name)
 {
 Buffer& _buf=m_bufs[scope_name];
 _buf.samples(_x,_y,src,line,idn,etc,params,_ty,flags); 
-if (SendGuard(flags)) return false;
+if (SendGuard(flags)) return BAD ;
+IdxTy nt=0;
 while (_buf.traces())
 {
+++nt;
 Ragged h;
  SetupOscope(h, idn, src, line, etc,  _ty, params);
 const Ragged & r=_buf.trace();
@@ -525,16 +527,16 @@ m_sender.m_rawfifo.send(h,r);
 _buf.take();
 } // traces
 
-return true;
+return nt;
 } // SendOscopeB
 template <class Tp>
-bool  SendOscope(const Tp & _x, const Tp & _y,  const StrTy& src, const IdxTy line, const StrTy idn,  const StrTy & etc,const StrTy & params, const StrTy & _ty, const IdxTy flags, const StrTy & scope_name)
+IdxTy  SendOscope(const Tp & _x, const Tp & _y,  const StrTy& src, const IdxTy line, const StrTy idn,  const StrTy & etc,const StrTy & params, const StrTy & _ty, const IdxTy flags, const StrTy & scope_name)
 {
 
 //if (true) return SendOscopeB(_x,_y,src,line,idn,etc,params,_ty,flags,scope_name); 
 if (scope_name.length()) 
 	return SendOscopeB(_x,_y,src,line,idn,etc,params,_ty,flags,scope_name); 
-if (SendGuard(flags)) return false;
+if (SendGuard(flags)) return BAD;
 //MM_ERR(MMPR3(data.nx(),data.ny(),pload.size()))
 Ragged h;
  SetupOscope(h, idn, src, line, etc,  _ty, params);
@@ -553,7 +555,7 @@ r.add(l);
 //++m_line;
 } // i 
 m_sender.m_rawfifo.send(h,r);
-return true; 
+return 1; 
 }  // SendOscope
 
 
