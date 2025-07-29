@@ -539,7 +539,42 @@ mi.add_svg(data);
 AddNewModel(mi);
 return 0;
 } // AddSvg
+
 IdxTy AddOrnate(const input_type & r, const IdxTy flags) 
+{
+//MM_ERR(" adding ornate "<<MMPR2(__FUNCTION__,r.size()))
+// junk_bin
+//ModelInfo mi;
+//mi.add_ornate_points(r,flags);
+//AddNewModel(mi);
+
+ModelInfo* mip=0;
+bool new_model=false;
+const IdxTy szd=m_data_idx.used();
+if (szd==0) { mip=new ModelInfo(); new_model=true;}
+else { mip=&m_data_idx(0); }
+ModelInfo & mi=*mip;
+if (szd>1) { MM_ERR(" should only have one to append "<<MMPR2(szd,m_src))}
+mi.m_src=m_src;
+mi.m_type="ornate-points";
+mi.add_ornate_points(r,flags);
+if (new_model){  m_data_idx.push_back(mi); delete mip; }
+//AppendModel(mi,flags);
+return 0;
+
+
+
+
+
+
+return 0;
+} // AddOrnate
+
+
+
+
+
+IdxTy AddOrnateOld(const input_type & r, const IdxTy flags) 
 {
 //MM_ERR(" adding ornate "<<MMPR2(__FUNCTION__,r.size()))
 // junk_bin
@@ -569,7 +604,8 @@ if (cmd=="etc"){  mi.add_etc(l,2,len);  continue; }
 //} // ADDITOR
 AddNewModel(mi);
 return 0;
-} // AddOrnate
+} // AddOrnateOld
+
 
 
 

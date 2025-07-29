@@ -5,6 +5,7 @@
 #include "mjm_vector_shapes.h"
 #include "mjm_thread_util.h"
 #include "mjm_string_tokenizer.h"
+#include "mjm_bounds.h"
 //#include "mjm_block_matrix.h"
 #include "mjm_instruments.h"
 #include "mjm_strings.h"
@@ -118,6 +119,7 @@ typedef std::vector<StrTy> Words;
 typedef mjm_string_base_params<Tr> BaseParams;
 typedef string_tokenizer Tokenizer;
 typedef string_tokenizer St;
+typedef mjm_bounds<Tr> Bounds;
 public:
 typedef mjm_vector_shapes<Tr> Shapes;
 private:
@@ -166,6 +168,7 @@ const D x() const { return m_x;}
 const D y() const { return m_y;}
 const D z() const { return m_z;}
 const D size() const { return m_size;}
+void size(const D & x)  {  m_size=x;}
 bool valid() const { return m_shapep!=this; } 
 const IdxTy color() const { return m_color; }
 const IdxTy shape() const { return m_shape; }
@@ -256,7 +259,7 @@ void Init_point_entry()
 m_x=0;
 m_y=0;
 m_z=0;
-m_size=0;
+m_size=1;
 m_color=0;
 m_shape=0;
 // should kill copy ctor etc lol 
@@ -311,6 +314,7 @@ void load( const D &x, const D &y, const D &z, const IdxTy flags)
 _point_entry p(x, y, z, flags) ;
 p.group(m_groups);
 m_points.push_back(p);
+m_bounds.add(x,y);
 }
 void load( const D &x, const D &y, const D &z,  
  const D &r, const D &g, const D &b, const IdxTy flags)  
@@ -318,6 +322,7 @@ void load( const D &x, const D &y, const D &z,
 _point_entry p(x, y, z, r,g,b,flags) ;
 p.group(m_groups);
 m_points.push_back(p);
+m_bounds.add(x,y);
 }
 IdxTy append(const Myt & that, const IdxTy flags)
 { return Append(that,flags); }
@@ -351,6 +356,7 @@ m_st=that.m_st; // cross fingers
 m_shapes=that.m_shapes; // pray , no pointers 
 //PointVector m_points;
 m_points=that.m_points; // don't look now ZZ
+m_bounds=that.m_bounds;
 // now all the shape pointers need to be updated to either this or
 // the new shape.... 
 auto m=m_shapes.assign_map(that.m_shapes);
@@ -447,6 +453,7 @@ Tokenizer m_st;
 Shapes m_shapes;
 PointVector m_points;
 IdxTy m_groups;
+Bounds m_bounds;
 }; // mjm_tokenized_points
 
 //////////////////////////////////////////////

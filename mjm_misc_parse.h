@@ -505,7 +505,8 @@ static Ctab MakeCtab()
 
 Ctab x(CARD);
 //memset(&x[0],0,CARD*sizeof(IdxTy));
-memset(&x[0],0,CARD*SZTAB);
+// 2025-07 compiler
+memset(&x[0],0,int(CARD)*int(SZTAB));
 Set(&x[0],0,0x01f,CTRL);
 Set(&x[0],0x041,0x05A,UC);
 Set(&x[0],0x061,0x07A,LC);

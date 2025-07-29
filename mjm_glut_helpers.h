@@ -268,7 +268,27 @@ doglutpos(glVertex3f,pi.x(),pi.y(),pi.z());
 glEnd();
 return 0;
 } // null 
+
+
 Shape & s=*pshape;
+
+if (s.just_point())
+{
+glColor3f(pi.r(),pi.g(),pi.b() );//
+//glColor3f(255.0,1.0,1.0 );//
+//D sz=(*(s.begin())).point_size();
+// TODO the code if fucked up 
+D sz=pi.size(); // s.point_size();
+if (sz<1) { MM_ERR( " point size is zero "<<MMPR(sz)) }
+glPointSize(sz);
+glBegin(GL_POINTS);
+//MM_ERR(MMPR3(pi.x(),pi.y(),pi.z()))
+doglutpos(glVertex3f,pi.x(),pi.y(),pi.z());
+glEnd();
+return 0;
+} // null 
+
+
 // size and place ok... 
 // maybe output vectors or something? 
 // FIXME the bastard coords- both glut and view have xforms, make this
@@ -844,10 +864,13 @@ const D & g, const D & b)
  strip().set_color(idx,r,g,b,0);
 return 0; 
 }
+void add_ornate_points( const Ragged & r, const IdxTy flags)
+{
+add_common_hdr(r,flags);
+ornate_points().load(r,0,0,0);
 
+} // add_ornate_points
 
-void clear() { m_strings.clear(); m_points.clear(); m_segs.clear();
-}
 void add_strip( const Ragged & r, const IdxTy flags)
 {
 //if (m_pstrip==0) m_pstrip= new strip_t();
@@ -1020,12 +1043,23 @@ ss<<CRLF;
 } // ii 
 return ss.str();
 } // show
+
+
+void clear() { 
+m_strings.clear(); 
+m_points.clear(); 
+m_segs.clear();
+m_ornate_points.clear();
+
+}
+
 void clear_data()
 {
 MM_ERR(" data clear ")
 m_strip.clear();
 m_oscope.clear();
 m_points.clear();
+m_ornate_points.clear();
 } // clear_data
 // junk_MEMBERS
 

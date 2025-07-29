@@ -147,11 +147,12 @@ class _point
 {
 public:
 enum { WHITE=((1<<24)-1) };
+// 2025-07 change default sz wtf was .01 
 _point(const D & a, const D & b, const D & c)
-:m_x(a),m_y(b),m_z(c),m_sz(.01),m_rgb(WHITE),m_shape("circle") {}
+:m_x(a),m_y(b),m_z(c),m_sz(2),m_rgb(WHITE),m_shape("circle") {}
 _point(const D & a, const D & b, const D & c, const IdxTy rgb)
-:m_x(a),m_y(b),m_z(c),m_sz(.01),m_rgb(rgb),m_shape("circle") {}
-_point() : m_x(0),m_y(0),m_z(0),m_sz(.01),m_rgb(WHITE), m_shape("circle") {}
+:m_x(a),m_y(b),m_z(c),m_sz(2),m_rgb(rgb),m_shape("circle") {}
+_point() : m_x(0),m_y(0),m_z(0),m_sz(2),m_rgb(WHITE), m_shape("circle") {}
 const D & theta() const { return 0; }
 const D & x() const { return m_x; }
 const D & y() const { return m_y; }
@@ -160,6 +161,7 @@ const D & sz() const { return m_sz; }
 void  sz(const D & x)  {  m_sz=x; }
 const IdxTy rgb() const { return m_rgb; }
 void  rgb(const IdxTy x)  {  m_rgb=x; }
+void shape(const StrTy & shape)  {  m_shape=shape; }
 const StrTy & shape() const { return m_shape; }
 //void Init_point() { } // Init_point
 D m_x,m_y,m_z,m_sz;

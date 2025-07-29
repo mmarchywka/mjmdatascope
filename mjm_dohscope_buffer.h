@@ -175,7 +175,7 @@ const IdxTy len=l.size();
 StrTy Save_trace( const IdxTy flags=0) const  
 {
 StrTy s;
-BaseParams kvp();
+BaseParams kvp;
 //kcp,encode(s,"",);
 return s; 
 } // Dump 

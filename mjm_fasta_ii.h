@@ -863,7 +863,9 @@ template <class Ty> class fasta_pair_iterator : public Ty
 typedef fasta_pair_iterator<Ty> Myt;
 
 public:
-fasta_pair_iterator<Ty>(const FileTy & si, const FileTy & sj ) : Parent(si,sj){}
+// 2025-07 new compiler 
+//fasta_pair_iterator<Ty>(const FileTy & si, const FileTy & sj ) : Parent(si,sj){}
+fasta_pair_iterator(const FileTy & si, const FileTy & sj ) : Parent(si,sj){}
 
 IdxTy i() const { return Super::m_i; } 
 IdxTy j() const { return Super::m_j; } 
