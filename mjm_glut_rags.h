@@ -1007,8 +1007,32 @@ continue;
 v.draw_ornate_shape(pi,pshape,sdp);
 } // ii 
 
+if (v.olay_ornates())  OverlayOrnatePoints(m,v, sdp);
+
 return 0;
 } // DrawOrnatePoints
+
+IdxTy OverlayOrnatePoints(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
+{
+ glBegin(GL_LINE_STRIP);
+// note no ref doh
+auto& p=m.ornate_points_d();
+for(IdxTy j=0; j<p.size(); ++j)
+{
+const auto & pj=p[j];
+
+  glColor3f(pj.r(),pj.g(),pj.b());     // Green
+v.doglutpos(glVertex3f,pj.x(),pj.y(),pj.z()); 
+
+      //MM_ERR(MMPR3(Gf(pj.x),Gf(pj.y),Gf(pj.z)));//upper-right corner
+} // j 
+    glEnd();//end drawing of points
+
+
+
+return 0;
+} // overlayOrnatePoints
+
 #if 0
 IdxTy DrawOrnateShape(const PointEntry & pi,Shape * pshape, ViewInfo & v, DrawInfo * sdp)
 {

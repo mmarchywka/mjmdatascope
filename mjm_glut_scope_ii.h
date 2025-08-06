@@ -905,6 +905,7 @@ ExitSerial(0);
 }
 IdxTy Screenshot(const StrTy & sin, const IdxTy flags)
 {
+MM_ERR(MMPR(__FUNCTION__))
 if (!m_psaver) return -1;
 return m_psaver->save_tiff(sin,flags); 
 } // Screenshot

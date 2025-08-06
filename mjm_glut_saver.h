@@ -186,7 +186,7 @@ m_fps=30;
 m_width=128;
 m_height=128;
 m_stuffer=3;
-manual_start=false;
+manual_start=!false;
 sk.get(m_fn_mpeg,"mpeg_name");
 sk.get(m_codec_id,"mpeg_codec_id");
 sk.get(m_fps,"fps");
@@ -206,7 +206,7 @@ _save_params()
 {
 offscreen=0;
   output_formats=0;
-manual_start=false;
+manual_start=!false;
  output_formats = PPM_BIT | LIBPNG_BIT | FFMPEG_BIT|TIFF_BIT;
 m_codec_id=BAD;
 m_fps=30;
@@ -308,11 +308,61 @@ void GetPixels()
 
 IdxTy SaveTiff(const StrTy & sin, const IdxTy flags)
 { 
+StrTy fn="datascope.tiff";
 GetPixels();
-
+MM_ERR(MMPR(fn))
+screenshot_tiff_only(fn.c_str());
 
 return 0; 
 }  //SaveTiff
+void screenshot_tiff_only(const char *filename) {
+
+    const size_t format_nchannels = 3;
+ int w=glutGet(GLUT_WINDOW_WIDTH);
+ int h=glutGet(GLUT_WINDOW_HEIGHT);
+    TIFF *tif = TIFFOpen(filename, "w");
+// goog ai generated.. 
+   if (!tif) {
+        // Handle error: file could not be opened
+		MM_ERR(" cant open tiff "<<MMPR(filename))
+        return ;
+    } 
+int bitsPerSample=8; // 24;
+int samplesPerPixel=3; // 1;
+    // Set essential TIFF tags
+    TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, w);
+    TIFFSetField(tif, TIFFTAG_IMAGELENGTH, h);
+    TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, bitsPerSample);
+    TIFFSetField(tif, TIFFTAG_SAMPLESPERPIXEL, samplesPerPixel);
+//    TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, photometric);
+    TIFFSetField(tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT); // Top-left origin
+    TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG); // Chunky organization
+    TIFFSetField(tif, TIFFTAG_COMPRESSION, COMPRESSION_NONE); // No compression
+
+    // Create sample pixel data (e.g., a simple gradient)
+const IdxTy bw=width*samplesPerPixel;
+    uint8* scanline = new uint8[bw]; // width * samplesPerPixel];
+    for (uint32 y = 0; y < height; ++y) {
+        for (uint32 x = 0; x < bw; ++x) {
+            scanline[x] = (pixels)[x+bw*y] ; //  static_cast<uint8>((x + y) / 2); // Simple gradient
+        }
+        // Write the scanline to the TIFF file
+        if (TIFFWriteScanline(tif, scanline, y, 0) < 0) {
+            // Handle error: scanline could not be written
+			MM_ERR(" writing tiff error "<<MMPR4(y,filename,width,height))
+            TIFFClose(tif);
+            delete[] scanline;
+            return ;
+        }
+    }
+
+    // Close the TIFF file and free resources
+    TIFFClose(tif);
+    delete[] scanline;
+
+
+}
+
 
 void screenshot_tiff(const char *filename, unsigned int width,
         unsigned int height, GLubyte **pixels) {
@@ -367,6 +417,7 @@ const IdxTy bw=width*samplesPerPixel;
 
 
 }
+
 #endif // MJmTIFF
 
 

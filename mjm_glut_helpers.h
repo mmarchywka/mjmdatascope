@@ -162,6 +162,8 @@ typedef GeoState triple_t;
 _view() {Init(); }
 int style() const { return m_style;}
 void style(const int s) { m_style=s; } 
+// bit zero is now on at add by default doh 
+bool olay_ornates() const { return !Bit(m_style,0); } 
 void reset() { Init(); } 
 void reset_geometry() { InitGeometry(); } 
 void reset(const StrTy & s ) { Init(s); } 
@@ -1624,7 +1626,7 @@ public:
 mjm_glut_helpers_map() {}
 StrTy dump(const IdxTy flags=0) { return Dump(flags); }
 private:
-bool Bit(const IdxTy f, const IdxTy b) const  { return  ((f>>b)&1)!=0; }
+static bool Bit(const IdxTy f, const IdxTy b)   { return  ((f>>b)&1)!=0; }
 // should loop over map now 
 //StrTy Dump(const IdxTy flags=0) {Ss ss;  return ss.str(); }
 typedef typename mjm_thread_util<Tr>::mutex_vector MutexVector;
