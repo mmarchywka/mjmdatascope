@@ -562,6 +562,19 @@ void Reshape(GLint width, GLint height)
 {
 // TODO FIXME this needs to use the same code as initially invoked...
 MyGLStatus & gls= m_gl_status;
+if (false) if( (width&3)||(height&3))
+{
+// for padding lol 
+// masking no work? 
+MM_ERR(MMPR2(width,height))
+while (width&3) {--width;};
+while (height&3) {--height;};
+MM_ERR(MMPR2(width,height))
+
+glutReshapeWindow((width),height);
+SeeRedisplay(); // if (m_alive) glutPostRedisplay();
+return; 
+}
    gls.g_Width = width;
    gls.g_Height = height;
    glViewport(0, 0, gls.g_Width, gls.g_Height);

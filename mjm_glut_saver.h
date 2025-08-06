@@ -36,6 +36,8 @@ g++ -fpermissive -x c++  movie_Example.h -lGL  -lGLU -lglut  -lpng  -lavcodec-ff
 #include "mjm_globals.h"
 #include "mjm_thread_util.h"
 
+#include "mjm_file_name_gen.h"
+
 #include "mjm_string_kvp.h"
 #include <map> 
 #include <vector> 
@@ -207,7 +209,7 @@ _save_params()
 offscreen=0;
   output_formats=0;
 manual_start=!false;
- output_formats = PPM_BIT | LIBPNG_BIT | FFMPEG_BIT|TIFF_BIT;
+// output_formats = PPM_BIT | LIBPNG_BIT | FFMPEG_BIT|TIFF_BIT;
 m_codec_id=BAD;
 m_fps=30;
 m_width=128;
@@ -225,6 +227,8 @@ StrTy m_fn_mpeg;
 IdxTy m_codec_id,m_fps,m_width,m_height,m_stuffer;
 bool manual_start;
 }; // _save_params  
+// TYPEDEF
+typedef mjm_file_name_gen<Tr> NameGen;
 // API
 public:
 mjm_glut_saver() {Init();}
@@ -270,19 +274,20 @@ void ExitSerial(const IdxTy i)const  {  m_mutex_vector.exit_serial(i ); }
  *     You must `free` it when you won't be calling this function anymore.
  */
 void screenshot_ppm(const char *filename, unsigned int width,
-        unsigned int height, GLubyte **pixels) {
+        unsigned int height) {
     size_t i, j, cur;
     const size_t format_nchannels = 3;
     FILE *f = fopen(filename, "w");
     fprintf(f, "P3\n%d %d\n%d\n", width, height, 255);
-    *pixels = (GLubyte*)realloc((GLubyte*)*pixels, format_nchannels * sizeof(GLubyte) * width * height);
+GetPixels(width,height,0);
+//    *pixels = (GLubyte*)realloc((GLubyte*)*pixels, format_nchannels * sizeof(GLubyte) * width * height);
 	//glReadBuffer(GL_BACK);
-	glReadBuffer(GL_FRONT);
-    glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, *pixels);
+//	glReadBuffer(GL_FRONT);
+//    glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, *pixels);
     for (i = 0; i < height; i++) {
         for (j = 0; j < width; j++) {
             cur = format_nchannels * ((height - i - 1) * width + j);
-            fprintf(f, "%3d %3d %3d ", (*pixels)[cur], (*pixels)[cur + 1], (*pixels)[cur + 2]);
+            fprintf(f, "%3d %3d %3d ", (m_pixels)[cur], (m_pixels)[cur + 1], (m_pixels)[cur + 2]);
         }
         fprintf(f, "\n");
     }
@@ -294,24 +299,30 @@ void screenshot_ppm(const char *filename, unsigned int width,
 #if MJMTIFF 
 // int w=glutGet(GLUT_WINDOW_WIDTH);
 
-void GetPixels()
+void GetPixels(const int width=0, const int height=0 , const IdxTy flags=0 )
 {
-    const size_t format_nchannels = 3;
+    const size_t format_nchannels = 4;
  int w=glutGet(GLUT_WINDOW_WIDTH);
  int h=glutGet(GLUT_WINDOW_HEIGHT);
-   pixels = (GLubyte*)realloc((GLubyte*)pixels, format_nchannels * sizeof(GLubyte) * w * h);
-
+if (width) w=width;
+if (height) h=height;
+const IdxTy sz=format_nchannels * sizeof(GLubyte) * w * h;
+if (m_pixels==0) m_pixels=new GLubyte[sz];
+   auto p = (GLubyte*)realloc((GLubyte*)m_pixels, sz);
+if (p!=0) m_pixels=p;
 	glReadBuffer(GL_FRONT);
-    glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+    glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, m_pixels);
 
 } // GetPixels
 
 IdxTy SaveTiff(const StrTy & sin, const IdxTy flags)
 { 
 StrTy fn="datascope.tiff";
+StrTy fnnew=fn;
 GetPixels();
-MM_ERR(MMPR(fn))
-screenshot_tiff_only(fn.c_str());
+IdxTy rc= m_namer.nonexist(fnnew,fn);
+MM_ERR(MMPR2(fn,fnnew))
+screenshot_tiff_only(fnnew.c_str());
 
 return 0; 
 }  //SaveTiff
@@ -320,6 +331,7 @@ void screenshot_tiff_only(const char *filename) {
     const size_t format_nchannels = 3;
  int w=glutGet(GLUT_WINDOW_WIDTH);
  int h=glutGet(GLUT_WINDOW_HEIGHT);
+			MM_ERR(" writing tiff  "<<MMPR3(filename,w,h))
     TIFF *tif = TIFFOpen(filename, "w");
 // goog ai generated.. 
    if (!tif) {
@@ -328,28 +340,30 @@ void screenshot_tiff_only(const char *filename) {
         return ;
     } 
 int bitsPerSample=8; // 24;
-int samplesPerPixel=3; // 1;
+int samplesPerPixel=4; // 1;
     // Set essential TIFF tags
     TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, w);
     TIFFSetField(tif, TIFFTAG_IMAGELENGTH, h);
     TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, bitsPerSample);
     TIFFSetField(tif, TIFFTAG_SAMPLESPERPIXEL, samplesPerPixel);
-//    TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, photometric);
+    TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
     TIFFSetField(tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT); // Top-left origin
     TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG); // Chunky organization
+    TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
     TIFFSetField(tif, TIFFTAG_COMPRESSION, COMPRESSION_NONE); // No compression
 
     // Create sample pixel data (e.g., a simple gradient)
-const IdxTy bw=width*samplesPerPixel;
+const IdxTy bw=w*samplesPerPixel;
     uint8* scanline = new uint8[bw]; // width * samplesPerPixel];
-    for (uint32 y = 0; y < height; ++y) {
+    //for (uint32 y = 0; y < height; ++y) {
+    for (uint32 y = 0; y < h; ++y) {
         for (uint32 x = 0; x < bw; ++x) {
-            scanline[x] = (pixels)[x+bw*y] ; //  static_cast<uint8>((x + y) / 2); // Simple gradient
+            scanline[x] = (m_pixels)[x+bw*(h-y-1)] ; //  static_cast<uint8>((x + y) / 2); // Simple gradient
         }
         // Write the scanline to the TIFF file
         if (TIFFWriteScanline(tif, scanline, y, 0) < 0) {
             // Handle error: scanline could not be written
-			MM_ERR(" writing tiff error "<<MMPR4(y,filename,width,height))
+			MM_ERR(" writing tiff error "<<MMPR4(y,filename,w,h))
             TIFFClose(tif);
             delete[] scanline;
             return ;
@@ -365,15 +379,16 @@ const IdxTy bw=width*samplesPerPixel;
 
 
 void screenshot_tiff(const char *filename, unsigned int width,
-        unsigned int height, GLubyte **pixels) {
+        unsigned int height) {
     size_t i, j, cur;
     const size_t format_nchannels = 3;
     //FILE *f = fopen(filename, "w");
 //    fprintf(f, "P3\n%d %d\n%d\n", width, height, 255);
-    *pixels = (GLubyte*)realloc((GLubyte*)*pixels, format_nchannels * sizeof(GLubyte) * width * height);
+GetPixels(width,height,0);
+//    *pixels = (GLubyte*)realloc((GLubyte*)*pixels, format_nchannels * sizeof(GLubyte) * width * height);
 	//glReadBuffer(GL_BACK);
-	glReadBuffer(GL_FRONT);
-    glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, *pixels);
+//	glReadBuffer(GL_FRONT);
+//    glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, *pixels);
 
     TIFF *tif = TIFFOpen(filename, "w");
 // goog ai generated.. 
@@ -399,7 +414,7 @@ const IdxTy bw=width*samplesPerPixel;
     uint8* scanline = new uint8[bw]; // width * samplesPerPixel];
     for (uint32 y = 0; y < height; ++y) {
         for (uint32 x = 0; x < bw; ++x) {
-            scanline[x] = (*pixels)[x+bw*y] ; //  static_cast<uint8>((x + y) / 2); // Simple gradient
+            scanline[x] = (m_pixels)[x+bw*y] ; //  static_cast<uint8>((x + y) / 2); // Simple gradient
         }
         // Write the scanline to the TIFF file
         if (TIFFWriteScanline(tif, scanline, y, 0) < 0) {
@@ -428,19 +443,20 @@ const IdxTy bw=width*samplesPerPixel;
 /* Adapted from https://github.com/cirosantilli/cpp-cheat/blob/19044698f91fefa9cb75328c44f7a487d336b541/png/open_manipulate_write.c */
 
  void screenshot_png(const char *filename, unsigned int width, unsigned int height,
-        GLubyte **pixels, png_byte **png_bytes, png_byte ***png_rows) {
+        png_byte **png_bytes, png_byte ***png_rows) {
     size_t i, nvals;
     const size_t format_nchannels = 4;
     FILE *f = fopen(filename, "wb");
     nvals = format_nchannels * width * height;
-    *pixels =(GLubyte*) realloc(*pixels, nvals * sizeof(GLubyte));
+GetPixels(width,height,0);
+//    *pixels =(GLubyte*) realloc(*pixels, nvals * sizeof(GLubyte));
     *png_bytes =(png_byte*) realloc(*png_bytes, nvals * sizeof(png_byte));
     *png_rows = (png_byte**) realloc(*png_rows, height * sizeof(png_byte*));
 	//glReadBuffer(GL_BACK);
-	glReadBuffer(GL_FRONT);
-    glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, *pixels);
+//	glReadBuffer(GL_FRONT);
+//    glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, *pixels);
     for (i = 0; i < nvals; i++)
-        (*png_bytes)[i] = (*pixels)[i];
+        (*png_bytes)[i] = (m_pixels)[i];
     for (i = 0; i < height; i++)
         (*png_rows)[height - i - 1] = &(*png_bytes)[i * width * format_nchannels];
     png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
@@ -667,13 +683,13 @@ void ffmpeg_encoder_glread_rgb(uint8_t **rgb, GLubyte **pixels, unsigned int wid
         glBindRenderbuffer(GL_RENDERBUFFER, rbo_color);
         /* Storage must be one of: */
         /* GL_RGBA4, GL_RGB565, GL_RGB5_A1, GL_DEPTH_COMPONENT16, GL_STENCIL_INDEX8. */
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB565, width, height);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB565, m_width, m_height);
         glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, rbo_color);
 
         /* Depth renderbuffer. */
         glGenRenderbuffers(1, &rbo_depth);
         glBindRenderbuffer(GL_RENDERBUFFER, rbo_depth);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, m_width, m_height);
         glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo_depth);
 
         glReadBuffer(GL_COLOR_ATTACHMENT0);
@@ -681,8 +697,8 @@ void ffmpeg_encoder_glread_rgb(uint8_t **rgb, GLubyte **pixels, unsigned int wid
         /* Sanity check. */
         assert(glCheckFramebufferStatus(GL_FRAMEBUFFER));
         glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE, &glget);
-        assert(width < (unsigned int)glget);
-        assert(height < (unsigned int)glget);
+        assert(m_width < (unsigned int)glget);
+        assert(m_height < (unsigned int)glget);
     } else {
         glReadBuffer(GL_BACK);
     }
@@ -690,7 +706,7 @@ void ffmpeg_encoder_glread_rgb(uint8_t **rgb, GLubyte **pixels, unsigned int wid
     glClearColor(0.0, 0.0, 0.0, 0.0);
     glEnable(GL_DEPTH_TEST);
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
-    glViewport(0, 0, width, height); 
+    glViewport(0, 0, m_width, m_height); 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glMatrixMode(GL_MODELVIEW);
@@ -698,7 +714,7 @@ void ffmpeg_encoder_glread_rgb(uint8_t **rgb, GLubyte **pixels, unsigned int wid
     time0 = glutGet(GLUT_ELAPSED_TIME);
 //    model_init();
 #if FFMPEG
-    ffmpeg_encoder_start("tmp.mpg", AV_CODEC_ID_MPEG1VIDEO, 25, width, height);
+    ffmpeg_encoder_start("tmp.mpg", AV_CODEC_ID_MPEG1VIDEO, 25, m_width, m_height);
 #endif
 }
 #if 0 
@@ -751,13 +767,14 @@ return 1;
 #if PPM
     if (sp.output_formats & PPM_BIT) {
         snprintf(filename, SCREENSHOT_MAX_FILENAME, "tmp.%d.ppm", nframes);
-        screenshot_ppm(filename, sp.m_width, sp.m_height, &pixels);
+        screenshot_ppm(filename, sp.m_width, sp.m_height);
     }
 #endif
 #if MJMTIFF 
     if (sp.output_formats & TIFF_BIT) {
         snprintf(filename, SCREENSHOT_MAX_FILENAME, "tmp.%d.tiff", nframes);
-        screenshot_tiff(filename, sp.m_width, sp.m_height, &pixels);
+        //screenshot_tiff(filename, sp.m_width, sp.m_height, &pixels);
+        screenshot_tiff(filename, sp.m_width, sp.m_height);
     }
 #endif
 
@@ -766,7 +783,8 @@ return 1;
 #if LIBPNG
     if (sp.output_formats & LIBPNG_BIT) {
         snprintf(filename, SCREENSHOT_MAX_FILENAME, "tmp.%d.png", nframes);
-        screenshot_png(filename, sp.m_width, sp.m_height, &pixels, &png_bytes, &png_rows);
+        //screenshot_png(filename, sp.m_width, sp.m_height, &pixels, &png_bytes, &png_rows);
+        screenshot_png(filename, sp.m_width, sp.m_height, &png_bytes, &png_rows);
     }
 #endif
 # if FFMPEG
@@ -791,7 +809,7 @@ if (!paused)
 	  frame->pts = nframes;
 // stuffer must be nonzero doh 
 //++nframes;
-        ffmpeg_encoder_glread_rgb(&rgb, &pixels, sp.m_width, sp.m_height);
+        ffmpeg_encoder_glread_rgb(&rgb, &m_pixels, sp.m_width, sp.m_height);
 MM_ILOOP(dummy, sp.m_stuffer) {frame->pts=nframes;    ffmpeg_encoder_encode_frame(rgb); ++nframes; } 
 } // paused 
 	MM_STATUS(" x to stop, mpeg frame "<<MMPR2(paused, nframes))   
@@ -821,11 +839,11 @@ int Main(int argc, char **argv) {
     }
     arg++;
     if (argc > arg) {
-        width = strtoumax(argv[arg], NULL, 10);
+        m_width = strtoumax(argv[arg], NULL, 10);
     }
     arg++;
     if (argc > arg) {
-        height = strtoumax(argv[arg], NULL, 10);
+        m_height = strtoumax(argv[arg], NULL, 10);
     }
     arg++;
     if (argc > arg) {
@@ -836,10 +854,10 @@ int Main(int argc, char **argv) {
     if (offscreen) {
         /* TODO: if we use anything smaller than the window, it only renders a smaller version of things. */
         /*glutInitWindowSize(50, 50);*/
-        glutInitWindowSize(width, height);
+        glutInitWindowSize(m_width, m_height);
         glut_display = GLUT_SINGLE;
     } else {
-        glutInitWindowSize(width, height);
+        glutInitWindowSize(m_width, m_height);
         glutInitWindowPosition(100, 100);
         glut_display = GLUT_DOUBLE;
     }
@@ -882,17 +900,21 @@ m_mpeg_state=0;
 sws_context=0;
 c=0;
 #endif
-pixels=0;
+m_pixels=0;
 max_nframes=10000;
 nframes=0;
-height=128;
-width=129; 
+m_height=128;
+m_width=128; 
+#if LIBPNG
+png_bytes=0; //  = NULL;
+png_rows=0; //  = NULL;
+#endif
 }; // Init
 
 // MEMBERS
 IdxTy m_signal;
 
-GLubyte *pixels; //  = NULL;
+GLubyte *m_pixels; //  = NULL;
 GLuint fbo;
 GLuint rbo_color;
 GLuint rbo_depth;
@@ -900,11 +922,11 @@ int offscreen = 1;
 unsigned int max_nframes; //  = 128;
  unsigned int nframes; //  = 0;
  unsigned int time0;
-unsigned int height ; //  = 128;
-unsigned int width; //  = 128;
+unsigned int m_height ; //  = 128;
+unsigned int m_width; //  = 128;
 //static unsigned int output_formats = PPM_BIT | LIBPNG_BIT | FFMPEG_BIT;
 
-
+NameGen m_namer;
 
 
 #if LIBPNG

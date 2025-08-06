@@ -240,22 +240,16 @@ MM_ILOOP(_i,(der+1))
 {
 int i=_i;
 
-// sub sample delay is based on linear interpolation
+// TODO sub sample delay is based on linear interpolation
 
 if (sign>0) gp.add_term(delayi+(offs-i),{D(coef),0});
 else gp.add_term(delayi+(offs-i),{D(-coef),0});
-
-
-
-
 
 MM_ERR(MMPR4((offs-i),coef,sign,i));
 coef=CursingBinomial(coef,der,i);
 sign=-sign;
 } // cursing
-//gp.add_term(delayi+1,{1,0});
-//gp.add_term(delayi-1,{1,0});
-//gp.add_term(delayi,{-2,0});
+//gp.add_term(delayi+1,{1,0}); //gp.add_term(delayi-1,{1,0}); //gp.add_term(delayi,{-2,0});
 
 IdxTy npts=360;
 ShowRoots(gp,tol,color);
@@ -264,7 +258,7 @@ AddUnitCircle(npts);
 const D deltheta=.00001*M_PI/D(delayi+D(offs)-D(der));
 //const D deltheta=.001*dt*dt;
 
-// ASSFUCK default fucking parm FUCK 
+// default fcking parm FCK 
 //AddAnalytic(der,delayi+(offs-der),deltheta);
 AddAnalytic(der,delayi+(offs-der),dt*dt, deltheta);
 
@@ -388,7 +382,8 @@ Define w=z-1=s*exp(i Omega ) and
 end up with n Omega = -m Theta + pi 
 and the positive radii error of  delta= s^n-gamma^n r^(-m) 
 Tan and Cot are used to get y/x and y/(x-1) but there is
-quadran confusion with this. 
+quadran confusion with this.  Go to sin/cos crap but should
+be able to do the check with vector addition lol. 
 
 */
 
@@ -563,7 +558,7 @@ const D c1=::cos(theta);
 const D c2=::cos(Omega);
 const D s1=::sin(theta);
 const D s2=::sin(Omega);
-// something is wrong here never mind sn==0 fuck 
+// something is wrong here never mind sn==0 fck 
 //const D r=fabs(s2/(c1*s2-c2*s1));
 const D r=(s2/(c1*s2-c2*s1));
 const D s=s1/(c1*s2-c2*s1);
@@ -575,7 +570,7 @@ if (s1*s2<=0) return false;
 if ((s<0)||(r<0)) return false; 
 return true;
 } // Isect
-void IsectFuck(D & x, D &y, const D & theta, const D & Omega)
+void IsectFck(D & x, D &y, const D & theta, const D & Omega)
 {
 const bool toor=Oor(theta);
 const bool ooor=Oor(Omega);
@@ -613,7 +608,7 @@ quad=Quadrant(x,y,theta);
 }
 
 MM_ERR(MMPR4(theta,Omega,x,y)<<MMPR3(toor,ooor,quad))
-} // IsectFuck
+} // IsectFck
 
 D Eval(D & x, D &y, const D & theta, const D & a, const D & anf, const D & offa, const IdxTy n, const IdxTy m, bool & ok)
 {
@@ -637,6 +632,7 @@ const D delta=cheap_pow(s,n)-a/cheap_pow(r,m);
 return delta;
 
 } // Eval
+// TODO need to look at accuracy of (1+d)^m with small d and large m
 D cheap_pow(const D & b, const IdxTy n)
 {
 //MM_ERR(MMPR2(b,n))
@@ -658,7 +654,8 @@ while (nlog)  {if (nlog&1) res=res*pows[p]; ++p;  nlog>>=1; }
 return res;
 } // cheap_pow
 
- 
+// this may have been based on something similar but not worth
+// trying to figure out  
 void AddAnalyticWTF(const int der,const int delayi,const D &dt2)
 {
 const IdxTy npts=delayi;
@@ -701,7 +698,7 @@ m_points.back().sz(10);
 } // AddUnitCircle
 
 
-
+// TODO this should be intersgrated into dscope interface by now
 bool SendPoints(const StrTy & params=StrTy())
 {
 const bool wait_on_full=true;

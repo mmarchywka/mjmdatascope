@@ -29,7 +29,8 @@ SVG_INC="-I/usr/include/glib-2.0  -I/usr/include/GL -I/usr/include/librsvg-2.0/l
 #LINK="$MMCD_LINK -lpthread  -lGL -lglut -lGLU -lglut -lpng -lavcodec -lswscale -lavutil "
 LINK="$MMCD_LINK -Wl,--copy-dt-needed-entries  -lpthread  -lrsvg-2 -lglib-2.0 -lGL -lglut -lGLU -lglut -lpng -ltiff  -lavcodec -lswscale -lavutil "
 # user-after-free threadutil code getting flagged but looks ok AFAICT
-COMPILER="$MMCD_COMPILER -std=gnu++14 -Wno-use-after-free "
+#COMPILER="$MMCD_COMPILER -std=gnu++14 -Wno-use-after-free "
+COMPILER="$MMCD_COMPILER -std=gnu++17 -Wno-use-after-free "
 # string_kvp etc still there 
 #INCDIR=" -MMD -MF datascope.deps $MMCD_INCDIR -I../freefem  -I/usr/include/GL "  # " -I.. " 
 INCDIR=" -MMD -MF datascope.deps $MMCD_INCDIR -I../freefem  -I/usr/include/GL   $SVG_INC "  # " -I.. " 
