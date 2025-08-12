@@ -56,7 +56,7 @@ void EnterSerial(const IdxTy i)const  {  m_mutex_vector.enter_serial(i ); }
 void ExitSerial(const IdxTy i)const  {  m_mutex_vector.exit_serial(i ); }
 //m_mutex_vector = MutexVector(MU_SZ);
 
-
+const StrTy & now() const { return m_now; } 
 const StrTy next() { return Next(); }  
 
 const StrTy sfx(const StrTy & s) { return Sfx(s); }  

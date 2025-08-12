@@ -402,7 +402,7 @@ const IdxTy flags=myatoi(cip.wif(3));
 MM_ERR(MMPR4(__FUNCTION__,cmd,s,flags))
 clear();
 } // cmd_clear 
-
+#define CC(x) myatoi(cip.wif(x)) 
 void cmd_scope(Cip & cip , LocalVar & lv )
 {
 const StrTy cmd=cip.p1;
@@ -412,7 +412,9 @@ MM_ERR(MMPR4(__FUNCTION__,cmd,s,flags))
 GlutScope & x=m_glut;
 if (cmd=="dump") { auto wtf=(x.dump()) ; MM_ERR(wtf) }
 if (cmd=="saver") {x.set_saver(&m_saver);  }
+if (cmd=="sig") {x.signal(s,flags);  }
 if (cmd=="nsaver") {x.set_saver(0);  }
+if (cmd=="bounds") {x.bound_box(CC(2),CC(3),CC(4),CC(5),0);  }
 if (cmd=="spr") {Sp sp(s); x.set_saver_params(sp);  }
 if (cmd=="launch") { auto wtf=(x.launch(s)); MM_ERR(wtf);  }
 //if (cmd=="stream") { MM_ERR(x.stream(s)) }
@@ -436,6 +438,7 @@ if (cmd=="main") {auto wtf=(x.main(0,0)); MM_ERR(wtf); }
 //if (cmd=="dump") { MM_ERR(x.dump()) }
 // not important here but for text search LOL WTF
 if (cmd=="dump") { auto wtf=x.dump() ; MM_ERR(wtf);}
+if (cmd=="set") { x.set(s,cip.wif(3)); MM_ERR("set");}
 //if (cmd=="launch") { MM_ERR(x.launch(s,flags)) }
 //if (cmd=="stream") { MM_ERR(x.stream(s)) }
 //if (cmd=="start") { MM_ERR(x.start(s)) }

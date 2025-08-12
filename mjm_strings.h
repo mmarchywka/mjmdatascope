@@ -46,7 +46,7 @@ public:
 static StrTy fancy_to_lower(const StrTy & y) 
 {
 StrTy x=y;
-std::string data = "Abc"; 
+//std::string data = "Abc"; 
 std::transform(x.begin(), x.end(), x.begin(), ::tolower);
 return x; 
 }

@@ -390,16 +390,22 @@ be able to do the check with vector addition lol.
 // ./mjm_ai_root_wtap.out  "test test=load;fn=gempol.txt;name=foo" "test test=delay;dtxpi=.02;frac=3;fhift=10;der=2;tol=1e-12;epsilon=1e-12;color=0xffffff" quit 2>
 void AddAnalytic(const int der,const int delayi,const D &dt2, const D & deltheta=1e-5)
 {
+// again it would have been better to put these in a small param struct
+// to keep sigs stable as params change.. 
 //const IdxTy npts=delayi;
 const int n=der;
 const int m=delayi;
 //const D rpow=D(n)/D(m);
 const D anf=D(m)/D(n);
 const D offa=M_PI/D(n);
-const D pfac=(D(n)*M_PI)/D(n-m);
+// fortunately this was never used here doh 
+//const D pfac=(D(n)*M_PI)/D(n-m);
+const D pfac=(D(n)*M_PI)/(D(n)-D(m));
 const D gamma=sqrt(dt2);
 const D a=::pow(gamma,D(n));
 MM_ERR(MMPR4(der,delayi,dt2,pfac))
+
+
 //MM_DIE("fucj")
 // apparently making n passes to get conjugates as
 // Omega changes phase. 
@@ -662,6 +668,7 @@ const IdxTy npts=delayi;
 const int n=der;
 const int m=delayi;
 const D rpow=D(n)/D(m);
+// denominator can't work 
 const D pfac=(D(n)*M_PI)/(n-m);
 MM_ERR(MMPR4(der,delayi,dt2,pfac))
 //MM_DIE("fucj")

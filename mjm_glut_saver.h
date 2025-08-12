@@ -229,6 +229,8 @@ bool manual_start;
 }; // _save_params  
 // TYPEDEF
 typedef mjm_file_name_gen<Tr> NameGen;
+typedef std::map<StrTy, StrTy> Properties;
+
 // API
 public:
 mjm_glut_saver() {Init();}
@@ -239,6 +241,7 @@ enum SIGNALS {STOP_CAPTURE=0, START_CAPTURE=1,PAUSE_CAPTURE };
 // non functrional easy way to get linker to look for everything 
 int main(int argc, char **argv) { return  Main(argc, argv);} 
 IdxTy display(const save_params_type & sp){ return Display(sp); } 
+void set(const StrTy & k, const StrTy & v) { m_prop[k]=v;}
 #if MJMTIFF 
 IdxTy save_tiff(const StrTy & sin, const IdxTy flags)
 { return SaveTiff(sin,flags); } 
@@ -326,6 +329,26 @@ screenshot_tiff_only(fnnew.c_str());
 
 return 0; 
 }  //SaveTiff
+
+void add_tiff_meta(TIFF * tif, const IdxTy flags=0 )
+{
+
+    TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
+    TIFFSetField(tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT); // Top-left origin
+    TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG); // Chunky organization
+    TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
+    TIFFSetField(tif, TIFFTAG_COMPRESSION, COMPRESSION_NONE); // No compression
+    TIFFSetField(tif, TIFFTAG_ARTIST, m_prop["artist"].c_str()); 
+    TIFFSetField(tif, TIFFTAG_DATETIME, m_namer.now().c_str()); 
+    TIFFSetField(tif, TIFFTAG_DOCUMENTNAME, m_prop["artist"].c_str()); 
+    TIFFSetField(tif, TIFFTAG_IMAGEDESCRIPTION, m_prop["artist"].c_str()); 
+    TIFFSetField(tif, TIFFTAG_MAKE, m_prop["artist"].c_str()); 
+    TIFFSetField(tif, TIFFTAG_MODEL, m_prop["artist"].c_str()); 
+    TIFFSetField(tif, TIFFTAG_PAGENAME, m_prop["artist"].c_str()); 
+    TIFFSetField(tif, TIFFTAG_SOFTWARE, m_prop["artist"].c_str()); 
+
+
+}
 void screenshot_tiff_only(const char *filename) {
 
     const size_t format_nchannels = 3;
@@ -346,12 +369,8 @@ int samplesPerPixel=4; // 1;
     TIFFSetField(tif, TIFFTAG_IMAGELENGTH, h);
     TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, bitsPerSample);
     TIFFSetField(tif, TIFFTAG_SAMPLESPERPIXEL, samplesPerPixel);
-    TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
-    TIFFSetField(tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT); // Top-left origin
-    TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG); // Chunky organization
-    TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
-    TIFFSetField(tif, TIFFTAG_COMPRESSION, COMPRESSION_NONE); // No compression
 
+add_tiff_meta(tif);
     // Create sample pixel data (e.g., a simple gradient)
 const IdxTy bw=w*samplesPerPixel;
     uint8* scanline = new uint8[bw]; // width * samplesPerPixel];
@@ -927,7 +946,7 @@ unsigned int m_width; //  = 128;
 //static unsigned int output_formats = PPM_BIT | LIBPNG_BIT | FFMPEG_BIT;
 
 NameGen m_namer;
-
+Properties m_prop;
 
 #if LIBPNG
 png_byte *png_bytes; //  = NULL;

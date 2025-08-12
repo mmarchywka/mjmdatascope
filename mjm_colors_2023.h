@@ -130,7 +130,7 @@ _color_desc(const Ragged & r, const IdxTy first,const IdxTy i0, const IdxTy flag
 const D r() const { return m_r; } 
 const D g() const { return m_g; } 
 const D b() const { return m_b; } 
-
+const StrTy & name() const { return m_name;}
 
 void color(const StrTy & s)
 {
@@ -163,9 +163,9 @@ kvp.get(m_r,"r");
 kvp.get(m_g,"g");
 kvp.get(m_b,"b");
 kvp.get(m_hex,"hex");
-kvp.get(m_name,"hame");
+kvp.get(m_name,"name");
 
-
+m_name=mjm_strings::fancy_to_lower(m_name);
 
 }
 void Init_color_desc(const Line & l,  const IdxTy first ) 
@@ -234,7 +234,7 @@ m_sat=255;
 
 // ss<<"r=93;g=138;b=168;hex=#5D8AA8;name=Air_Force_Blue;lum=53;hue=204;sat=30;lig=51"<<CRLF;
 //ss<<"r=240;g=248;b=255;hex=#F0F8FF;name=Alice_Blue;lum=97;hue=208;sat=100;lig=97"<<CRLF;
-
+public:
 // _color_descMEMBERS
 D m_r,m_g,m_b;
 StrTy m_hex;
@@ -243,7 +243,8 @@ D m_lum,m_hue,m_sat;
  
 }; // _color_desc
 
-
+typedef _color_desc ColorDesc;
+typedef std::map<StrTy,ColorDesc> ColorMap;
 
 
 // API
@@ -253,12 +254,15 @@ typedef _color_desc color_desc_t;
 mjm_colors_2023() {Init(); }
 mjm_colors_2023(const StrTy & sin,const IdxTy flags) {Init(sin,flags); }
 mjm_colors_2023(const Ragged & r,const IdxTy start, const IdxTy first,const IdxTy flags ) {Init(r,start,first,flags);}
-
+StrTy conform( const StrTy & x) const { return mjm_strings::fancy_to_lower(x); } 
 void load(const StrTy & sin,const IdxTy flags) {Init(sin,flags); }
 void load(const Ragged & r,const IdxTy start, const IdxTy first,const IdxTy flags ) {Init(r,start,first,flags);}
 void save(const StrTy & fn,const StrTy &s) {Save(fn,s); }
 color_desc_t color(const StrTy & s)
 {
+
+const auto ii=m_map.find(conform(s));
+if (ii!=m_map.end()) { return (*ii).second; }
 color_desc_t x;
 // first try name lookup in aloaded table. 
 x.color(s);
@@ -303,6 +307,7 @@ void Init(const StrTy  & sin,const IdxTy flags =0  )
 Init();
 BaseParams kvp(sin);
 } // Init 
+// ss<<"r=150;g=75;b=0;hex=#964B00;name=Brown;lum=38;hue=30;sat=100;lig=29"<<CRLF;
 
 void LoadColorStreams(const IdxTy flags=0)
 {
@@ -314,23 +319,23 @@ StrTy s;
 ss>> s;
 color_desc_t cd(s,flags);
 //m_colors.
-
+if (cd.name().length()) m_map[cd.name()]=cd;
 
 } // ss.eof
-
+MM_ERR(MMPR(m_map.size()))
 } // LoadColorStreams
 
 
 void Init()
 {
-
+LoadColorStreams();
 
 } // Init
 
 
 
 // MEMBERS
-
+ColorMap m_map;
 
 
 }; // mjm_colors_2023

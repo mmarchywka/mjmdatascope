@@ -210,8 +210,8 @@ bool send( const Ragged & r, const Block & data, const IdxTy flags)
 { return Send(r,&data,flags); } 
 bool send( const Ragged & r,  const IdxTy flags)
 { return Send(r,NULL,flags); } 
-bool send_strip_chart( const Ragged & r,  const StrTy & src,const StrTy & params, const IdxTy flags)
-{ return SendStripChart(r,src,params,flags); } 
+bool send_strip_chart( const Ragged & r,  const StrTy & src,const StrTy & params, const IdxTy flags, const StrTy & etc=StrTy())
+{ return SendStripChart(r,src,params,flags,etc); } 
 // TODO this needs multiple instances now with tiggering and 
 // buffering on the source side. In most cases a name is included
 // to be sorted out by viewers. 
@@ -251,8 +251,8 @@ IdxTy send_stream( IsTy & is, const StrTy & ty, const StrTy & src,const IdxTy fl
 { return SendStream(is,ty,src,flags); }
 IdxTy send_file( const StrTy  & fn, const StrTy & ty, const StrTy & src,const IdxTy flags=0)
 { return SendFile(fn,ty,src,flags); }
-IdxTy setup(Ragged & r, const StrTy & sid, const StrTy & ty,const StrTy & params ="")
-{ return Setup(r, sid, ty,params); } 
+IdxTy setup(Ragged & r, const StrTy & sid, const StrTy & ty,const StrTy & params ="",const StrTy & etc=StrTy())
+{ return Setup(r, sid, ty,params,etc); } 
 
 StrTy angle_color(const D & t) const { return theta_color(t); } 
 // TODO call back or notifier on exit?
@@ -346,12 +346,13 @@ else m_dgrams.send(r);
 
 
 #endif
-IdxTy Setup(Ragged & r, const StrTy & sid, const StrTy & ty,const StrTy & params)
+IdxTy Setup(Ragged & r, const StrTy & sid, const StrTy & ty,const StrTy & params,const StrTy & etc="")
 {
 Ss ss;
 ss<<"# id "<<sid<<CRLF;
 ss<<"# "<<ty<<CRLF;
 if (params.length()) { ss<<"# params "<<params<<CRLF; } 
+if (etc.length()) { ss<<"# etc "<<etc<<CRLF; } 
 r.load(ss,false);
 return 0;
 } // Setup
@@ -503,12 +504,14 @@ else m_sender.m_rawfifo.send(r);
 return true; 
 }  // Send
 
-bool  SendStripChart( const Ragged & r, const StrTy& src, const StrTy & params, const IdxTy flags)
+bool  SendStripChart( const Ragged & r, const StrTy& src, const StrTy & params, const IdxTy flags, const StrTy & etc)
 {
 if (SendGuard(flags)) return false;
 //MM_ERR(MMPR3(data.nx(),data.ny(),pload.size()))
+MM_ERR(MMPR2(params,etc))
 Ragged h;
-setup(h, src, "strip-chart",params );
+
+setup(h, src, "strip-chart",params,etc );
 m_sender.m_rawfifo.send(h,r);
 return true; 
 }  // SendStripChart

@@ -137,6 +137,145 @@ typedef int BOOL;
 #define FALSE 0
 typedef mjm_glut_rags<Tr> RagScene;
 typedef std::map<StrTy,RagScene * > RagSceneMap;
+typedef typename RagScene::view_info_t ViewInfo;
+
+ class _ui_glut_flags  
+{
+typedef std::map<StrTy,D> ParamMap;
+public:
+_ui_glut_flags() {Init_ui_glut_flags(); } 
+~_ui_glut_flags() {Free_ui_glut_flags(); } 
+
+_ui_glut_flags(const Line & l,  const IdxTy first ) { Init_ui_glut_flags(l,first); }
+_ui_glut_flags(const StrTy & s,  const IdxTy flags ) { Init_ui_glut_flags(s,flags); }
+_ui_glut_flags(const Ragged & r, const IdxTy first,const IdxTy i0, const IdxTy flags ) 
+{Init_ui_glut_flags(r,first,i0,flags); } 
+IdxTy signal(const StrTy & s,  const IdxTy flags ) { return Signal(s,flags); }
+bool get(int & x, const StrTy & s) const 
+{
+const auto ii=m_map.find(s);
+if (ii==m_map.end()) return false;
+x=int((*ii).second);
+return true;
+} 
+void clear_param(const StrTy & s)
+{
+const auto ii=m_map.find(s);
+if (ii==m_map.end()) return;
+m_map.erase(ii); 
+}
+StrTy save( const IdxTy flags=0) const { return Save_ui_glut_flags(flags); } 
+StrTy dump( const IdxTy flags=0) const { return Dump_ui_glut_flags(flags); } 
+private:
+void Init_ui_glut_flags(const StrTy & s,  const IdxTy flags ) 
+{ Init_ui_glut_flags(); 
+BaseParams kvp(s);
+
+}
+void Init_ui_glut_flags(const Line & l,  const IdxTy first ) 
+{ 
+Init_ui_glut_flags();
+const IdxTy len=l.size();
+for(IdxTy i=first; i<len; ++i)
+{
+
+
+} // i 
+
+} // Init_ui_glut_flags
+
+void Init_ui_glut_flags(const Ragged & r, const IdxTy first,const IdxTy i0,const IdxTy flags ) 
+{
+Init_ui_glut_flags();
+const IdxTy sz=r.size();
+for(IdxTy i=i0; i<sz; ++i)
+{
+const Line & l=r[i];
+const IdxTy len=l.size();
+
+} // i 
+
+} // Init_ui_glut_flags
+
+StrTy Save_ui_glut_flags( const IdxTy flags=0) const  
+{
+StrTy s;
+BaseParams kvp; // (); new compiler fck 
+//kcp,encode(s,"",);
+return s; 
+} // Dump 
+
+
+
+StrTy Dump_ui_glut_flags( const IdxTy flags=0) const  
+{
+Ss ss;
+// ss<<MMPR4(); 
+ ss<<MMPR4(m_alive, m_displayed, m_fix_menu, m_window_close);
+ss<<MMPR(m_resize);
+return ss.str(); 
+} // Dump 
+
+
+void Free_ui_glut_flags()
+{
+
+} // Free_ui_glut_flags
+IdxTy Signal(const StrTy & s,  const IdxTy flags ) 
+{ 
+IdxTy rc=0;
+BaseParams kvp(s);  
+StrTy cmd="";
+kvp.get(cmd,"cmd");
+if (cmd.length()==0) return rc;
+if (cmd=="resize") { int x=0; 
+kvp.get(x,"w"); if (x) {  m_map["W"]=x; }
+x=0;
+kvp.get(x,"h"); if (x) { m_map["H"]=x; }
+int w=0,h=0;
+get(w,"W");
+get(h,"H");
+MM_ERR("resize"<<MMPR2(w,h))
+ m_resize=true; 
+{ GLint w=glutGet(GLUT_WINDOW_WIDTH);
+GLint h=glutGet(GLUT_WINDOW_HEIGHT);
+get(w,"W");
+get(h,"H");
+MM_ERR(" redisplay "<<MMPR2(w,h))
+glutReshapeWindow(w,h);
+m_resize=false;
+}
+
+} 
+return rc; 
+} // Signal 
+
+void Init_ui_glut_flags()
+{
+ m_alive=false; 
+ m_displayed=false; 
+ m_fix_menu=false; 
+m_window_close=false;
+m_resize=false;
+
+} // Init_ui_glut_flags
+
+// _ui_glut_flagsMEMBERS
+public:
+
+volatile bool m_alive=false; 
+volatile bool m_displayed=false; 
+volatile bool m_fix_menu=false; 
+volatile bool m_window_close=false;
+volatile bool m_resize=false;
+//volatile 
+ParamMap m_map;
+ 
+}; // _ui_glut_flags
+
+typedef _ui_glut_flags GlutFlags;
+
+
 
 struct _mjm_gl_status
 {
@@ -248,6 +387,18 @@ typedef typename Saver::save_params_type Sp;
 mjm_glut_scope_ii() {Init();}
 ~mjm_glut_scope_ii() {Free(); }
 void app( app_t * p ) { m_p_app=p; } 
+IdxTy signal(const StrTy & s, const IdxTy flags) 
+{ 
+EnterSerial(0);
+IdxTy x= m_gf.signal(s,flags);
+SeeRedisplay();
+ExitSerial(0);
+return x;
+} // signal
+IdxTy  bound_box(const D & xmin, const D & xmax, const D & ymin, const D & ymax, const IdxTy flags=0 )
+{ 
+MM_ERR(MMPR4(xmin,xmax,ymin,ymax))
+return BoundBox(xmin, xmax, ymin, ymax, flags); }
 // TODO FIXME thes is a hazard here but not sure it is worth
 // creating a posisble deadlock on panic exit until
 // threading worked out.  
@@ -262,7 +413,7 @@ try {
   glutIdleFunc (Myt::_AnimateScene);
 glutPostRedisplay(); } catch (...) {}
  }} 
-bool alive() const { return m_alive; } 
+bool alive() const { return m_gf.m_alive; } 
 // this is a source of confiusion.. 
 static Myt * p( Myt * pin=0)  
 {  static bool setting=true;
@@ -300,7 +451,9 @@ if (!have_lock) ExitSerial(0);
 // set active scene
 void activate( const StrTy name, const IdxTy flags){Activate(name,flags); } 
 void deactivate( const StrTy name, const IdxTy flags){Deactivate(name,flags); } 
-void set_saver(Saver * p ) { m_psaver=p; }
+void set_saver(Saver * p ) { m_psaver=p;
+if (m_psaver) { m_psaver->set("artist",m_product); } 
+ }
 void set_saver_params(Sp & sp) { m_save_params=sp; } 
 IdxTy launch(const StrTy & s) { return Launch(s);  } 
 IdxTy start(const StrTy & s) { return Start(s);  } 
@@ -322,7 +475,12 @@ if (ii==m_scenes.end()) { MM_ERR(" something stupid occured ") }
 (*ii).second->view().style(1);
 //if (actives()==0) 
 if (m_deactive.find(name)==m_deactive.end()) {	activate(name,0); 
-if (pold==0) BuildPopupMenu(); } 
+if (pold==0) BuildPopupMenu(); 
+if (pold==0) (*ii).second->view()=m_default_strip_view; 
+
+}
+
+ 
 
 // this is activated in Display now hopefully avoiding hazards 
 SeeRedisplay(); // if (m_alive) glutPostRedisplay();
@@ -332,7 +490,7 @@ return pold;
 } // Add  
 void SeeRedisplay()
 {
-if (m_alive) glutPostRedisplay();
+if (m_gf.m_alive) glutPostRedisplay();
 }
 void  Activate( const StrTy name, const IdxTy flags) 
 { 
@@ -356,7 +514,7 @@ if (ii!=m_actives.end()) {  m_actives.erase(ii); m_deactive[name]=(*ii).second; 
 
 }
 //glutPostRedisplay();
-SeeRedisplay(); // if (m_alive) glutPostRedisplay();
+SeeRedisplay();  
 } // Deactivate  
 
 
@@ -370,7 +528,7 @@ if (ii!=m_scenes.end())
 if (ii!=m_deselect.end()) m_deselect.erase(ii);
 }
 //glutPostRedisplay();
-SeeRedisplay(); // if (m_alive) glutPostRedisplay();
+SeeRedisplay(); // 
 } // Activate  
 
 
@@ -382,7 +540,7 @@ if (ii!=m_select.end()) {  m_select.erase(ii); m_deselect[name]=(*ii).second; }
 
 }
 //glutPostRedisplay();
-SeeRedisplay(); // if (m_alive) glutPostRedisplay();
+SeeRedisplay(); 
 } // Deactivate  
 
 
@@ -513,15 +671,35 @@ glDrawPixels(m_svg.w(),m_svg.h(),GL_BGRA, ty,m_svg.data());
 } // data 
 
 } // DealWithLocals
+bool CheckFlags()
+{
+bool rc=false;
+if (m_gf.m_fix_menu) 
+//{ m_gf.m_fix_menu=false; _BuildPopupMenu(); SeeRedisplay(); rc=true; } 
+{ m_gf.m_fix_menu=false; _BuildPopupMenu();  rc=true; } 
+if (false) if (m_gf.m_resize)
+{
+m_gf.m_resize=false;
+GLint w=glutGet(GLUT_WINDOW_WIDTH);
+GLint h=glutGet(GLUT_WINDOW_HEIGHT);
+m_gf.get(w,"W");
+m_gf.get(h,"H");
+MM_ERR(" redisplay "<<MMPR2(w,h))
+glutReshapeWindow(w,h);
+rc=true;
+} // resize
+
+if (rc) SeeRedisplay();
+return rc;
+} // CheckFlags
 
 void Display(void)
 {
 //MM_ERR(MMPR(ThreadUtil::thread_id()))
-// new fucking shit sync fuck 
-if (m_fix_menu) { m_fix_menu=false; _BuildPopupMenu(); SeeRedisplay(); return; } 
+if ( CheckFlags()) return;
 // at this point we know glut is alive unless
 // someone else calls this which should not happen 
-m_alive=true;
+m_gf.m_alive=true;
 // may need the gl_status object ? ZZ
 //GlutUtil::start_view_zed();
 MyGLStatus & gls= m_gl_status;
@@ -545,7 +723,7 @@ DealWithLocals(di);
 glutSwapBuffers();
 //glFlush();
 //MM_ERR(" flushing ")
-m_displayed=true;
+m_gf.m_displayed=true;
 // Draw any hot items... 
 
 
@@ -560,7 +738,9 @@ if (rc==1) m_save_params.cancel_capture();
 
 void Reshape(GLint width, GLint height)
 {
+MM_ERR(MMPR3(__FUNCTION__,width,height))
 // TODO FIXME this needs to use the same code as initially invoked...
+// this fails since its on wrong thread doh. 
 MyGLStatus & gls= m_gl_status;
 if (false) if( (width&3)||(height&3))
 {
@@ -572,7 +752,7 @@ while (height&3) {--height;};
 MM_ERR(MMPR2(width,height))
 
 glutReshapeWindow((width),height);
-SeeRedisplay(); // if (m_alive) glutPostRedisplay();
+SeeRedisplay(); 
 return; 
 }
    gls.g_Width = width;
@@ -584,7 +764,7 @@ return;
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
 //  glutPostRedisplay();
-SeeRedisplay(); // if (m_alive) glutPostRedisplay();
+SeeRedisplay(); // 
 }
 IdxTy ResetViews(const IdxTy flags)
 {
@@ -598,7 +778,7 @@ else
 //if (m_active!=0 ) { auto & v=m_active->view(); v.reset(); }
  ExitSerial(0);
 //if (dispu)   glutPostRedisplay();
-if (dispu ) SeeRedisplay(); // if (m_alive) glutPostRedisplay();
+if (dispu ) SeeRedisplay(); 
 return dispu;
 } // ResetViews 
 
@@ -678,12 +858,12 @@ auto & v=(*ii).second->view();
 
 ExitSerial(0);
 //if (dispu) {   glutPostRedisplay(); }
-if (dispu) SeeRedisplay(); // if (m_alive) glutPostRedisplay();
+if (dispu) SeeRedisplay();
 }
 void WindowClose()
 {
 MM_ERR(" user closes doh ") 
-m_window_close=true;
+m_gf.m_window_close=true;
 exit_loop();
 }
 void MouseMotion(int x, int y)
@@ -751,12 +931,12 @@ gls.last(x,y);
 ExitSerial(0);
 //  if (gls.g_bButton1Down)
 if (gls.b1down()||gls.b2down())  //  glutPostRedisplay();
-SeeRedisplay(); // if (m_alive) glutPostRedisplay();
+SeeRedisplay(); 
 }
 // used as a watch dog thingy
 void AnimateScene(void)
 {
-m_alive=true; // we don't have a better way to set this doh!
+m_gf.m_alive=true; // we don't have a better way to set this doh!
 /*
   float dt;
 #ifdef _WIN32
@@ -781,7 +961,7 @@ m_alive=true; // we don't have a better way to set this doh!
 usleep(200000);
 //if (!false)  glutPostRedisplay();
 // 2025-03-20 suspect if redisplay missing but may save CPU lol. 
-//SeeRedisplay(); // if (m_alive) glutPostRedisplay();
+//SeeRedisplay(); 
 }
 enum { POPUP_RESET,POPUP_TOGGLE_VIS,POPUP_CLEAR };
 //static 
@@ -790,7 +970,7 @@ enum { POPUP_RESET,POPUP_TOGGLE_VIS,POPUP_CLEAR };
 // active, deactive to avoid auto-active, 
 // select for manipulation 
 // the fucking new shit needs this in the glut thread fuck 
-int BuildPopupMenu (void) { m_fix_menu=true; return 0; } 
+int BuildPopupMenu (void) { m_gf.m_fix_menu=true; return 0; } 
 int _BuildPopupMenu (void)
 {
 glutDetachMenu(GLUT_MIDDLE_BUTTON);
@@ -874,7 +1054,7 @@ MM_ERR(" could have a menu for this ")
     }
  // Almost any menu selection requires a redraw
 //  glutPostRedisplay();
-SeeRedisplay(); // if (m_alive) glutPostRedisplay();
+SeeRedisplay(); 
 }
 // https://community.khronos.org/t/what-are-the-codes-for-arrow-keys-to-use-in-glut-keyboard-callback-function/26457
 
@@ -977,7 +1157,7 @@ FOREACHA( act->set_strip_color(0,idx,r,g,b); )
 
 ExitSerial(0);
 
-SeeRedisplay(); // if (m_alive) glutPostRedisplay();
+SeeRedisplay(); 
 } // Modify 
 
 void SpecialInput(int key, int x, int y)
@@ -1057,7 +1237,7 @@ break;}
 //default: Keyboard(key,x,y); 
 }
 //  glutPostRedisplay();
-SeeRedisplay(); // if (m_alive) glutPostRedisplay();
+SeeRedisplay(); 
 } // SpecialInput
 
 void Keyboard(unsigned char key, int x, int y)
@@ -1128,7 +1308,7 @@ case 'b' : { BoundBox(0); break; }
 
   }
 //  glutPostRedisplay();
-SeeRedisplay(); // if (m_alive) glutPostRedisplay();
+SeeRedisplay(); 
 } // Keyboardj
 
 // #define FOREACHA(x)  MM_LOOP(ii,m_actives){ auto & act=(*ii).second;  auto & v=(*ii).second->view();  x } 
@@ -1194,6 +1374,23 @@ ExitSerial(0);
 return 1; 
 } // BoundBox 
 
+IdxTy  BoundBox(const D & xmin, const D & xmax, const D & ymin, const D & ymax, const IdxTy flags)
+{
+
+EnterSerial(0);
+m_default_strip_view.contain(xmin,xmax,ymin,ymax); 
+FOREACHA( 
+if (act->amodel().strip_d().size()) 
+{ 	v.reset_geometry(); v.contain(xmin,xmax,ymin,ymax); 
+MM_ERR(MMPR2(__FUNCTION__,v.dump())) 
+ }
+//MM_ERR(MMPR(v.dump())) 
+)
+ExitSerial(0);
+SeeRedisplay(); 
+return 1; 
+} // BoundBox 
+
 
 
 
@@ -1204,7 +1401,7 @@ ThParam* tp= new ThParam(p(), &Myt::Start, s,flags ) ;
 tp->invoke();
 // wait upto a second or two for display to draw 
 IdxTy cnt=0; 
-while (!m_displayed ) 
+while (!m_gf.m_displayed ) 
 { usleep(10000); ++cnt; if (cnt>200) { MM_ERR(" no display ") break; }  } 
 return 0; 
 }
@@ -1268,9 +1465,9 @@ glutSetOption(GLUT_ACTION_GLUTMAINLOOP_RETURNS,GLUT_ACTION_CONTINUE_EXECUTION);
 MM_ERR(" glut loop START") std::cerr.flush();
 try { 
   glutMainLoop ();
-} catch (...) { m_alive=false;  MM_ERR(" glutMainLoop exit throws  " ); std::cerr.flush();  throw ;  } 
+} catch (...) { m_gf.m_alive=false;  MM_ERR(" glutMainLoop exit throws  " ); std::cerr.flush();  throw ;  } 
 MM_ERR(" glut loop done ") std::cerr.flush();
-m_alive=false; 
+m_gf.m_alive=false; 
   return 0;
 } // Start
  
@@ -1287,9 +1484,10 @@ void Init()
 {
 m_product="MJMDatascope";
 m_mutex_vector=MutexVector(4);
-m_alive=false;
-m_window_close=false;
-m_displayed=false;
+//m_alive=false;
+//m_window_close=false;
+//m_fix_menu=false;
+//m_displayed=false;
 m_thread=0;
 m_gl_status.setup();
 //m_active=0;
@@ -1308,10 +1506,9 @@ if (false) { m_svg.render(svgstr,0); }
 
 // MEMBERS - didn't know inits allowed here? wtf
 StrTy m_product;
-volatile bool m_alive=false; 
-volatile bool m_displayed=false; 
-volatile bool m_fix_menu=false; 
-volatile bool m_window_close=false;
+GlutFlags m_gf;
+// flags from ui to glut 
+
 ThreadId m_thread;
 int m_menu,m_vismenu,m_selmenu;
 app_t* m_p_app;
@@ -1331,6 +1528,7 @@ GuiLayout m_gui;
 // tacked in
 SvgRender m_svg;
 MyErrMsgs m_msg;
+ViewInfo m_default_strip_view;
 }; // mjm_glut_scope_ii
 
 //////////////////////////////////////////////

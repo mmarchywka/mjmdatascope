@@ -410,8 +410,9 @@ void Append(const Ragged & r, const IdxTy flags) { m_params.clear();  LoadXNY(r,
 template <class Tm> 
 void Append(const Ragged & r, Tm & mi, const IdxTy flags) { 
 m_params=mi.params();
+m_etc=mi.etc();
 Ss ss; MM_LOOP(ii,m_params) { ss<<MMPR2((*ii).first,(*ii).second); } 
-MM_ERR(MMPR2(m_params.size(),ss.str()))
+MM_ERR(MMPR3(m_etc.size(),m_params.size(),ss.str()))
 LoadXNY(r,"",flags); 
 } 
 // these all have different m_st values doh... 
@@ -571,7 +572,7 @@ InfoMap m_info;
 IdxTy m_size;
 //IdxTy m_groups;
 D m_x0,m_x1,m_y0,m_y1;
-Parameters m_params;
+Parameters m_params,m_etc;
 }; // mjm_strip_chart
 
 //////////////////////////////////////////////

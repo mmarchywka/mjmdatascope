@@ -109,6 +109,7 @@ typedef typename ModelIndex::pool_t pool_t;
 public:
 #define HAPIRC virtual IdxTy 
 typedef InputType input_type;
+typedef ViewInfo view_info_t;
 // too long doh 
 typedef typename  GlutUtil::draw_info_t scope_draw_param_type;
 //typedef typename  GlutUtil::draw_info_t DrawInfo;
@@ -695,6 +696,23 @@ if (szd>1) { MM_ERR(" should only have one to append "<<MMPR2(szd,m_src))}
 mi.m_src=m_src;
 mi.m_type="strip-chart";
 mi.add_strip(r,flags);
+if (szd==0) { 
+auto ii=mi.params().find("bounds");
+if (ii!=mi.params().end())
+{
+const StrTy & s=(*ii).second;
+BaseParams kvp(s);
+D xmin,xmax,ymin,ymax;
+ xmin=xmax=ymin=ymax=0;
+kvp.get(xmin,"xmin");
+kvp.get(xmax,"xmax");
+kvp.get(ymin,"ymin");
+kvp.get(ymax,"ymax");
+MM_ERR(MMPR4(xmin,xmax,ymin,ymax))
+m_view.contain(xmin,xmax,ymin,ymax);
+
+} // bounds 
+} // szd
 if (new_model){  m_data_idx.push_back(mi); delete mip; } 
 //AppendModel(mi,flags);
 return 0;
