@@ -476,8 +476,8 @@ if (ii==m_scenes.end()) { MM_ERR(" something stupid occured ") }
 //if (actives()==0) 
 if (m_deactive.find(name)==m_deactive.end()) {	activate(name,0); 
 if (pold==0) BuildPopupMenu(); 
-if (pold==0) (*ii).second->view()=m_default_strip_view; 
-
+if (pold==0) if ( !(*ii).second->view().get_by_bit(0))
+		(*ii).second->view()=m_default_strip_view; 
 }
 
  

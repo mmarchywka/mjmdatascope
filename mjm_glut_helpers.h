@@ -162,6 +162,9 @@ typedef GeoState triple_t;
 _view() {Init(); }
 int style() const { return m_style;}
 void style(const int s) { m_style=s; } 
+int set_by() const { return m_set_by;}
+void set_by_bit(const int n) { m_set_by|=(1<<n); } 
+bool get_by_bit(const int n) { return Bit(m_set_by,n); } 
 // bit zero is now on at add by default doh 
 bool olay_ornates() const { return !Bit(m_style,0); } 
 void reset() { Init(); } 
@@ -637,6 +640,7 @@ m_squash= 1e-12;
 m_scale=1;
 m_tgt=0;
 m_style=0;
+m_set_by=9;
 m_action=BAD;
 InitGeometry();
 }
@@ -648,6 +652,7 @@ Ss ss;
 ss<<MMPR(m_tgt.dump());
 ss<<MMPR(m_scale.dump());
 ss<<MMPR4(m_action,m_squash,m_vidx,m_style);
+ss<<MMPR(m_set_by);
 ss<<MMPR(m_mat.dump());
 ss<<MMPR(m_imat.dump());
 //ss<<MMPR4(m_vidx,theta,phi,distance);
@@ -658,7 +663,7 @@ return ss.str();
 
 GeoState   m_tgt,m_scale;
 mutable Matrix m_mat,m_imat;
-IdxTy m_vidx,m_style;
+IdxTy m_vidx,m_style,m_set_by;
 D m_squash;
 action_t m_act;
 IdxTy m_action;

@@ -412,6 +412,8 @@ void Append(const Ragged & r, Tm & mi, const IdxTy flags) {
 m_params=mi.params();
 m_etc=mi.etc();
 Ss ss; MM_LOOP(ii,m_params) { ss<<MMPR2((*ii).first,(*ii).second); } 
+ss<<" etc ";
+ MM_LOOP(ii,m_etc) { ss<<MMPR2((*ii).first,(*ii).second); } 
 MM_ERR(MMPR3(m_etc.size(),m_params.size(),ss.str()))
 LoadXNY(r,"",flags); 
 } 
@@ -465,8 +467,12 @@ IdxTy oldchart=BAD;
 TokPoints * pp=NULL;
 Info * pi=NULL;
 std::map<IdxTy,IdxTy> hits;
-auto ii=m_params.find("color");
-bool have_color=(ii!=m_params.end());
+//auto ii=m_params.find("color");
+//bool have_color=(ii!=m_params.end());
+auto ii=m_etc.find("color");
+bool have_color=(ii!=m_etc.end());
+
+
 Info def;
 bool rainbow=false;
 if (have_color)

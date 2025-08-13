@@ -696,9 +696,21 @@ if (szd>1) { MM_ERR(" should only have one to append "<<MMPR2(szd,m_src))}
 mi.m_src=m_src;
 mi.m_type="strip-chart";
 mi.add_strip(r,flags);
-if (szd==0) { 
-auto ii=mi.params().find("bounds");
-if (ii!=mi.params().end())
+if (szd==0) 
+{ 
+AddBounds(mi.params(),"bounds");
+AddBounds(mi.etc(),"bounds");
+
+} // szd
+if (new_model){  m_data_idx.push_back(mi); delete mip; } 
+//AppendModel(mi,flags);
+return 0;
+} // AddStripChart
+template <class Tp > bool AddBounds(const Tp & params, const StrTy & key)
+{
+
+auto ii=params.find("bounds");
+if (ii!=params.end())
 {
 const StrTy & s=(*ii).second;
 BaseParams kvp(s);
@@ -710,13 +722,11 @@ kvp.get(ymin,"ymin");
 kvp.get(ymax,"ymax");
 MM_ERR(MMPR4(xmin,xmax,ymin,ymax))
 m_view.contain(xmin,xmax,ymin,ymax);
-
-} // bounds 
-} // szd
-if (new_model){  m_data_idx.push_back(mi); delete mip; } 
-//AppendModel(mi,flags);
-return 0;
-} // AddStripChart
+m_view.set_by_bit(0);
+return true;
+}
+return false;
+} // AddBounds 
 
 IdxTy AddStripChartOld(const input_type & r, const IdxTy flags) 
 {
