@@ -467,17 +467,15 @@ IdxTy oldchart=BAD;
 TokPoints * pp=NULL;
 Info * pi=NULL;
 std::map<IdxTy,IdxTy> hits;
-//auto ii=m_params.find("color");
-//bool have_color=(ii!=m_params.end());
+auto jj=m_params.find("color");
+bool have_colorp=(jj!=m_params.end());
 auto ii=m_etc.find("color");
 bool have_color=(ii!=m_etc.end());
-
-
 Info def;
 bool rainbow=false;
-if (have_color)
+if (have_color||have_colorp)
 {
-const StrTy & colspec=(*ii).second;
+const StrTy & colspec=have_color?(*ii).second:(*jj).second;
 if (colspec!="rainbow") def.color(colspec);
 else rainbow=true;
 MM_ERR("have color "<< MMPR3(sin,colspec,def.dump()))

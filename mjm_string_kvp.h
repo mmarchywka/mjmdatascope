@@ -445,6 +445,25 @@ else d=(*ii).second;
 if ((m_flags&1)!=0) {MM_ERR(MMPR3(rc,d,n)) } 
 return rc;
 }
+const IdxTy  get_mod(IdxTy & _d,const StrTy & n, const IdxTy flags=0, const IdxTy min=0, const IdxTy max=0 ) const { 
+IdxTy rc=1;
+const auto ii=(m_map.find(n)); 
+if (ii==m_map.end()) { rc=0; } //  return 0;
+else{ 
+const char * p= ((*ii).second.c_str());
+int  d=myatoi(p);
+if (p[0]=='+') _d+=d;
+else if (p[0]=='-') _d+=d; // d should be negative lol
+else _d=d;
+
+}
+
+if ((m_flags&1)!=0) {MM_ERR(MMPR4(rc,_d,n,(*ii).second)) } 
+return rc;
+}
+
+
+
 template <class Tv> 
 const IdxTy  get_vec(Tv & d,const IdxTy sz, const StrTy & n ) const { 
 IdxTy rc=0;

@@ -147,7 +147,7 @@ else { m_x1=x0+len; m_y1=y0; m_z1=z0; }
 m_r=r; m_g=g; m_b=b;
 m_lw=lw;
 }
-
+void set_width( const D & w) { m_lw=w; } 
 void set(const D & x0, const D & y0, const D & z0, 
 const D & x1, const D & y1, const D & z1, 
 const D & r, const D & g, const D & b, const D & lw)
@@ -235,6 +235,11 @@ StrTy Dump_graicule_line( const IdxTy flags=0) const
 {
 Ss ss;
 // ss<<MMPR4(); 
+ss<<MMPR3( m_x0,m_y0,m_z0);
+ss<<MMPR3( m_x1,m_y1,m_z1);
+ss<<MMPR3(m_r,m_g,m_b);
+ss<<MMPR(m_lw); 
+
 return ss.str(); 
 } // Dump 
 
@@ -246,6 +251,7 @@ void Free_graicule_line()
 
 void Init_graicule_line()
 {
+m_lw=0;
 
 } // Init_graicule_line
 
@@ -255,6 +261,7 @@ D m_x0,m_y0,m_z0;
 D m_x1,m_y1,m_z1;
 D m_r,m_g,m_b;
 D m_lw; 
+
 }; // _graicule_line
 
 
@@ -326,8 +333,11 @@ return (in<0)?(-y):y;
 typedef std::vector<D> Locations;
 void Locate(Locations & l, const D & lo, const D & h, const IdxTy n)
 {
+if (n<2) return;
+if (int(n)<0) return ; 
 const D range=h-lo;
-D d=range/(n-1);
+//D d=range/D(n-1);
+D d=range/D(n-1);
 // given this range, find snapped or rounded or cool locations 
 Locations snapped;
 // quantize in terms of the range,
@@ -338,11 +348,18 @@ D base=int(.5*((lo<0)?(-1):1)+lo/q)*q;
 d=int(.5+d/q)*q;
 D adj=.0*5;
 // for snap quantize the line to rounded values 
-MM_ILOOP(i,n)
+//MM_ILOOP(i,n)
 {
+int i=0;
+while (true)
+{
+if (i>=(n<<1)) break; 
 D yy=base+1.0*i*d+adj*d;
+if (yy>(h-.5*d)) break;
 l.push_back(yy);
+++i;
 } // i 
+}  //scoping 
 } // Locate
 
 
@@ -359,18 +376,25 @@ v.inv_inplacepos(x1,y1,z1);
 // now split up space hopefull this works ok withz=0
 IdxTy nx=m_nx; // 5;
 IdxTy ny=m_ny; // 5;
+if (!m_fixed_width) 
+{
+if ((nx>5)||(ny>5)) m_lwidth=1;
+else m_lwidth=2;
+} // m_fixed_w
+
 { // scope y
 Locations loc;
 if (m_use_snap_y)Locate(loc, y,y1,ny);
 const bool use_snap=(m_use_snap_y)&&(y1>y);
 
-MM_ILOOP(i,ny)
+//MM_ILOOP(i,ny)
+MM_ILOOP(i,loc.size())
 {
 GratLine l;
 D yy=0; // loc[i]; 
 if (!use_snap) yy= y+1.0*i*(y1-y)/ny;
 else yy=loc[i];
-l.set(x,yy,z,x1,yy,z1,1,1,1,2);
+l.set(x,yy,z,x1,yy,z1,1,1,1,m_lwidth);
 
 D yp=-1+i*2.0/ny;
 if (use_snap)  yp=-1+((yy-y)*ny/(y1-y))*2.0/ny;
@@ -391,7 +415,8 @@ m_lines.push_back(l);
 Locations loc;
 if (m_use_snap_x) Locate(loc, x,x1,nx);
 const bool use_snap=m_use_snap_x&&(x1>x);
-MM_ILOOP(i,nx)
+//MM_ILOOP(i,nx)
+MM_ILOOP(i,loc.size())
 {
 GratLine l;
 D xx=0; // loc[i]; 
@@ -399,7 +424,7 @@ if (!use_snap) xx= x+1.0*i*(x1-x)/nx;
 else xx=loc[i];
 //const D xx=x+1.0*i*(x1-x)/nx;
 //l.set(x+1.0*i*(x1-x)/nx,y,z,!false,y1-y,1,1,1,2);
-l.set(xx,y,z,xx,y1,z1,1,1,1,2);
+l.set(xx,y,z,xx,y1,z1,1,1,1,m_lwidth);
 
 D xp=-1+i*2.0/nx;
 if (use_snap)  xp=-1+((xx-x)*nx/(x1-x))*2.0/nx;
@@ -511,6 +536,8 @@ m_nx=6;
 m_ny=5;
 m_use_snap_x=true;
 m_use_snap_y=true;
+m_lwidth=2;
+m_fixed_width=false;
 } // Init
 IdxTy Append(const Myt & that, const IdxTy flags)
 { 
@@ -521,13 +548,15 @@ IdxTy Config(const StrTy & sin=StrTy(), const IdxTy flags=0)
 { 
 m_config=sin;
 BaseParams kvp(sin);
-kvp.get(m_nx,"nx");
-kvp.get(m_ny,"ny");
+kvp.get_mod(m_nx,"nx");
+kvp.get_mod(m_ny,"ny");
 kvp.get(m_use_snap_x,"snap");
 kvp.get(m_use_snap_x,"snapx");
 kvp.get(m_use_snap_y,"snap");
 kvp.get(m_use_snap_y,"snapy");
-MM_ERR(MMPR4(m_nx,m_ny,m_use_snap_x,m_use_snap_y))
+kvp.get(m_lwidth,"lwidth");
+kvp.get(m_fixed_width,"fixedw");
+MM_ERR(MMPR4(m_nx,m_ny,m_use_snap_x,m_use_snap_y)<<MMPR2(m_fixed_width,m_lwidth))
 return 0;
  } // Config
 
@@ -537,6 +566,8 @@ return 0;
 StrTy m_config;
 GratLines m_lines;
 IdxTy m_nx, m_ny;
+D m_lwidth;
+bool m_fixed_width;
 bool m_use_snap_x, m_use_snap_y;
 }; // mjm_glut_graticule
 

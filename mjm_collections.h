@@ -1418,7 +1418,7 @@ const bool debug_parse=((flags&32)!=0);
 const bool add_breaks=((flags&256)!=0)&&(loss.m_max!=0);
 const bool add_padding=(loss.pad_size()!=0);
 const bool add_headers=((flags&512)==0);
-MM_ERR("dump_;atex "<<MMPR4(use_space,add_seq,add_quote,add_escapes)
+MM_ERR("dump_latex "<<MMPR4(use_space,add_seq,add_quote,add_escapes)
 <<MMPR4(flags,use_s,add_breaks,loss.m_max)
 <<MMPR(add_padding))
 StrTy seps="&";

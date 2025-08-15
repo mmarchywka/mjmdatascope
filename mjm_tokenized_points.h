@@ -301,7 +301,7 @@ Ci end() const { return  m_points.end(); }
 
 Ii begin()  { return m_points.begin(); } 
 Ii end(){ return  m_points.end(); } 
-
+_point_entry & back() { return m_points.back(); } 
 void next_group() { ++m_groups;}
 IdxTy groups() const { return m_groups;}
 

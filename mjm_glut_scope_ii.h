@@ -1084,6 +1084,17 @@ void Unsnap() { EnterSerial(0); MM_ERR(" s")
 FOREACHA( act->config_grat("snap=0"); ) 
 ExitSerial(0);
 } 
+void Gratings(int dnx, int dny) { 
+Ss ss; 
+ss<<"nx="; if (dnx>0) ss<<"+"; ss<<dnx; ss<<";";
+ss<<"ny="; if (dny>0) ss<<"+"; ss<<dny;
+
+EnterSerial(0); MM_ERR(" s")
+FOREACHA( act->config_grat(ss.str()); ) 
+ExitSerial(0);
+} 
+
+
 void Capture(const IdxTy flags)
 {
 const bool start=Bit(flags,0);
@@ -1246,64 +1257,35 @@ if (m_p_app) if (m_p_app->glut_key(key,x,y)) return;
 MyGLStatus & gls= m_gl_status;
   switch (key)
   {
- /* case 27:             // ESCAPE key
-	  exit (0); // not trapped? k
-	  break;
-  case 'l':
-	  _SelectFromMenu(MENU_LIGHTING);
-	  break;
-  case 'p':
-	  _SelectFromMenu(MENU_POLYMODE);
-	  break;
-  case 't':
-	  _SelectFromMenu(MENU_TEXTURING);
-	  break;
-*/
 case 'l':  { Style(0); break; }  // Stop
 case 'd':  { MM_ERR(dump()) break; }  // Start
 case 'v':  { Capture(1); break; }  // Start
 case 'T':  { Screenshot(m_tiff_params,0); break; }  // Start
 case '-':  { Capture(2); break; }  // Pause 
 case '|':  { Capture(4); break; }  // Stop
-  case 'X': { ZoomX(1.1); break; } 
-  case 'x': { ZoomX(0.9); break; } 
+  case 'X': { ZoomX(m_zoom_in_f); break; } 
+  case 'x': { ZoomX(m_zoom_out_f); break; } 
 
-  case 'Y': { ZoomY(1.1); break; } 
-  case 'y': { ZoomY(0.9); break; } 
+  case 'Y': { ZoomY(m_zoom_in_f); break; } 
+  case 'y': { ZoomY(m_zoom_out_f); break; } 
 
-
+//  case 'Y': { ZoomY(1.1); break; } 
+//  case 'y': { ZoomY(0.9); break; } 
   case 'z': { ZoomZ(0.9); break; } 
   case 'Z': { ZoomZ(1.1); break; } 
-/*
-  case 'z':
-EnterSerial(0);
-MM_ERR(" z")
-//if (m_active) m_views[""].m_scale[2]*=1.1;
-//if (m_active) m_active->view().m_scale[2]*=1.1;
-//FOREACHA( v.m_scale[2]*=1.1; ) 
-FOREACHA( v.scale_factor(1,1,1.1,0); ) 
-ExitSerial(0);
-break;
-  case 'Z':
-EnterSerial(0);
-MM_ERR(" z")
-//m_views[""].m_scale[2]*=.9;
-//if (m_active) m_active->view().m_scale[2]*=0.9;
-//FOREACHA( v.m_scale[2]*=0.9; ) 
-FOREACHA( v.scale_factor(1,1,0.9,0); ) 
-ExitSerial(0);
-break;
-*/
-
 //////////////////////////////////
   case 's': { Snap(); break; }
 case 'S': { Unsnap(); break; } 
-
-
 //////////////////////////////////
 case ' ' : { ResetView(0); break; } 
 case 'c' : { ClearData(0); break; } 
 case 'b' : { BoundBox(0); break; } 
+case 'g' : { Gratings(m_dnx,m_dny); break; } 
+case '!' : { ++m_dny; MM_ERR(MMPR2(m_dnx,m_dny)) break; } 
+case 'i' : { --m_dny; MM_ERR(MMPR2(m_dnx,m_dny)) break; } 
+case '/' : { ++m_dnx; MM_ERR(MMPR2(m_dnx,m_dny)) break; } 
+case '\\' : { --m_dnx; MM_ERR(MMPR2(m_dnx,m_dny)) break; } 
+
 
 
   }
@@ -1494,6 +1476,10 @@ m_gl_status.setup();
 m_psaver=0;
 m_menu=BAD;
 m_p_app=0;
+m_zoom_in_f=1.1; 
+m_zoom_out_f=.9;
+m_dnx=1;
+m_dny=1;
 //m_submenu=BAD;
 m_vismenu=BAD;
 m_selmenu=BAD;
@@ -1528,6 +1514,8 @@ GuiLayout m_gui;
 // tacked in
 SvgRender m_svg;
 MyErrMsgs m_msg;
+D m_zoom_in_f, m_zoom_out_f;
+int m_dnx,m_dny;
 ViewInfo m_default_strip_view;
 }; // mjm_glut_scope_ii
 
