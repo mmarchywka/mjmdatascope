@@ -5,6 +5,7 @@
 #include "mjm_thread_util.h"
 #include "gemini_root_finder.cpp"
 #include "mjm_dscope_interface.h"
+#include "mjm_uni_params.h"
 
 //#include "mjm_block_matrix.h"
 #include "mjm_instruments.h"
@@ -128,6 +129,7 @@ typedef mjm_string_base_params<Tr> BaseParams;
 
 typedef gemini_root_ns::Polynomial GemPoly;
 
+typedef mjm_uni_params<Tr> AllParams;
 // API
 
 public:
@@ -174,6 +176,7 @@ StrTy test="";
 kvp.get(test,"test");
 if (test=="gemini") Gemini(sin,flags); 
 if (test=="delay") DelayHarmonic(sin,flags); 
+if (test=="sdelay") SPlaneDelayHarmonic(sin,flags); 
 if (test=="load") LoadRag(sin,flags); 
 return sout;
 } // XXX_test
@@ -190,6 +193,60 @@ m_map[name].load(fn);
 MM_ERR(MMPR3(fn,name,m_map[name].size()))
 return StrTy();
 } // LoadRag
+
+// s-plane continuous delay oscillator 
+// solve s^n + omega*exp(s T ) =0 
+// wit s=r exp(theta)  get explicit equation for r(theta)
+// and points with implicit for real part
+// r=(n theta - 2 pi j - pi)/(T sin theta) ; 
+// implicit iterative r= omega exp (rT/n * cos (theta))
+// for T==0, s^n+omega^n=0 
+D SP_r(const D & theta, const int j, const AllParams & ap)
+{
+if (ap.T()==0)  return ap.omega();
+const D r=(ap.n()*theta-2*M_PI*j- M_PI)/(ap.T()*::sin(theta));
+return r;
+}
+D deficit(const D & r, const D & theta, const AllParams & ap)
+{
+const D d1=r;
+const D d2=ap.omega()*::exp(r*ap.T()/ap.n()*::cos(theta));
+if (ap.T()==0)
+{
+//D thx=(2*j-1)*M_PI/ap.n();
+int an=int( (theta*ap.n()/M_PI+1)/2);
+return 1-(an&1)?0:2;
+}
+return d1-d2;
+}
+StrTy SPlaneDelayHarmonic(const StrTy & sin, const IdxTy flags) 
+{
+AllParams ap(sin,flags);
+Ss ss;
+D thetaz=1e-4;
+//MM_ILOOP(j,IdxTy(ap.nj()))
+int jlim=ap.nj();
+for(int j=-jlim; j<=jlim; ++j)
+{
+for(D theta=thetaz; theta<(2*M_PI); theta+=ap.dtheta())
+{
+D r=SP_r(theta,j,ap);
+D del=deficit(r,theta,ap);
+//MM_ERR(MMPR2(j,theta))
+D x=r*::cos(theta);
+D y=r*::sin(theta);
+IdxTy color=(del>0)?(255<<8):(255<<16);
+ m_points.push_back(Point(x,y,0,color)); 
+m_points.back().sz(ap.ptsz());
+
+} // theta
+
+} // j 
+
+SendPoints();
+return ss.str();
+} // SPlaneDelayHarmonic
+
 StrTy DelayHarmonic(const StrTy & sin, const IdxTy flags) 
 {
 Ss ss;
@@ -269,6 +326,10 @@ MM_ERR(MMPR4(name,dtxpi,dt,delay)<<MMPR3(delayi,frac,shift))
 return ss.str();
 
 } // DelayHarmonic
+
+
+
+
 int CursingBinomial(const int last, const int n, const int k)
 {
 
@@ -455,7 +516,8 @@ D thetal=thetah-deltheta;
 D deltah=delta;
 D deltal=lastdelta;
 D thetanew=(thetah+thetal)*.5;
-D xnew,ynew;
+// iint should never be needed but compile complains 
+D xnew=0,ynew=0;
 IdxTy max=40;
 IdxTy iter=0;
 D thetatol=1e-12;
@@ -703,6 +765,17 @@ m_points.back().sz(10);
 
 
 } // AddUnitCircle
+void SendStripChart(const Ragged & r, const StrTy & params, const StrTy & _src="")
+{
+// is x,name,y lines 
+//Ragged & r= m_ragged_map[fn];
+//if (file) r.load(fn); 
+StrTy src=_src;
+if (src.length()==0) src=m_src;
+//const StrTy src=m_src; // "catmjmds";
+m_dscope.send_strip_chart(  r, src, params, 0,m_etc);
+m_dscope.wait_done(100,10000);
+}
 
 
 // TODO this should be intersgrated into dscope interface by now
@@ -783,7 +856,7 @@ m_dscope.launch_default();
 RaggedMap m_map;
 Dscope m_dscope;
 Points m_points;
-
+StrTy m_src,m_params,m_etc;
 }; // mjm_ai_root_wtap
 
 //////////////////////////////////////////////
@@ -969,7 +1042,7 @@ Ragged r; r.load(cip.p1); x.load(r,start,first,flags); }
 if (cmd=="load") {x.load(cip.p1,atoi(cip.p2.c_str())); }
 if (cmd=="save") {x.save(cip.p1,cip.p2); }
 if (cmd=="test") {StrTy xxx=x.xxx_test(cip.p1,CIP(2)); MM_ERR(MMPR(xxx))  }
-if (cmd=="quit") break;
+if (cmd=="quit") { ::usleep(100000); ::usleep(10000);  break; } 
 // NB this does not work in gneral when errors are disabled
 //if (cmd=="dump") { MM_ERR(x.dump()) }
 if (cmd=="dump") { auto wtf=x.dump();  MM_ERR(wtf) }

@@ -30,6 +30,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <cerrno>
 
 #include <map> 
 #include <vector> 
@@ -337,11 +338,103 @@ MM_ERR(" leaving "<<MMPR(__FUNCTION__))
 
 return rc;
 } // StartDataClient
+/////////////////////////////////////////////////////////
+
 
 IdxTy StartDataServer(const StrTy & s,const IdxTy flags )
 {
 IdxTy rc=0;
 IdxTy dumb=0;
+IdxTy blocktime=1000;
+IdxTy maxbuf=1<<25;
+MM_ERR(MMPR2(__FUNCTION__,flags))
+BaseParams sk(s);
+bool notify_data=false;
+StrTy fifo_name=m_default_fifo_name; // "/tmp/datascope_fifo.txt";
+int mode=7+7*8+7*64; // lol 
+//const IdxTy blocksz=1<<18;
+//IdxTy blocksz=1<<22;
+IdxTy blocksz=1<<16;
+sk.get(fifo_name,"fifo_name");
+sk.get(blocktime,"blocktime");
+sk.get(blocksz,"blocksz");
+sk.get(maxbuf,"maxbuf");
+MM_ERR(MMPR4(blocksz,blocktime,fifo_name,notify_data)<<MMPR(maxbuf))
+ int fifo_rc=mkfifo( fifo_name.c_str(),mode);
+int fd=0;
+fd = open(fifo_name.c_str(), O_RDONLY|O_NONBLOCK);
+    MM_ERR(" fifo server "<<MMPR(fifo_rc)<<MMPR4(fd,rc,fifo_name,mode));
+ 
+bool done=false;
+RdBuf rd;
+//char * p= new char[blocksz];
+     while (true) {   
+//rd.clear();
+
+try { 
+while (true)
+{
+rd.insure_space(blocksz+3);
+int n=read(fd, rd.buf()+rd.size(), blocksz);
+// for fifo zero is CLOSED while -1 is possible temp error 
+
+// this needs to take the zero or cap it later? 
+//if (n>0){ bool br=false; if ( p[n-1]==0){  br=true; n=n-1; }    rd.append(p,n); if (br) break; } 
+if (n>0)
+	{ 
+rd.appended(n); // added this much 
+int zed=rd.zero_loc();
+if (zed!= ~0 )
+{
+StrTy * pload= new StrTy(rd.buf()); 
+m_rq.push(pload);
+rd.shift(zed+1);
+
+}
+bool too_big=(rd.alloc()>maxbuf);
+if (too_big) {
+MM_ERR(" biffer too big dropping all "<<MMPR2(fifo_name,rd.alloc()))
+ rd.minimize();
+} 
+	} 
+else if (n==0)
+{ if (false ) { MM_ERR(" fifo closed "<<MMPR2(fifo_name,n)) } break; }
+else
+{
+int err=errno;
+if ((err==EAGAIN)||(err==EWOULDBLOCK)) {  usleep(blocktime); }
+else { MM_ERR(" fifo read error "<<MMPR2(fifo_name,err)) done=true; break; } 
+} // n<0
+if ( notify_data) { if (n>0) MM_ERR(MMPR3(__FUNCTION__,n,rd.size())) } 
+} // true
+} catch (...) { MM_ERR(" fifo read throws ") }
+if (m_debug) MM_ERR(" have string "<< MMPR2(__FUNCTION__,rd.size()))
+if (rd.size())
+{ rd.terminate(); StrTy * pload= new StrTy(rd.buf()); m_rq.push(pload); rd.clear(); } 
+else
+{ 
+// no client connected... 
+++dumb;
+if ((dumb&((1<<20)-1))==0) MM_ERR(" dumb sleep "<<MMPR2(fifo_name,dumb))
+usleep(20000);
+}
+if (done) break;
+} // truel 
+
+
+close(fd);
+ MM_ERR("SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSexit" << MMPR2(fifo_name,__FUNCTION__))       
+return rc;
+} // StartDataServer
+
+
+
+//////////////////////////////////////////////////////
+IdxTy StartDataServerOld(const StrTy & s,const IdxTy flags )
+{
+IdxTy rc=0;
+IdxTy dumb=0;
+IdxTy blocktime=1000;
 MM_ERR(MMPR2(__FUNCTION__,flags))
 BaseParams sk(s);
 bool notify_data=false;
@@ -349,21 +442,24 @@ StrTy fifo_name=m_default_fifo_name; // "/tmp/datascope_fifo.txt";
 int mode=7+7*8+7*64; // lol 
 const IdxTy blocksz=1<<18;
 sk.get(fifo_name,"fifo_name");
-
+sk.get(blocktime,"blocktime");
  int fifo_rc=mkfifo( fifo_name.c_str(),mode);
 int fd=0;
 fd = open(fifo_name.c_str(), O_RDONLY|O_NONBLOCK);
     MM_ERR(" fifo server "<<MMPR(fifo_rc)<<MMPR4(fd,rc,fifo_name,mode));
  
-
+bool done=false;
 RdBuf rd;
 char * p= new char[blocksz];
      while (true) {   
 rd.clear();
+
 try { 
 while (true)
 {
 int n=read(fd, p, blocksz);
+// for fifo zero is CLOSED while -1 is possible temp error 
+
 // this needs to take the zero or cap it later? 
 //if (n>0){ bool br=false; if ( p[n-1]==0){  br=true; n=n-1; }    rd.append(p,n); if (br) break; } 
 if (n>0)
@@ -373,9 +469,18 @@ if (n>0)
 		rd.append(p,n); 
 		if (br) break; 
 	} 
-if (n==0) usleep(1000);
+else if (n==0)
+{ if (false ) { MM_ERR(" fifo closed "<<MMPR2(fifo_name,n)) } break; }
+else
+{
+int err=errno;
+if ((err==EAGAIN)||(err==EWOULDBLOCK)) {  usleep(blocktime); }
+else { MM_ERR(" fifo read error "<<MMPR2(fifo_name,err)) done=true; break; } 
+} // n<0
+
+//if (n==0) usleep(1000);
 if ( notify_data) { if (n>0) MM_ERR(MMPR3(__FUNCTION__,n,rd.size())) } 
-if (n<0){ MM_ERR(MMPR(n))  break; }
+//if (n<0){ MM_ERR(MMPR(n))  break; }
 } // true
 } catch (...)
 {
@@ -385,6 +490,7 @@ MM_ERR(" fifo read throws ")
 if (m_debug) MM_ERR(" have string "<< MMPR2(__FUNCTION__,rd.size()))
 if (rd.size())
 {
+rd.terminate();
 StrTy * pload= new StrTy(rd.buf()); 
 //MM_ERR(MMPR((*pload)))
 //MM_DIE(" ok or no")
@@ -392,19 +498,21 @@ m_rq.push(pload);
 // need to prune m_rq from front ...
 } else
 { 
+// no client connected... 
 ++dumb;
-MM_ERR(" dumb sleep "<<MMPR(dumb))
+if ((dumb&((1<<30)-1))==0) MM_ERR(" dumb sleep "<<MMPR(dumb))
 //usleep(2000000);
-usleep(200);
+usleep(20000);
 }
-
+if (done) break;
 } // truel 
 delete[] p;
 close(fd);
  MM_ERR("SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSexit" << MMPR(__FUNCTION__))       
 return rc;
-} // StartDataServer
+} // StartDataServerOld
 
+/////////////////////////////////
 
 
 

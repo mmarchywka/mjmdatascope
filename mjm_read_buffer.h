@@ -50,6 +50,7 @@ enum { MAP_MU=0 , MU_SZ};
 
 enum { DEFAULT_BUFFER_LN2=14};
 
+// API
 public:
 mjm_read_buffer() {Init();}
 mjm_read_buffer(const IdxTy pad) {Init(); Pad(pad); }
@@ -88,6 +89,11 @@ Ch * buf() { return m_ptr; }
 const Ch * buf() const  { return m_ptr; } 
 Ch * next() { return m_ptr+m_pc; } 
 void appended(const IdxTy n ) { m_pc+=n; } 
+void shift(const IdxTy n )
+{ ::memcpy(m_ptr,m_ptr+n,m_pc-n); m_pc-=n; } 
+IdxTy zero_loc() 
+const { MM_ILOOP(i,m_pc) { if (m_ptr[i]==0) return i; } return ~0; } 
+void insure_space(const IdxTy n) { IdxTy tgt=m_pc+n+1; Expand(tgt); } 
 void push_back(const Ch _c) { append(_c); } 
 void append(const Ch _c) { Ch c[2]; c[0]=_c; c[1]=0; Append(c,1); }
 IdxTy write(std::ostream & os, const IdxTy flags ) {os.write(m_ptr,m_pc); return 0;  }
@@ -152,11 +158,13 @@ void append(const char *  c, const IdxTy sz ) { Append(c,sz); }
 // this makes the contents into a string for extraction  although
 // after all of that should just let caller do StrTy(pt()) lol
 // although ctor sthould stupidly be elided.. 
+void terminate() { m_ptr[m_pc]=0; } 
 StrTy string()
 {
 m_ptr[m_pc]=0;
 return StrTy(m_ptr);
 }
+
 StrTy summary(const IdxTy flags) const
 {
 Ss ss;

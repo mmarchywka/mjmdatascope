@@ -270,7 +270,7 @@ p_add_fun_type p=0;
 if (ii!=m_add_map.end())  p=(*ii).second;
 if (p) (this->*p)(r,flags); 
 else {
-MM_ERR(" danger ignoring ragged "<<MMPR(r.dump()))
+//MM_ERR(" danger ignoring ragged "<<MMPR(r.dump()))
 MM_ERR(" ignoring ragged "<<MMPR(ty))
 if (true)  { ExitSerial(0); return ExplainReject(r,flags); } 
 }
@@ -295,14 +295,18 @@ m_add_map["molecule"]=&Myt::AddMolecule;
 
 IdxTy ExplainReject(const input_type & r, const IdxTy flags) 
 {
+MM_ERR(" start of bad ragged, ")
 for(IdxTy i=0; i<r.size(); ++i)
 {
 const Line & l = r[i];
-if (l.size()<1) continue;
-if (l[0]!="#" ) continue;
+
+//if (l.size()<1) continue;
+//if (l[0]!="#" ) continue;
 Ss ss;
-for(int j=1; j<l.size(); ++j)  ss<<l[j]<<" ";
+ss<<MMPR(l.size());
+for(int j=1; j<l.size(); ++j)  ss<<MMPR(l[j])<<" ";
 MM_ERR(ss.str())
+if (i>10) break;
 } // i 
 return BAD;
 } // ExplainReject
@@ -468,14 +472,15 @@ bool setx=false;
 
 ColorVec ct;
 Rainbow(ct,0);
-
+mi.add_common_hdr(r,flags);
 //  This needs to be locked if used.. 
 //ViewInfo & v=m_view;
 //reject blank linkes but let comment through
 ADDITORC
 // params etc. 
-if (l[0]=="#")
-{
+if (l[0]=="#") continue;
+/*
+if (false) {
 if (len<2) continue;
 const StrTy & cmd=l[1];
 if (cmd=="params"){   AddParams(mi,l,len); continue; } 
@@ -483,6 +488,7 @@ if (cmd=="names") {  AddNames(mi,l,len); continue; }
 MM_ONCE(" silently ignoring future comments like  "<<MMPR(cmd),)
 continue;
 }  // # 
+*/
 // "x" is now in the last line entry doh 
  D x=atof(l[len-1]);
 //if ( !setx){  xbase=x; setx=true; } 

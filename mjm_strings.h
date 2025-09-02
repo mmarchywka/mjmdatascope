@@ -50,6 +50,48 @@ StrTy x=y;
 std::transform(x.begin(), x.end(), x.begin(), ::tolower);
 return x; 
 }
+// find pattern p in s 
+static bool fast_grep(const StrTy &s, const StrTy & p)
+{
+const char * pp=p.c_str();
+const char * sp=s.c_str();
+const IdxTy psz=p.length();
+const IdxTy ssz=s.length();
+if (ssz<psz) return false; 
+const IdxTy sd=ssz-psz; 
+for(IdxTy i=0; i<sd; ++i)
+{
+if (strncmp(sp+i,pp,psz)==0) return true;
+
+}
+return false;
+} // fast_grep
+
+static bool fast_grep(const StrTy &s, const std::vector<StrTy> & v)
+{
+const IdxTy sz=v.size();
+IdxTy i=0;
+MM_ILOOP(j,sz){
+const StrTy & p=v[j];
+const char * pp=p.c_str();
+const char * sp=s.c_str();
+const IdxTy psz=p.length();
+const IdxTy ssz=s.length();
+if (ssz<psz) return false; 
+const IdxTy sd=ssz-psz; 
+for(; i<sd; ++i)
+{
+if (strncmp(sp+i,pp,psz)==0) break; //  return true;
+
+}
+return false;
+} //j 
+
+return true;
+} // fast_grep
+
+
+
 
 
 static my64int str_to_time(const ChTy * s)

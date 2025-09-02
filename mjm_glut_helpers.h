@@ -672,7 +672,7 @@ IdxTy m_action;
 }; // _view
 
 
-
+// redundant with the one that includes color table.. 
 class _color_desc
 {
 

@@ -170,7 +170,8 @@ D xx,yy;
 x=IdxTy(xx);
 y=IdxTy(yy);
 }
-
+// 2025 compiler coplains about hiding just a warnin fix later 
+#if 0
 // normally coord xform should be fast but here vitual is ok 
 virtual void operator()(D & x, D & y, const D & xin, const D & yin)
 {
@@ -183,7 +184,7 @@ D x=xin*m_xpitch+m_x_zed;
 D y=yin*m_ypitch+m_y_zed;
 xin=x; yin=y;
 }
-
+#endif
 
 
 void bounds(IdxTy  & x, IdxTy & y, const level_map & m)
@@ -225,6 +226,8 @@ mjm_circular_warp(const D & xp, const D & yp, const D &xz, const D &yz)
 :Super(xp,yp,xz,yz),m_xc(0),m_yc(0) {}
 // warp into a circule with x as radius and y as some measure of the angle.
 // need ymax(x) t get angle right 
+// 2025 compiler complains fix when error 
+#if 0
 void operator()(IdxTy & x, IdxTy & y, const IdxTy & xin, const IdxTy & yin)
 {
 
@@ -235,6 +238,10 @@ y=IdxTy(yy);
 // Super()(x,y,xin,yin);
 
  } 
+#endif
+// 2025-08 compiler complains this hides 
+// ../../mjm/hlib/mjm_gen_viz.h:180:14: warning: ‘virtual void mjm_output_warp::operator()(D&, D&)’ was hidden [-Woverloaded-virtual=]
+#if 0 
 virtual void operator()(D & x, D & y, const D & xin, const D & yin)
 {
 const D r=xin; // -m_xc; 
@@ -245,6 +252,8 @@ x= m_xpitch*(r*::cos(theta)+m_xc); //   xin*m_xpitch+m_x_zed;
 y=m_ypitch*(r*::sin(theta)+m_yc); // yin*m_ypitch+m_y_zed;
 MM_ERR(MMPR4(x,y,m_xpitch,m_ypitch))
 }
+#endif
+
 void bounds(IdxTy  & x, IdxTy & y, const level_map & m)
 { Super::bounds(x,y,m); } 
 virtual void bounds(D & x, D & y, const level_map & m)
