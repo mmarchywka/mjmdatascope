@@ -1048,18 +1048,87 @@ return 0;
 
 IdxTy OverlayOrnatePoints(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
 {
- glBegin(GL_LINE_STRIP);
+ //glBegin(GL_LINE_STRIP);
+ glBegin(GL_POLYGON);
 // note no ref doh
+glLineWidth(20);
+D wl=.01;
+D dx=wl/v.scale(0);
+D dy=wl/v.scale(1);
+D dz=.00/v.scale(2);
 auto& p=m.ornate_points_d();
-for(IdxTy j=0; j<p.size(); ++j)
+if (false) if (p.size())
+{
+const auto & pj=p[0];
+// this looks like a ribbon as there is no width in x=y dir fuck
+  glColor3f(pj.r(),pj.g(),pj.b());     // Green
+v.doglutpos(glVertex3f,pj.x()-dx,pj.y()-dy,pj.z()-dz); 
+v.doglutpos(glVertex3f,pj.x()+dx,pj.y()+dy,pj.z()+dz); 
+
+
+}
+for(IdxTy j=1; j<p.size(); ++j)
+{
+const auto & pj=p[j];
+const auto & pjm=p[j-1];
+const D xdx=pj.x()-pjm.x();
+const D xdy=pj.y()-pjm.y();
+
+ D r=xdx*xdx+xdy*xdy;
+if (r==0) continue;
+r=sqrt(r);
+D a=-xdy/r;
+D b=xdx/r;
+ dx=wl/v.scale(0)*a;
+ dy=wl/v.scale(1)*b;
+
+ glBegin(GL_POLYGON);
 {
 const auto & pj=p[j];
 
   glColor3f(pj.r(),pj.g(),pj.b());     // Green
-v.doglutpos(glVertex3f,pj.x(),pj.y(),pj.z()); 
+v.doglutpos(glVertex3f,pj.x()-dx,pj.y()-dy,pj.z()-dz); 
+v.doglutpos(glVertex3f,pj.x()+dx,pj.y()+dy,pj.z()+dz); 
+}
+
+{
+const auto & pj=p[j-1];
+
+  glColor3f(pj.r(),pj.g(),pj.b());     // Green
+v.doglutpos(glVertex3f,pj.x()+dx,pj.y()+dy,pj.z()+dz); 
+v.doglutpos(glVertex3f,pj.x()-dx,pj.y()-dy,pj.z()-dz); 
+}
+if (false) {
+const auto & pj=p[j];
+
+  glColor3f(pj.r(),pj.g(),pj.b());     // Green
+v.doglutpos(glVertex3f,pj.x()-dx,pj.y()-dy,pj.z()-dz); 
+//v.doglutpos(glVertex3f,pj.x()+dx,pj.y()+dy,pj.z()+dz); 
+}
+
+
+
+
+    glEnd();//end drawing of points
 
       //MM_ERR(MMPR3(Gf(pj.x),Gf(pj.y),Gf(pj.z)));//upper-right corner
 } // j 
+/*
+for(IdxTy j=0; j<p.size(); ++j)
+{
+const auto & pj=p[p.size()-1-j];
+
+  glColor3f(pj.r(),pj.g(),pj.b());     // Green
+v.doglutpos(glVertex3f,pj.x()+dx,pj.y()+dy,pj.z()+dz); 
+
+      //MM_ERR(MMPR3(Gf(pj.x),Gf(pj.y),Gf(pj.z)));//upper-right corner
+} // j 
+if (p.size()) { 
+const auto & pj=p[0];
+  glColor3f(pj.r(),pj.g(),pj.b());     // Green
+v.doglutpos(glVertex3f,pj.x()-dx,pj.y()-dy,pj.z()-dz); 
+}
+*/
     glEnd();//end drawing of points
 
 

@@ -181,6 +181,7 @@ m_tgt.move(dx,dy,dz);
 }
 // change scale and move camera along line
 // between m_tgt and m_pov.
+const D & scale(const IdxTy n) const { return m_scale[n]; } 
 void zoom(const D & f, const IdxTy flags)
 {
 //MM_ERR(" zoom empty "<<MMPR2(f,flags))
