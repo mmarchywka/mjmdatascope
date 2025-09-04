@@ -1,5 +1,5 @@
-mjm_ai_root_wtap.out: ../euvnoise/mjm_ai_root_wtap.h ../../mjm/hlib/mjm_globals.h \
- ../../mjm/hlib/mjm_thread_util.h ../euvnoise/gemini_root_finder.cpp \
+mjm_ai_root_wtap.out: mjm_ai_root_wtap.h ../../mjm/hlib/mjm_globals.h \
+ ../../mjm/hlib/mjm_thread_util.h gemini_root_finder.cpp \
  ../datascope/mjm_dscope_interface.h ../../mjm/hlib/mjm_block_matrix.h \
  ../../mjm/hlib/mjm_globals.h ../../mjm/hlib/mjm_generic_iterators.h \
  ../../mjm/hlib/mjm_instruments.h ../../mjm/hlib/mjm_read_buffer.h \
@@ -34,4 +34,4 @@ mjm_ai_root_wtap.out: ../euvnoise/mjm_ai_root_wtap.h ../../mjm/hlib/mjm_globals.
  ../../mjm/hlib/mjm_str_2_num.h ../../mjm/hlib/mjm_worm_blob.h \
  ../../mjm/hlib/mjm_canned_methods.h \
  ../../mjm/hlib/mjm_generic_iterators.h \
- ../datascope/mjm_dohscope_trigger.h
+ ../datascope/mjm_dohscope_trigger.h mjm_uni_params.h

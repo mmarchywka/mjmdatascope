@@ -565,6 +565,12 @@ if (szd>1) { MM_ERR(" should only have one to append "<<MMPR2(szd,m_src))}
 mi.m_src=m_src;
 mi.m_type="ornate-points";
 mi.add_ornate_points(r,flags);
+int doclear=mi.etc_int("clear");
+MM_ERR(MMPR2(doclear,new_model))
+//ZZif (doclear&&!new_model) { ModelInfo mn=mi; clear(); new_model=true; } 
+//if (doclear&&!new_model) { mi.clear(); 
+//mi.add_ornate_points(r,flags);
+//} 
 if (new_model){  m_data_idx.push_back(mi); delete mip; }
 //AppendModel(mi,flags);
 return 0;

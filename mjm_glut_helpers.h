@@ -872,9 +872,28 @@ const D & g, const D & b)
  strip().set_color(idx,r,g,b,0);
 return 0; 
 }
+StrTy etc_val(const StrTy &k )  const
+{
+const auto ii=m_etc.find(k);
+if (ii==m_etc.end()) return StrTy();
+return (*ii).second; 
+} // etc_vali
+int etc_int(const StrTy &k )   const
+{
+const auto ii=m_etc.find(k);
+if (ii==m_etc.end()) return 0;
+return myatoi((*ii).second); 
+} // etc_vali
+
+
+int myatoi(const StrTy & s )const   
+{ return mjm_canned_methods::myatoi(s.c_str()); }
+
 void add_ornate_points( const Ragged & r, const IdxTy flags)
 {
 add_common_hdr(r,flags);
+int doclear=etc_int("clear");
+if (doclear) clear();
 ornate_points().load(r,0,0,0);
 
 } // add_ornate_points
