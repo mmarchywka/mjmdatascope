@@ -438,7 +438,8 @@ BaseParams kvp(sin);
 
 void Init()
 {
-m_shapes.load(StrTy(),0);
+// Init is called from Init(ragged) for append now... 
+if (m_shapes.size()==0) m_shapes.load(StrTy(),0);
 m_groups=0;
 } // Init
 

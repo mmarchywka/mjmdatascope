@@ -1007,7 +1007,7 @@ m.strip().draw_points(m,v,sdp);
 // need lock on the changed flag 
 if (m_grat_changed) 
 { m_grat_changed=0; m.graticule_d().config(m_grat_config); }
-m.graticule_d().draw(m,v,sdp);
+if (m.strip().size()) m.graticule_d().draw(m,v,sdp);
 
 return 0;
 } // DrawStrip
@@ -1017,7 +1017,7 @@ m.oscope().draw_points(m,v,sdp);
 // need lock on the changed flag 
 if (m_grat_changed) 
 { m_grat_changed=0; m.graticule_d().config(m_grat_config); }
-m.graticule_d().draw(m,v,sdp);
+if (m.oscope().size()) m.graticule_d().draw(m,v,sdp);
 
 return 0;
 } // DrawStrip
@@ -1049,6 +1049,7 @@ v.draw_ornate_shape(pi,pshape,sdp);
 
 if (v.olay_ornates())  OverlayOrnatePoints(m,v, sdp);
 
+if (p.size()) m.graticule_d().draw(m,v,sdp);
 return 0;
 } // DrawOrnatePoints
 

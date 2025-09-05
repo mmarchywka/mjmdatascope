@@ -230,6 +230,44 @@ if (invert) {  m_imat=m.invert3x3(); }
 
 } // unscale
 
+
+#define TFUK(x) const D & x
+void wide_line_fuk( TFUK(_wl), TFUK(x0),TFUK(y0),TFUK(z0),TFUK(x1),TFUK(y1),
+TFUK(z1) , TFUK(r0),TFUK(g0),TFUK(b0) , TFUK(r1),TFUK(g1),TFUK(b1))
+{
+
+GLint w_shit=glutGet(GLUT_WINDOW_WIDTH);
+GLint h_shit=glutGet(GLUT_WINDOW_HEIGHT);
+//const auto & pj=p[j];
+//const auto & pjm=p[j-1];
+const D xdx=x0-x1;
+const D xdy=y0-y1; // ()-pjm.y();
+const D wl=2.0*_wl; // convet from gl fuk
+//MM_ERR(" ASSFUCK "<<MMPR2(wl,_wl))
+ D r=xdx*xdx+xdy*xdy;
+if (r==0) return; //  continue;
+r=sqrt(r);
+D a=-xdy/r;
+D b=xdx/r;
+D  dx=wl/scale(0)*a/D(w_shit);
+D  dy=wl/scale(1)*b/D(h_shit);
+D dz=0;
+ glBegin(GL_POLYGON);
+//const auto & pj=p[j];
+
+  glColor3f(r0,g0,b0);     // Green
+doglutpos(glVertex3f,x0-dx,y0-dy,z0-dz);
+doglutpos(glVertex3f,x0+dx,y0+dy,z0+dz);
+//const auto & pj=p[j-1];
+  glColor3f(r1,g1,b1);     // Green
+doglutpos(glVertex3f,x1+dx,y1+dy,z1+dz);
+doglutpos(glVertex3f,x1-dx,y1-dy,z1-dz);
+glEnd();
+} // wide_line_fuk 
+
+
+
+
 void scale_factor(const D & fx, const D & fy, const D & fz, const IdxTy flags )
 {
 
@@ -1058,6 +1096,9 @@ bool used(const IdxTy e) const { const auto ii=m_usage_map.find(e);
 if (ii==m_usage_map.end()) return false;  return (*ii).second !=0; } 
 
 
+//////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////
 StrTy show() const
 {
 Ss ss;

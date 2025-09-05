@@ -169,21 +169,43 @@ template <class ModelInfo, class ViewInfo, class DrawInfo>
 IdxTy draw(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
 { return Draw(m,v,sdp); } 
 
+template <class Fuck, class ModelInfo, class ViewInfo, class DrawInfo>
+IdxTy drawASSFUCK( Fuck & fuk, ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
+{ return Draw(fuk,m,v,sdp); } 
 
 private:
+
+template <class Fuck, class ModelInfo, class ViewInfo, class DrawInfo>
+IdxTy Draw( Fuck  & fuk, ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
+{ 
+// WHUY THE ASS FUCK DOE ANY GRAPHICS PAADF MAKE YIOU WRITE RSHIT CODE
+// LIKE THIS FUCKRERE FUCJ
+v.wide_line_fuk(m_lw,fuk.m_x1,fuk.m_y1,fuk.m_z1,m_x0,m_y0,m_z0,m_r,m_g,m_b,
+
+m_r,m_g,m_b);
+return 0; 
+
+} 
+
+
+
 template <class ModelInfo, class ViewInfo, class DrawInfo>
 IdxTy Draw(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
 {
 /// highly similar should coalesece... 
-glColor3f(m_r,m_g,m_b );
-MM_ONCE("line width deprecated wtf",)
- glLineWidth(m_lw);
-MM_ONCE("dun line width deprecated wtf",)
-v.doglutpos(glVertex3f,m_x0,m_y0,m_z0);
-v.doglutpos(glVertex3f,m_x1,m_y1,m_z1);
+//glColor3f(m_r,m_g,m_b );
+//MM_ONCE("line width deprecated wtf",)
+// glLineWidth(m_lw);
+//MM_ONCE("dun line width deprecated wtf",)
+//v.doglutpos(glVertex3f,m_x0,m_y0,m_z0);
+//v.doglutpos(glVertex3f,m_x1,m_y1,m_z1);
 //MM_ERR(MMPR3(m_r,m_g,m_b));
 //MM_ERR(MMPR3(m_x0,m_y0,m_z0));
 //MM_ERR(MMPR3(m_x1,m_y1,m_z1));
+v.wide_line_fuk(m_lw,m_x0,m_y0,m_z0,m_x1,m_y1,m_z1,m_r,m_g,m_b,
+m_r,m_g,m_b);
+
+
 
 return 0;
 } 
@@ -459,12 +481,15 @@ glGetFloatv(GL_LINE_WIDTH,&oldw);
 //glBegin(GL_LINE_STRIP);
 //glColor3f(pi.r(),pi.g(),pi.b() );
 glColor3f(1.0f,1.0f,1.0f );
+//auto jj=m_lines.begin();
 MM_LOOP(ii,m_lines) {
 
-glBegin(GL_LINE_STRIP);
+//glBegin(GL_LINE_STRIP);
 //glBegin(GL_LINES);
  (*ii).draw(m,v,sdp);
-glEnd();
+
+//if (jj!=ii) { (*ii).drawASSFUCK(*jj,m,v,sdp); ++jj; }
+//glEnd();
 
  } 
 //v.doglutpos(glVertex3f,pi.x(),pi.y(),pi.z());
