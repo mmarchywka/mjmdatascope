@@ -212,6 +212,10 @@ bool send( const Ragged & r,  const IdxTy flags)
 { return Send(r,NULL,flags); } 
 bool send_strip_chart( const Ragged & r,  const StrTy & src,const StrTy & params, const IdxTy flags, const StrTy & etc=StrTy())
 { return SendStripChart(r,src,params,flags,etc); } 
+template <class Tp > bool send_zij( const Tp & r, const IdxTy nx,  const IdxTy ny, const StrTy & src,const StrTy & params, const IdxTy flags, const StrTy & etc=StrTy())
+{ return SendZij(r,nx,ny,src,params,flags,etc); } 
+
+
 // TODO this needs multiple instances now with tiggering and 
 // buffering on the source side. In most cases a name is included
 // to be sorted out by viewers. 
@@ -263,7 +267,13 @@ if (false) { MM_ERR(" cmd "<<MMPR3(__FUNCTION__,i,que_empty())) }
 return que_empty();
 } // WaitDone
 
+bool wait_full(const IdxTy n, const IdxTy mu)
+{
+int cnt=0;
+{ while (que_full()&&(cnt<n)) {++cnt;  usleep(mu); }   }
 
+return ! (que_full()) ;  
+}
 
 
 ~mjm_dscope_interface() {}
@@ -515,6 +525,30 @@ setup(h, src, "strip-chart",params,etc );
 m_sender.m_rawfifo.send(h,r);
 return true; 
 }  // SendStripChart
+
+//template <class Tp > 
+bool SendZij( const Ragged & r, const IdxTy nx, const IdxTy ny,  const StrTy & src,const StrTy & params, const IdxTy flags, const StrTy & etc=StrTy())
+{ 
+if (SendGuard(flags)) return false;
+Ragged h;
+setup(h, src, "zij",params,etc );
+Line l;
+l.push_back("#");
+l.push_back("zijparams");
+BaseParams kvp;
+kvp.set("nx",nx);
+kvp.set("ny",ny);
+MM_ERR(MMPR(kvp.encoded()))
+l.push_back(kvp.encoded());
+h.add(l);
+m_sender.m_rawfifo.send(h,r);
+return true; 
+}  // SendZij
+
+
+
+
+
 template <class Tp>
 IdxTy  SendOscopeB(const Tp & _x, const Tp & _y,  const StrTy& src, const IdxTy line, const StrTy idn,  const StrTy & etc,const StrTy & params, const StrTy & _ty, const IdxTy flags,const StrTy & scope_name)
 {

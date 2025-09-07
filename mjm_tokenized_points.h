@@ -2,6 +2,7 @@
 #define MJM_TOKENIZED_POINTS_H__
 
 #include "mjm_globals.h"
+#include "mjm_dscope_point.h"
 #include "mjm_vector_shapes.h"
 #include "mjm_thread_util.h"
 #include "mjm_string_tokenizer.h"
@@ -123,6 +124,7 @@ typedef mjm_bounds<Tr> Bounds;
 public:
 typedef mjm_vector_shapes<Tr> Shapes;
 private:
+#if 0 
  class _point_entry  
 {
 
@@ -280,12 +282,14 @@ IdxTy m_ri,m_gi,m_bi;
 D m_r,m_g,m_b;
 IdxTy m_flags,m_group;
 }; // _point_entry
+#endif
 
 
 // API
 
 public:
-typedef _point_entry PointEntry;
+//typedef _point_entry PointEntry;
+typedef mjm_dscope_point<Tr> PointEntry;
 typedef std::vector<PointEntry> PointVector;
 typedef typename PointVector::const_iterator Ci;
 typedef typename PointVector::iterator Ii;
@@ -301,7 +305,7 @@ Ci end() const { return  m_points.end(); }
 
 Ii begin()  { return m_points.begin(); } 
 Ii end(){ return  m_points.end(); } 
-_point_entry & back() { return m_points.back(); } 
+PointEntry & back() { return m_points.back(); } 
 void next_group() { ++m_groups;}
 IdxTy groups() const { return m_groups;}
 
@@ -311,7 +315,7 @@ void load(const Ragged & r,const IdxTy start, const IdxTy first,const IdxTy flag
 const PointEntry & operator[](const IdxTy n) const { return m_points[n]; } 
 void load( const D &x, const D &y, const D &z, const IdxTy flags)  
 {
-_point_entry p(x, y, z, flags) ;
+PointEntry p(x, y, z, flags) ;
 p.group(m_groups);
 m_points.push_back(p);
 m_bounds.add(x,y);
@@ -319,7 +323,7 @@ m_bounds.add(x,y);
 void load( const D &x, const D &y, const D &z,  
  const D &r, const D &g, const D &b, const IdxTy flags)  
 {
-_point_entry p(x, y, z, r,g,b,flags) ;
+PointEntry  p(x, y, z, r,g,b,flags) ;
 p.group(m_groups);
 m_points.push_back(p);
 m_bounds.add(x,y);

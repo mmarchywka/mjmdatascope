@@ -700,6 +700,12 @@ if ( CheckFlags()) return;
 // at this point we know glut is alive unless
 // someone else calls this which should not happen 
 m_gf.m_alive=true;
+// ASSFUCK rely o draw order for now
+glDisable(GL_DEPTH_TEST);
+// that works except hides numbers on graticle FUCK 
+// really want equaliy to revert to draw order or I 
+// can add small increment to z ROFL.
+//glEnable(GL_DEPTH_TEST);
 // may need the gl_status object ? ZZ
 //GlutUtil::start_view_zed();
 MyGLStatus & gls= m_gl_status;

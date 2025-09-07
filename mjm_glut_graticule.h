@@ -472,6 +472,7 @@ template <class ModelInfo, class ViewInfo, class DrawInfo>
 IdxTy Draw(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
 {
 
+glColor3f(1.0f,1.0f,1.0f );
 Make(m,v,sdp);
 typename ViewInfo::G  oldw=100;
 //MM_ERR(MMPR(oldw))
@@ -483,15 +484,16 @@ glGetFloatv(GL_LINE_WIDTH,&oldw);
 glColor3f(1.0f,1.0f,1.0f );
 //auto jj=m_lines.begin();
 MM_LOOP(ii,m_lines) {
-
 //glBegin(GL_LINE_STRIP);
 //glBegin(GL_LINES);
  (*ii).draw(m,v,sdp);
-
 //if (jj!=ii) { (*ii).drawASSFUCK(*jj,m,v,sdp); ++jj; }
 //glEnd();
-
  } 
+// see if numbers need to be up again with depth test setting 
+// GL_DEPTH_TEST doesn't have a " test but use draw order when eqal "fuk
+// this appears to be a color issue not draw order.. 
+//Make(m,v,sdp);
 //v.doglutpos(glVertex3f,pi.x(),pi.y(),pi.z());
 //v.doglutpos(glVertex3f,pi.x(),pi.y(),pi.z());
 //glEnd();

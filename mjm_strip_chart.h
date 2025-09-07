@@ -285,12 +285,10 @@ const D & xmin() const { return m_x0; }
 const D & xmax() const { return m_x1; } 
 const D & ymin() const { return m_y0; } 
 const D & ymax() const { return m_y1; } 
-
-
-
 void append(const Ragged & r, const IdxTy flags) { Append(r,flags); } 
 template <class Tm> void append(const Ragged & r, Tm & mi, const IdxTy flags) { Append(r,mi,flags); } 
 void append(const Myt & that, const IdxTy flags) { Append(that,flags); } 
+
 void save(const StrTy & fn,const StrTy &s) {Save(fn,s); }
 
 void set_color(const IdxTy idx, const D & r, const D & g, const D & b,const IdxTy flags)

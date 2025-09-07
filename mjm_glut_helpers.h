@@ -7,6 +7,7 @@
 #include "mjm_glut_graticule.h"
 #include "mjm_strip_chart.h"
 #include "mjm_doscilloscope.h"
+#include "mjm_zij_image.h"
 #include "mjm_tokenized_points.h"
 #include "mjm_svg_render.h"
 
@@ -79,6 +80,7 @@ typedef  typename Elements::Element Element ;
 
 typedef mjm_strip_chart<Tr> strip_t;
 typedef mjm_doscilloscope<Tr> oscope_t;
+typedef mjm_zij_image<Tr> zij_t;
 
 typedef mjm_glut_decorations<Tr> decorations_t;
 typedef mjm_glut_molecule<Tr> mole_t; 
@@ -162,6 +164,10 @@ typedef GeoState triple_t;
 _view() {Init(); }
 int style() const { return m_style;}
 void style(const int s) { m_style=s; } 
+int layer() const { return m_layer;}
+void layer(const int d, const int l)
+{m_layer+=d; if (m_layer>l) m_layer=l; if (m_layer<0) m_layer=0; }
+void layer(const int d) {m_layer=d;  }
 int set_by() const { return m_set_by;}
 void set_by_bit(const int n) { m_set_by|=(1<<n); } 
 bool get_by_bit(const int n) { return Bit(m_set_by,n); } 
@@ -264,8 +270,22 @@ doglutpos(glVertex3f,x1+dx,y1+dy,z1+dz);
 doglutpos(glVertex3f,x1-dx,y1-dy,z1-dz);
 glEnd();
 } // wide_line_fuk 
+template <class Tp>
+void draw_4gon( const Tp & p0, const Tp & p1, const Tp & p2, const Tp & p3)
+{
 
+ glBegin(GL_POLYGON);
+color(p0); posv(p0);
+color(p1); posv(p1);
+color(p2); posv(p2);
+color(p3); posv(p3);
 
+glEnd();
+} // draw_4gon
+
+template <class Tp> void color (const Tp & p) { glColor3f(p.r(),p.g(),p.b()); } 
+template <class Tp> void posv (const Tp & p) 
+{ doglutpos(glVertex3f,p.x(),p.y(),p.z()); } 
 
 
 void scale_factor(const D & fx, const D & fy, const D & fz, const IdxTy flags )
@@ -680,6 +700,7 @@ m_scale=1;
 m_tgt=0;
 m_style=0;
 m_set_by=9;
+m_layer=0;
 m_action=BAD;
 InitGeometry();
 }
@@ -691,6 +712,7 @@ Ss ss;
 ss<<MMPR(m_tgt.dump());
 ss<<MMPR(m_scale.dump());
 ss<<MMPR4(m_action,m_squash,m_vidx,m_style);
+ss<<MMPR(m_layer);
 ss<<MMPR(m_set_by);
 ss<<MMPR(m_mat.dump());
 ss<<MMPR(m_imat.dump());
@@ -706,7 +728,7 @@ IdxTy m_vidx,m_style,m_set_by;
 D m_squash;
 action_t m_act;
 IdxTy m_action;
-
+int m_layer;
 
 }; // _view
 
@@ -935,6 +957,14 @@ if (doclear) clear();
 ornate_points().load(r,0,0,0);
 
 } // add_ornate_points
+void add_zij( const Ragged & r, const IdxTy flags)
+{
+add_common_hdr(r,flags);
+int doclear=etc_int("clear");
+if (doclear) clear();
+zij().load(r,0,0,0);
+} // add_ornate_points
+
 
 void add_strip( const Ragged & r, const IdxTy flags)
 {
@@ -1015,7 +1045,7 @@ if (that.used(M_MOLECULE)) m_molecule.append(that.m_molecule,flags);
 // new accessors to account for usage...
 // cat pieces.txt| sed -e 's/;//g'  | while read ; do t=`echo $REPLY | awk '{print $1}' `; v=`echo $REPLY | awk '{print $2}'`; e=`echo $v | tr "[a-z]" "[A-Z]" `;n=`echo $v| sed -e 's/m_//' `;  enum="$enum,$e" ; echo $v $t $e $enum; echo -e "$t & $n() { ++m_usage_map[$e];  return $v; } "  ; done | grep "()"
 
-enum { M_STRINGS,M_POINTS,M_ORNATE_POINTS,M_OSCOPE,M_SEGS,M_SVGS,M_CODE,M_SZLIM,M_PARAMS,M_ETC,M_HEATMAP,M_FF_MESH,M_STRIP,M_GRATICULE,M_DECORATIONS,M_MOLECULE};
+enum { M_STRINGS,M_POINTS,M_ORNATE_POINTS,M_ZIJ,M_OSCOPE,M_SEGS,M_SVGS,M_CODE,M_SZLIM,M_PARAMS,M_ETC,M_HEATMAP,M_FF_MESH,M_STRIP,M_GRATICULE,M_DECORATIONS,M_MOLECULE};
 
 
 SegVec & segs() { ++m_usage_map[M_SEGS];  return m_segs; } 
@@ -1045,6 +1075,8 @@ const strip_t & strip_d() const  {  return m_strip; }
 oscope_t & oscope() { ++m_usage_map[M_OSCOPE];  return m_oscope; } 
 const oscope_t & oscope_d() const  {  return m_oscope; } 
 
+const zij_t & zij_d() const  {  return m_zij; } 
+zij_t & zij() { ++m_usage_map[M_ZIJ];  return m_zij; } 
 
 
 graticule_t & graticule() { ++m_usage_map[M_GRATICULE];  return m_graticule; } 
@@ -1070,6 +1102,7 @@ m[M_SVGS]="M_SVGS";
 m[M_CODE]="M_CODE";
 m[M_SZLIM]="M_SZLIM";
 m[M_OSCOPE]="M_OSCOPE";
+m[M_ZIJ]="M_ZIJ";
 m[M_PARAMS]="M_PARAMS";
 m[M_ETC]="M_ETC";
 m[M_HEATMAP]="M_HEATMAP";
@@ -1126,6 +1159,7 @@ void clear_data()
 MM_ERR(" data clear ")
 m_strip.clear();
 m_oscope.clear();
+m_zij.clear();
 m_points.clear();
 m_ornate_points.clear();
 } // clear_data
@@ -1164,6 +1198,7 @@ Heatmap m_heatmap;
 _ff_mesh_t m_ff_mesh;
 strip_t  m_strip;
 oscope_t m_oscope;
+zij_t m_zij;
 graticule_t m_graticule;
 decorations_t m_decorations;
 mole_t m_molecule; 

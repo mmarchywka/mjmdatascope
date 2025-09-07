@@ -74,6 +74,7 @@ typedef typename  GlutUtil::junk_bin_t ModelInfo;
 typedef typename  GlutUtil::color_t color_type;
 
 typedef std::vector<color_type> ColorVec;
+typedef std::vector<ViewInfo> ViewInfoVec;
 
 
 
@@ -123,7 +124,11 @@ const StrTy srcname() const { return m_src; }
 void  srcname(const StrTy & s ) { m_src=s; } 
 void pool(pool_t * p ) { m_data_idx.pool(p); } 
 ~mjm_glut_rags() {}
-ViewInfo& view() { return m_view; } 
+ViewInfo& view() { return m_views[m_iview]; } 
+int iview() const { return m_iview;}
+void iview(const int d, const int l)
+{m_iview+=d; if (m_iview>l) m_iview=l; if (m_iview<0) m_iview=0; }
+void iview(const int d) {m_iview=d;  }
 // add a rag to the contents
 IdxTy add(const input_type & r, const IdxTy flags) 
 { return Add(r,flags); } 
@@ -211,9 +216,10 @@ protected:
 bool Bit(const IdxTy f, const IdxTy b) const  { return  ((f>>b)&1)!=0; }
 // should loop over map now 
 StrTy Dump(const IdxTy flags=0) {Ss ss;
-ss<<m_view.dump();
+ss<<view().dump();
 //ss<<MMPR(m_data.size());
 ss<<MMPR(m_data_idx.size());
+ss<<MMPR2(m_iview, m_views.size());
   return ss.str(); }
 
 
@@ -282,6 +288,7 @@ void MakeAddMap()
 m_add_map["oldoscilloscope"]=&Myt::AddOscilloscope;
 m_add_map["oscilloscope"]=&Myt::AddNewOscilloscope;
 m_add_map["strip-chart"]=&Myt::AddStripChart;
+m_add_map["zij"]=&Myt::AddZij;
 m_add_map["ornate-points"]=&Myt::AddOrnate;
 m_add_map["ffmesh"]=&Myt::AddFFmesh;
 m_add_map["time-snap"]=&Myt::AddTimeSnap;
@@ -546,6 +553,28 @@ mi.add_svg(data);
 AddNewModel(mi);
 return 0;
 } // AddSvg
+IdxTy AddZij(const input_type & r, const IdxTy flags) 
+{
+ModelInfo* mip=0;
+bool new_model=false;
+const IdxTy szd=m_data_idx.used();
+if (szd==0) { mip=new ModelInfo(); new_model=true;}
+else { mip=&m_data_idx(0); }
+ModelInfo & mi=*mip;
+if (szd>1) { MM_ERR(" should only have one to append "<<MMPR2(szd,m_src))}
+mi.m_src=m_src;
+mi.m_type="ornate-points";
+mi.add_zij(r,flags);
+int doclear=mi.etc_int("clear");
+MM_ERR(MMPR2(doclear,new_model))
+//ZZif (doclear&&!new_model) { ModelInfo mn=mi; clear(); new_model=true; } 
+//if (doclear&&!new_model) { mi.clear(); 
+//mi.add_ornate_points(r,flags);
+//} 
+if (new_model){  m_data_idx.push_back(mi); delete mip; }
+//AppendModel(mi,flags);
+return 0;
+}
 
 IdxTy AddOrnate(const input_type & r, const IdxTy flags) 
 {
@@ -733,8 +762,8 @@ kvp.get(xmax,"xmax");
 kvp.get(ymin,"ymin");
 kvp.get(ymax,"ymax");
 MM_ERR(MMPR4(xmin,xmax,ymin,ymax))
-m_view.contain(xmin,xmax,ymin,ymax);
-m_view.set_by_bit(0);
+view().contain(xmin,xmax,ymin,ymax);
+view().set_by_bit(0);
 return true;
 }
 return false;
@@ -1021,12 +1050,24 @@ if (m.oscope().size()) m.graticule_d().draw(m,v,sdp);
 
 return 0;
 } // DrawStrip
+IdxTy DrawZij(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
+{
+m.zij().draw_points(m,v,sdp);
+// need lock on the changed flag 
+
+return 0;
+} // DrawZij
+
 
 
 IdxTy DrawOrnatePoints(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
 {
 //MM_ERR(" drawing ornate ")
 auto& p=m.ornate_points_d();
+// apparently with depth testing equal z doesn first thing
+// drawn and suppresses later FUCK draw order was being ASSUMED to
+// deominate .. fuck 
+//if (p.size()) m.graticule_d().draw(m,v,sdp);
 //MM_ERR(MMPR(p.size()))
 MM_LOOP(ii,p)
 {
@@ -1240,7 +1281,7 @@ virtual IdxTy Draw(scope_draw_param_type * sdp , const IdxTy flags)
 {
 //MM_ERR(__FUNCTION__)
 EnterSerial(0);
-ViewInfo & v=m_view;
+ViewInfo & v=view();
 //MM_ERR(MMPR(v.dump()))
 
 GlutUtil::start_view(v);
@@ -1276,6 +1317,7 @@ if (false) DrawSeg(m,v,sdp);
 DrawOrnatePoints(m,v,sdp); 
 DrawStrip(m,v,sdp); 
 DrawOscope(m,v,sdp); 
+DrawZij(m,v,sdp); 
 DrawMolecule(m,v,sdp);
 DrawDecorations(m,v,sdp);
 //ExitSerial(0);
@@ -1727,7 +1769,9 @@ m_grat_changed=0;
 m_data_idx.set_size(10);
   m_mutex_vector= MutexVector(3);;
  MakeAddMap();
-
+if (m_views.size()==0) m_views.push_back(ViewInfo());
+m_views.resize(1);
+m_iview=0;
 } // Init
 
 void Init(const StrTy & s)
@@ -1743,7 +1787,9 @@ Init();
 
 // MEMBERS
 StrTy m_src;
-ViewInfo m_view;
+//ViewInfo m_view;
+ViewInfoVec m_views;
+IdxTy m_iview;
 ModelInfo m_background;
 //Models  m_data;
 // this is an index buffer not an object pool
