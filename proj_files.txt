@@ -21,3 +21,4 @@ mjmdscope/man/mjmdscope-package.Rd
 mjmdscope/Read-and-delete-me
 ../freefem/ff_dscope_line.zip
 ../freefem/first_ff_dscope.zip
+run_datascope

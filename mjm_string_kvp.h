@@ -478,6 +478,24 @@ get(d[i],ss.str());
 return rc;
 }
  
+
+template <class Tv> 
+const IdxTy  get_vec_contig(Tv & d, const StrTy & n ) const { 
+IdxTy rc=0;
+IdxTy i=0;
+while (true) // MM_ILOOP(i,sz)
+{
+Ss ss;
+ss<<n<<i;
+if (!has(ss.str())) break; // continue;
+++rc;
+d.push_back(StrTy());
+get(d[i],ss.str());
+++i;
+} // i
+return rc;
+}
+ 
  
 //const StrTy& get(const StrTy & n )const{ return (*(m_map.find(n))).second;} 
 const StrTy get(const StrTy & n ) const { 

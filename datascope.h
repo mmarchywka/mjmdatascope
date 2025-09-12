@@ -5,6 +5,7 @@
 #include "mjm_globals.h"
 // 
 #include "mjm_thread_util.h"
+#include "mjm_canned_methods.h"
 
 #ifndef NO_DSCOPE_GRAPHICS
 // complains if included later doh 
@@ -28,7 +29,6 @@
 #include "mjm_logic_base.h"
 #include "mjm_strings.h"
 #include "mjm_string_kvp.h"
-#include "mjm_canned_methods.h"
 
 
 #include "mjm_dscope_pktfifo.h"
