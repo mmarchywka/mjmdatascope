@@ -6,7 +6,7 @@
 // 
 #include "mjm_thread_util.h"
 #include "mjm_canned_methods.h"
-
+ 
 #ifndef NO_DSCOPE_GRAPHICS
 // complains if included later doh 
 // although this should only be in glut_scope NOT
