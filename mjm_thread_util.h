@@ -255,12 +255,14 @@ void start()
 {
 //Myt * p = tp->p; StrTy s=tp->s; IdxTy flags=tp->flags;
 Ty * pt = p; StrTy _s=s; IdxTy _flags=flags;
+pFunc _f=func;
 delete this; 
 //auto pFunc=tp->func;
 //delete tp;
 //p->Start(s,flags); 
 try {
-(pt->*func)(_s,_flags);
+//(pt->*func)(_s,_flags);
+(pt->*_f)(_s,_flags);
 } catch (...) { MM_ERR(" throw "<<MMPR(__FUNCTION__)) }
 pthread_exit(NULL);
 //delete this;

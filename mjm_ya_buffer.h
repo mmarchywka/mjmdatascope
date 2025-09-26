@@ -4,6 +4,7 @@
 #include "mjm_globals.h"
 #include "mjm_thread_util.h"
 
+//#include "mjm_canned_methods.h"
 //#include "mjm_block_matrix.h"
 #include "mjm_instruments.h"
 #include "mjm_strings.h"
@@ -11,7 +12,6 @@
 #include "mjm_worm_blob.h"
 //#include "mjm_collections.h"
 //#include "mjm_tokenized_collections.h"
-#include "mjm_canned_methods.h"
 
 #include "mjm_pawnoff.h"
 #include "mjm_strings.h"
@@ -241,6 +241,15 @@ return rc;
 // only useful for fixed length samples with buffer multiple of
 // that size ... doh 
 // TODO text this lol 
+IdxTy write_string(const StrTy & s, const IdxTy flags=0)
+{
+const bool write_zed=!Bit(flags,0);
+const IdxTy del=write_zed?1:0;
+const IdxTy n=s.length()+del;
+const IdxTy nsent=write_wrap(s.c_str(),n,0);
+return n-nsent;
+} // write_string
+
 IdxTy write_wrap(const Data * p, const IdxTy sz,const IdxTy flags )
 {
 EnterSerial(0);
@@ -322,9 +331,34 @@ else sz=m_wr_ptr-m_rd_ptr;
 
 void inc(volatile IdxTy & p,const IdxTy n ) const { p=(p+n)%m_sz; } 
 void take( const IdxTy n) { inc(m_rd_ptr,n); //  m_rd_ptr=(m_rd_ptr+n) % m_sz;
-MM_ERR(MMPR4(m_rd_ptr,m_wr_ptr,n,m_full))
+//MM_ERR(MMPR4(m_rd_ptr,m_wr_ptr,n,m_full))
 if (n) m_full=false;
  } // take
+// could index eol during write? 
+StrTy *  read_string( const IdxTy flags=0 )
+{
+//bool found=false;
+//MM_ERR(" rd wtf "<<MMPR(Available())) 
+EnterSerial(0);
+IdxTy ptr=m_rd_ptr;
+if ( ptr==m_wr_ptr) if (!m_full) { ExitSerial(0); return 0; }
+IdxTy n=0;
+while ((m_tgt[ptr]!=0)&&(m_tgt[ptr]!='\n')) 
+{ ++n; 
+if ( ptr==m_wr_ptr) if (m_full) { ExitSerial(0); return 0; }
+inc(ptr,1); 
+if ( ptr==m_wr_ptr)if(!m_full)   { ExitSerial(0); return 0; }
+} 
+ExitSerial(0);
+Data * p=new char[n+1];
+read(p,n+1,0);
+//if (p[n-1]=='\r')
+p[n]=0;
+StrTy * s= new StrTy(p);
+delete [] p;
+return s;
+
+} // read_string
 IdxTy read( Data * p, const IdxTy sz,const IdxTy flags )
 {
 const bool take=!Bit(flags,0);

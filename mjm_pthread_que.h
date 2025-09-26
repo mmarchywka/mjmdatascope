@@ -128,8 +128,13 @@ EnterSerial(COUNT_MUX);
 if (m_limit_size!=0){ 
 IdxTy dr=m_dropped;
  while (m_que.size()>m_limit_size) Dispose(); 
+if (false) {IdxTy mask=(-1)<<4;
 if (dr!=m_dropped) 
-	MM_ERR(" queue overflow "<<MMPR3(dr,m_dropped,(m_dropped-dr)))
+	if ((m_dropped&mask)-(dr&mask)) 
+		//MM_ERR(" queue overflow "<<MMPR3((-int(mask)),(m_dropped&mask),(dr&mask))<<MMPR3(dr,m_dropped,(m_dropped-dr)))
+		MM_ERR(" queue overflow "<<MMPR3(dr,m_dropped,(m_dropped-dr)))
+}
+
 } 
 if (!m_done) m_que.push(p);
 rc=!m_done;

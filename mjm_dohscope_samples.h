@@ -129,7 +129,7 @@ StrTy set(const StrTy & sin,const IdxTy flags) {return Set(sin,flags); }
 // channels numbered from 1 time base on zero 
 D trail(const IdxTy n, const IdxTy c) const { return m_buf(c,Trail(n)); } 
 void resize(const IdxTy nc, const IdxTy pts) { Resize( nc, pts); } 
-void add(const D & t, const D & y) {Add(t,y); }
+void add(const D & t, const D & y, const IdxTy channel=0) {Add(t,y,channel); }
 void add(Ragged & r, const IdxTy first, const IdxTy nlines, const IdxTy nch, const IdxTy flags) 
 { Add(r, first, nlines, nch,flags); } 
 void add_trailing(Ragged & r, const IdxTy nlines) 
@@ -241,11 +241,11 @@ Add(r,plead,nlead,m_channels);
 if ( m_debug_trailing ) MM_ERR(MMPR3(nlines,m_newest,m_oldest)<<MMPR3(plead,nlead,r.size()))
 
 } // AddTrailing 
-void Add(const D & t, const D & y) 
+void Add(const D & t, const D & y, const IdxTy channel) 
 { 
 
 m_buf(0,m_newest)=t;
-m_buf(1,m_newest)=y;
+m_buf(channel+1,m_newest)=y;
 Inc_newest(1);
 
 } // Add

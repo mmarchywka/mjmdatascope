@@ -403,7 +403,7 @@ return BoundBox(xmin, xmax, ymin, ymax, flags); }
 // creating a posisble deadlock on panic exit until
 // threading worked out.  
 void exit_loop() {MM_ERR(MMPR(alive())) 
-// this fucks everything up fuck 
+// this fks everything up fck 
 if (alive()){  glutLeaveMainLoop(); 
 // it does nothing until this happens doh 
 // this STILL does not fing work f 
@@ -975,7 +975,7 @@ enum { POPUP_RESET,POPUP_TOGGLE_VIS,POPUP_CLEAR };
 // TODO needs a mutex for m_scenees... 
 // active, deactive to avoid auto-active, 
 // select for manipulation 
-// the fucking new shit needs this in the glut thread fuck 
+// the fking new sit needs this in the glut thread fck 
 int BuildPopupMenu (void) { m_gf.m_fix_menu=true; return 0; } 
 int _BuildPopupMenu (void)
 {

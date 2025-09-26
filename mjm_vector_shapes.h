@@ -129,6 +129,7 @@ _triple(const D & x, const D &y, const D & z): m_x(x),m_y(y),m_z(z) {}
 const D & x() const { return m_x;}
 const D & y() const { return m_y;}
 const D & z() const { return m_z;}
+StrTy dump() const { Ss ss; ss<<MMPR3(m_x,m_y,m_z); return ss.str(); } 
 D m_x,m_y,m_z;
 }; // _triple
 
@@ -438,6 +439,7 @@ static void Ngon( Tv & x, Tv & y, const D & r, const IdxTy & n
 , const D & xz=0, const D & yz=0, const D & phiz=0, const IdxTy & m=1)
 {
 static const D px=M_PI/180.0;
+//for (IdxTy i=0; i<n; ++i)
 for (IdxTy i=0; i<n; ++i)
 {
 const D f= 360.0*((i*m)%n)/n;

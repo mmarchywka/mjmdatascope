@@ -595,7 +595,7 @@ mi.m_src=m_src;
 mi.m_type="ornate-points";
 mi.add_ornate_points(r,flags);
 int doclear=mi.etc_int("clear");
-MM_ERR(MMPR2(doclear,new_model))
+//MM_ERR(MMPR2(doclear,new_model))
 //ZZif (doclear&&!new_model) { ModelInfo mn=mi; clear(); new_model=true; } 
 //if (doclear&&!new_model) { mi.clear(); 
 //mi.add_ornate_points(r,flags);
@@ -1066,7 +1066,7 @@ IdxTy DrawOrnatePoints(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
 auto& p=m.ornate_points_d();
 // apparently with depth testing equal z doesn first thing
 // drawn and suppresses later FUCK draw order was being ASSUMED to
-// deominate .. fuck 
+// deominate .. fck 
 //if (p.size()) m.graticule_d().draw(m,v,sdp);
 //MM_ERR(MMPR(p.size()))
 MM_LOOP(ii,p)
@@ -1108,7 +1108,7 @@ auto& p=m.ornate_points_d();
 if (false) if (p.size())
 {
 const auto & pj=p[0];
-// this looks like a ribbon as there is no width in x=y dir fuck
+// this looks like a ribbon as there is no width in x=y dir fck
   glColor3f(pj.r(),pj.g(),pj.b());     // Green
 v.doglutpos(glVertex3f,pj.x()-dx,pj.y()-dy,pj.z()-dz); 
 v.doglutpos(glVertex3f,pj.x()+dx,pj.y()+dy,pj.z()+dz); 
@@ -1541,14 +1541,14 @@ Gf pitch=bw;
 
 MM_LOOP(ii,hm.col_names())
 {
-// assfuck 
+// asfck 
 Gf yy=ymin; // +cols*bw;;
 Gf xx=di;
 Gf zz=0;
 v.inplacepos(xx,yy,zz);
 //MM_ERR(MMPR3(xx,yy,zz))
 //drawString(xmin,ymin+di,0,(*ii).c_str());
-drawStringfuck(xx,yy-.4,zz,(*ii).c_str());
+drawStringfck(xx,yy-.4,zz,(*ii).c_str());
 di+=pitch; // pitch;
 
 } // ii col_names
@@ -1572,7 +1572,7 @@ di+=pitch; // pitch;
 
 } // ii 
 } // false 
-// shitty ass shit fuck test fucking pattern fuck this shit 
+// shty s sht fck test fcking pattern fck this sht 
 if (false)
 {
 MM_ILOOP(i,1000)
@@ -1594,11 +1594,11 @@ return 0;
 
 void drawString(float x, float y, float z, const char *string) {
 //  glRasterPos3f(x, y, z);
-//MM_ERR(" fuck "<<MMPR4(x,y,z,string))
+//MM_ERR(" fck "<<MMPR4(x,y,z,string))
 //porject(x,y,z); // need the view first 
 //MM_ERR(" shit "<< MMPR4(x,y,z,string))
 // ASSFUCK 
-// this shit doesn't fucking work for shit  ASSFUCK 
+// this shit doesn't fcking work for shit  ASSFUCK 
 //glPushMatrix();
 //glMatrixMode(GL_MODELVIEW) ;
 //glRotatef(45,x,y,z);
@@ -1611,21 +1611,21 @@ if (!false)  glRasterPos3f(x, y, z);
     //glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, *c);  // Updates the position
     glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, *c);  // Updates the position
 //glTranslatef(x,y,z);
-// no fucking work fuclk 
+// no fcking work fuk 
 //    glutStrokeCharacter(GLUT_STROKE_MONO_ROMAN, *c);  // Updates the position
   }
-// another assfuck
+// another asfck
 //glPopMatrix();
 }
 
 
-void drawStringfuck(float x, float y, float z, const char *string) {
+void drawStringfck(float x, float y, float z, const char *string) {
 //  glRasterPos3f(x, y, z);
-//MM_ERR(" fuck "<<MMPR4(x,y,z,string))
+//MM_ERR(" fck "<<MMPR4(x,y,z,string))
 //porject(x,y,z); // need the view first 
 //MM_ERR(" shit "<< MMPR4(x,y,z,string))
 // ASSFUCK 
-// this shit doesn't fucking work for shit  ASSFUCK 
+// this shit doesn't fking work for shit  ASSFUCK 
 //glPushMatrix();
 //glMatrixMode(GL_MODELVIEW) ;
 //glRotatef(45,x,y,z);
@@ -1638,12 +1638,12 @@ void drawStringfuck(float x, float y, float z, const char *string) {
 if (!false)  glRasterPos3f(x, y-.4*(c-string), z);
     glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, *c);  // Updates the position
 //glTranslatef(x,y,z);
-// no fucking work fuclk 
+// no fking work fuclk 
 //    glutStrokeCharacter(GLUT_STROKE_MONO_ROMAN, *c);  // Updates the position
   }
-// another assfuck
+// another ssfck
 //glPopMatrix();
-} // drawStringfuck
+} // drawStringfck
 
 
 // https://community.khronos.org/t/placing-text-in-3d-world/59313/4
@@ -1651,11 +1651,11 @@ void porject(float & x, float & y, float &z )
 {
  //glRasterPos3f(0,0,0);
  //glTranslatef(0,0,0);
-// someone sets the last 4 to fucking shit 
+// someone sets the last 4 to fcking sit 
 //glMatrixMode(GL_MODELVIEW);
 //   glLoadIdentity();
 
-// this assfuck sets the fucking matrix vector fuck 
+// this assck sets the fking matrix vector fck 
 //glTranslatef(0,0,0);
 	GLdouble modelview[16];
 	GLdouble projection[16];
@@ -1671,11 +1671,11 @@ void porject(float & x, float & y, float &z )
  GLdouble xx=0,yy=0,zz=0;
 	//gluProject(x, y, z, modelview, projection, viewport, &outputCoord.x, &outputCoord.y, &outputCoord.z);
 if(GL_TRUE==	gluProject(x, y, z, modelview, projection, viewport, &xx, &yy, &zz))
-{} // MM_ERR(" fucker worked ")
+{} // MM_ERR(" fuer worked ")
 else
 {
 
-MM_ERR(" fucker failed ")
+MM_ERR(" fker failed ")
 
 } ;
 x=xx;
@@ -1686,7 +1686,7 @@ z=zz;
 
 //	return outputCoord;
 
-} // fuck         
+} // fk         
 IdxTy DrawSvg(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
 {
 auto & sv= m.svgs_d();

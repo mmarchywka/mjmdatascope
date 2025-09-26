@@ -341,9 +341,12 @@ return kvp.encoded(m_map);
 // TODO ignores vector, just allw it to sort but may want groups
 // etc. 
 // precision etc 
-void set(const StrTy & nm, const D & x, const IdxTy flags=0 ) { Ss ss; ss<<x;  m_map[nm]=ss.str(); } 
+void set(const StrTy & nm, const D & x, const IdxTy flags=0 ) 
+{ Ss ss; ss<<std::setprecision(18)<<x;  m_map[nm]=ss.str(); } 
 // want base conversion et 
 void set(const StrTy & nm, const int & x, const IdxTy flags=0 ) { Ss ss; ss<<x;  m_map[nm]=ss.str(); } 
+void set(const StrTy & nm, const IdxTy & x, const IdxTy flags=0 ) { Ss ss; ss<<x;  m_map[nm]=ss.str(); } 
+void set(const StrTy & nm, const bool & x, const IdxTy flags=0 ) { Ss ss; ss<<x;  m_map[nm]=ss.str(); } 
 // allow for escape and safety etc 
 void set(const StrTy & nm, const StrTy & x, const IdxTy flags=0) {  m_map[nm]=x; } 
 const IdxTy  get(IdxTy  & d,const StrTy & n ) const { 

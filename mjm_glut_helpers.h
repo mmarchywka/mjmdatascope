@@ -351,7 +351,14 @@ doglutpos(glVertex3f,pi.x(),pi.y(),pi.z());
 glEnd();
 return 0;
 } // null 
-
+//MM_ERR(" not drawing fucked up assf cuk ")
+if (false) { MM_LOOP(ii,s)
+{
+auto fuck=(*ii).triple(pi.x(),pi.y(),pi.z(),pi.size());
+MM_ERR(MMPR(fuck.dump()))
+} // ii 
+}
+//if (true) return 0; 
 
 // size and place ok... 
 // maybe output vectors or something? 
@@ -363,6 +370,7 @@ return 0;
 glColor3f(pi.r(),pi.g(),pi.b() );//
 if (s.filled())  glBegin(GL_POLYGON);
 else  glBegin(GL_LINE_LOOP);
+// glBegin(GL_LINE_STRIP);
 // this has to be a translated shape or else translated... 
 MM_LOOP(ii,s)
 {

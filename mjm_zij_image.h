@@ -192,7 +192,9 @@ IdxTy DrawPoints(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
 const int style=v.style();
 const bool as_points=Bit(style,0);
 const IdxTy layer=v.layer();
-if (layer>=size()) { MM_ERR( " layer oor "<<MMPR2(layer,dump())) } 
+// this is normal lol 
+if (layer>=size()) { MM_ONCE( " layer oor "<<MMPR2(layer,dump()),) } 
+if (layer>=size()) { return 0;  } 
 const Image & vi=m_images[layer];
 const ImageStat & vis=m_stats[layer];
 D r=1;

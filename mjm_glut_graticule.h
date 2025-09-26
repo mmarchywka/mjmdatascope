@@ -170,7 +170,7 @@ IdxTy draw(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
 { return Draw(m,v,sdp); } 
 
 template <class Fuck, class ModelInfo, class ViewInfo, class DrawInfo>
-IdxTy drawASSFUCK( Fuck & fuk, ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
+IdxTy drawASUCK( Fuck & fuk, ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
 { return Draw(fuk,m,v,sdp); } 
 
 private:
@@ -178,8 +178,8 @@ private:
 template <class Fuck, class ModelInfo, class ViewInfo, class DrawInfo>
 IdxTy Draw( Fuck  & fuk, ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
 { 
-// WHUY THE ASS FUCK DOE ANY GRAPHICS PAADF MAKE YIOU WRITE RSHIT CODE
-// LIKE THIS FUCKRERE FUCJ
+// WHUY THE ASCK DOE ANY GRAPHICS PAADF MAKE YIOU WRITE RSHIT CODE
+// LIKE THIS FRE FUCJ
 v.wide_line_fuk(m_lw,fuk.m_x1,fuk.m_y1,fuk.m_z1,m_x0,m_y0,m_z0,m_r,m_g,m_b,
 
 m_r,m_g,m_b);
@@ -478,7 +478,7 @@ typename ViewInfo::G  oldw=100;
 //MM_ERR(MMPR(oldw))
 glGetFloatv(GL_LINE_WIDTH,&oldw);
 //MM_ERR(MMPR(oldw))
-// fuck 
+// fk 
 //glBegin(GL_LINE_STRIP);
 //glColor3f(pi.r(),pi.g(),pi.b() );
 glColor3f(1.0f,1.0f,1.0f );
@@ -487,7 +487,7 @@ MM_LOOP(ii,m_lines) {
 //glBegin(GL_LINE_STRIP);
 //glBegin(GL_LINES);
  (*ii).draw(m,v,sdp);
-//if (jj!=ii) { (*ii).drawASSFUCK(*jj,m,v,sdp); ++jj; }
+//if (jj!=ii) { (*ii).drawASUCK(*jj,m,v,sdp); ++jj; }
 //glEnd();
  } 
 // see if numbers need to be up again with depth test setting 
