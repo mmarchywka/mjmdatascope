@@ -1065,7 +1065,7 @@ IdxTy DrawOrnatePoints(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
 //MM_ERR(" drawing ornate ")
 auto& p=m.ornate_points_d();
 // apparently with depth testing equal z doesn first thing
-// drawn and suppresses later FUCK draw order was being ASSUMED to
+// drawn and suppresses later FCK draw order was being ASSUMED to
 // deominate .. fck 
 //if (p.size()) m.graticule_d().draw(m,v,sdp);
 //MM_ERR(MMPR(p.size()))
@@ -1597,8 +1597,8 @@ void drawString(float x, float y, float z, const char *string) {
 //MM_ERR(" fck "<<MMPR4(x,y,z,string))
 //porject(x,y,z); // need the view first 
 //MM_ERR(" shit "<< MMPR4(x,y,z,string))
-// ASSFUCK 
-// this shit doesn't fcking work for shit  ASSFUCK 
+// ASFCK 
+// this st doesn't fcking work for sht  ASCK 
 //glPushMatrix();
 //glMatrixMode(GL_MODELVIEW) ;
 //glRotatef(45,x,y,z);
@@ -1624,8 +1624,8 @@ void drawStringfck(float x, float y, float z, const char *string) {
 //MM_ERR(" fck "<<MMPR4(x,y,z,string))
 //porject(x,y,z); // need the view first 
 //MM_ERR(" shit "<< MMPR4(x,y,z,string))
-// ASSFUCK 
-// this shit doesn't fking work for shit  ASSFUCK 
+// ASUCK 
+// this shit doesn't fking work for shit  ASUCK 
 //glPushMatrix();
 //glMatrixMode(GL_MODELVIEW) ;
 //glRotatef(45,x,y,z);

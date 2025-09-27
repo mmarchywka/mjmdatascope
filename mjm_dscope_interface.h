@@ -149,17 +149,24 @@ public:
 static D & defsz() { static D ds=2; return ds; }
 static D & defsz(const D & x) {defsz()=x; return defsz(); }
 
+static StrTy & defsh() { static StrTy ds="point"; return ds; }
+static StrTy & defsh(const StrTy & x) {defsh()=x; return defsh(); }
+
+static bool & ok() { static bool ds=false; return ds; }
+static bool & ok(const bool & x) {ok()=x; return ok(); }
+
 enum { WHITE=((1<<24)-1) };
 // 2025-07 change default sz wtf was .01 
-// 2025-09 assfuck if its a shape huge kills graphics fuck 
+// 2025-09 asuck if its a shape huge kills graphics fk 
 _point(const D & a, const D & b, const D & c)
 //:m_x(a),m_y(b),m_z(c),m_sz(2),m_rgb(WHITE),m_shape("circle") {}
-:m_x(a),m_y(b),m_z(c),m_sz(defsz()),m_rgb(WHITE),m_shape("circle") {}
+:m_x(a),m_y(b),m_z(c),m_sz(defsz()),m_rgb(WHITE),m_shape(defsh()) {guard();}
 _point(const D & a, const D & b, const D & c, const IdxTy rgb)
 //:m_x(a),m_y(b),m_z(c),m_sz(2),m_rgb(rgb),m_shape("circle") {}
-:m_x(a),m_y(b),m_z(c),m_sz(defsz()),m_rgb(rgb),m_shape("circle") {}
+:m_x(a),m_y(b),m_z(c),m_sz(defsz()),m_rgb(rgb),m_shape(defsh()) {guard();}
 //_point() : m_x(0),m_y(0),m_z(0),m_sz(2),m_rgb(WHITE), m_shape("circle") {}
-_point() : m_x(0),m_y(0),m_z(0),m_sz(defsz()),m_rgb(WHITE), m_shape("circle") {}
+_point() : m_x(0),m_y(0),m_z(0),m_sz(defsz()),m_rgb(WHITE), m_shape(defsh()) 
+{guard();}
 const D & theta() const { return 0; }
 const D & x() const { return m_x; }
 const D & y() const { return m_y; }
@@ -168,8 +175,15 @@ const D & sz() const { return m_sz; }
 void  sz(const D & x)  {  m_sz=x; }
 const IdxTy rgb() const { return m_rgb; }
 void  rgb(const IdxTy x)  {  m_rgb=x; }
-void shape(const StrTy & shape)  {  m_shape=shape; }
+void shape(const StrTy & shape)  {  m_shape=shape; guard(); }
 const StrTy & shape() const { return m_shape; }
+void guard() const
+{ 
+if (ok()) return; 
+if (defsz()>1) if (m_shape!="point") 
+ MM_DIE(" stupid glut will choke on old params set defsz or use point or set ok() ")
+}
+
 //void Init_point() { } // Init_point
 D m_x,m_y,m_z,m_sz;
 IdxTy m_rgb;

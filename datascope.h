@@ -1122,7 +1122,7 @@ RagScene * rs=m_scenes[r];
 rs->pool(&m_pool);
 const StrTy srcname=rs->srcname();
 if (false) MM_ERR(MMPR(rs->dump()))
-// fuck this needs a model info here ... 
+// fck this needs a model info here ... 
 rs->add(r,0);
 // this needs to create a glut_rag 
 // 

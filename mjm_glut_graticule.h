@@ -169,14 +169,14 @@ template <class ModelInfo, class ViewInfo, class DrawInfo>
 IdxTy draw(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
 { return Draw(m,v,sdp); } 
 
-template <class Fuck, class ModelInfo, class ViewInfo, class DrawInfo>
-IdxTy drawASUCK( Fuck & fuk, ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
+template <class Fck, class ModelInfo, class ViewInfo, class DrawInfo>
+IdxTy drawASUCK( Fck & fuk, ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
 { return Draw(fuk,m,v,sdp); } 
 
 private:
 
-template <class Fuck, class ModelInfo, class ViewInfo, class DrawInfo>
-IdxTy Draw( Fuck  & fuk, ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
+template <class Fck, class ModelInfo, class ViewInfo, class DrawInfo>
+IdxTy Draw( Fck  & fuk, ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
 { 
 // WHUY THE ASCK DOE ANY GRAPHICS PAADF MAKE YIOU WRITE RSHIT CODE
 // LIKE THIS FRE FUCJ

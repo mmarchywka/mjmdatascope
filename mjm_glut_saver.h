@@ -618,7 +618,7 @@ return 0;
 }
 
 // https://stackoverflow.com/questions/59470927/how-to-replace-avcodec-encode-audio2-avcodec-encode-video2-with-avcodec-send
-// fucking deprectaed fucker
+// fking deprectaed fker
     //ret = my_avcodec_encode_video2(c, &pkt, frame, &got_output);
         //ret = avcodec_encode_video2(c, &pkt, NULL, &got_output);
         int   my_avcodec_encode_video2( AVCodecContext* c, 
@@ -638,7 +638,7 @@ while (ret >= 0) {
         fprintf(stderr, "Error during encoding\n");
         exit(1);
     }
-// this is an audio assfuck
+// this is an audio asuck
 //    ret = write_frame(oc, &c->time_base, ost->st, &pkt);
 //    if (ret < 0) {
 //       fprintf(stderr, "Error while writing video frame: %s\n", av_err2str(ret));

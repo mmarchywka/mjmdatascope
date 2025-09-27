@@ -249,7 +249,7 @@ GLint h_shit=glutGet(GLUT_WINDOW_HEIGHT);
 const D xdx=x0-x1;
 const D xdy=y0-y1; // ()-pjm.y();
 const D wl=2.0*_wl; // convet from gl fuk
-//MM_ERR(" ASSFUCK "<<MMPR2(wl,_wl))
+//MM_ERR(" ASUCK "<<MMPR2(wl,_wl))
  D r=xdx*xdx+xdy*xdy;
 if (r==0) return; //  continue;
 r=sqrt(r);
@@ -341,9 +341,15 @@ if (s.just_point())
 glColor3f(pi.r(),pi.g(),pi.b() );//
 //glColor3f(255.0,1.0,1.0 );//
 //D sz=(*(s.begin())).point_size();
-// TODO the code if fucked up 
+// TODO the code if fked up 
 D sz=pi.size(); // s.point_size();
-if (sz<1) { MM_ERR( " point size is zero "<<MMPR(sz)) }
+// this aparently is drawn in glut coords which are fixed as
+// datascope does the matrix math lol 
+// wrong, it was dropping .03 size points fck 
+// aparently it triggers z buffer but does not add a color to pixel
+// unless size is 1 or more doh. 
+if (sz<1) { MM_ERR( " upping point size is zero "<<MMPR(sz)) sz=1; }
+//if (sz==0 ) { MM_ERR( " point size is zero "<<MMPR(sz)) }
 glPointSize(sz);
 glBegin(GL_POINTS);
 //MM_ERR(MMPR3(pi.x(),pi.y(),pi.z()))
@@ -351,11 +357,11 @@ doglutpos(glVertex3f,pi.x(),pi.y(),pi.z());
 glEnd();
 return 0;
 } // null 
-//MM_ERR(" not drawing fucked up assf cuk ")
+//MM_ERR(" not drawing cked up assf cuk ")
 if (false) { MM_LOOP(ii,s)
 {
-auto fuck=(*ii).triple(pi.x(),pi.y(),pi.z(),pi.size());
-MM_ERR(MMPR(fuck.dump()))
+auto fck=(*ii).triple(pi.x(),pi.y(),pi.z(),pi.size());
+MM_ERR(MMPR(fck.dump()))
 } // ii 
 }
 //if (true) return 0; 
