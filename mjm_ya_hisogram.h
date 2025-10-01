@@ -124,7 +124,8 @@ typedef std::map<StrTy, Ragged> RaggedMap;
 typedef std::vector<StrTy> Words;
 typedef mjm_string_base_params<Tr> BaseParams;
 typedef mjm_num_tricks<Tr> Tricks;
-typedef std::map<D,int > Map;
+typedef int CountTy;
+typedef std::map<D,CountTy > Map;
 
 // API
 
@@ -144,10 +145,11 @@ if (log)
 {  D end=start+inc*n;  D dinc=::pow(end/start,1.0/D(n));  
 	MM_ILOOP(i,n) {m_map[d]=0; d*=dinc; }  } 
 } // bins 
-void reset() { MM_LOOP(ii,m_map) { (*ii).second=0; }   m_n=0; m_s=0; } 
+void reset() { MM_LOOP(ii,m_map) { (*ii).second=0; } m_max=0;   m_n=0; m_s=0; } 
 void digits(const IdxTy  p) { m_digits=(p); } 
-void clear() { m_map.clear();m_n=0;m_s=0; } 
+void clear() { m_map.clear();m_n=0;m_s=0; m_max=0; } 
 const IdxTy n() const { return m_n; } 
+const IdxTy max() const { return m_max; } 
 const D & sum() const { return m_s; } 
 typename Map::iterator begin() { return m_map.begin(); } 
 typename Map::iterator end() { return m_map.end(); } 
@@ -183,7 +185,7 @@ static bool Bit(const IdxTy f, const IdxTy b) { return  ((f>>b)&1)!=0; }
 static void Set(IdxTy& f, const IdxTy b,const bool x) //const  
     { if (x) f|=(1<<b); else f&=~((1)<<b); }
 StrTy Dump(const IdxTy flags=0) {Ss ss;  
-ss<<MMPR3(m_digits,m_n,m_s); 
+ss<<MMPR4(m_digits,m_n,m_s,m_max); 
 MM_LOOP(ii,m_map) { const D & k=(*ii).first; const int & v=(*ii).second;
  ss<<MMPR2(k,v)<<CRLF; } 
 return ss.str(); }
@@ -244,15 +246,17 @@ return 0;
 void Add(const D & p) { 
 m_s+=p;
 D pd=m_tricks.digits(p,m_digits);
-++m_map[pd];
+auto & x=m_map[pd];
+++x;
+if (x>m_max) m_max=x;
 ++m_n;
 } // Add 
 
 void AddBounds(const D & p) { 
 m_s+=p;
 auto ii=m_map.lower_bound(p);
-if (ii==m_map.end()) m_map[p]=1; 
-else { ++(*ii).second; } 
+if (ii==m_map.end()){  m_map[p]=1;if (m_max==0) m_max=1; }  
+else { auto & x=(*ii).second; ++x; if ( x>m_max) m_max=x; } 
 ++m_n;
 } // Add 
 
@@ -285,6 +289,7 @@ void Init()
 m_digits=3;
 m_n=0;
 m_s=0;
+m_max=0;
 } // Init
 
 
@@ -292,6 +297,7 @@ m_s=0;
 // MEMBERS
 Tricks m_tricks;
 IdxTy m_digits,m_n;
+CountTy m_max;
 Map m_map;
 D m_s;
 }; // mjm_ya_hisogram

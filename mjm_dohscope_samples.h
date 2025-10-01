@@ -130,6 +130,11 @@ StrTy set(const StrTy & sin,const IdxTy flags) {return Set(sin,flags); }
 D trail(const IdxTy n, const IdxTy c) const { return m_buf(c,Trail(n)); } 
 void resize(const IdxTy nc, const IdxTy pts) { Resize( nc, pts); } 
 void add(const D & t, const D & y, const IdxTy channel=0) {Add(t,y,channel); }
+//m_buf(0,m_newest)=t; m_buf(channel+1,m_newest)=y; Inc_newest(1);
+void set_t(const D & t) { m_buf(0,m_newest)=t; }
+void set( const D & y, const IdxTy channel=0){ m_buf(channel+1,m_newest)=y; }
+void inc() {  Inc_newest(1); } 
+
 void add(Ragged & r, const IdxTy first, const IdxTy nlines, const IdxTy nch, const IdxTy flags) 
 { Add(r, first, nlines, nch,flags); } 
 void add_trailing(Ragged & r, const IdxTy nlines) 
