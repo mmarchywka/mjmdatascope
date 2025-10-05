@@ -131,6 +131,7 @@ mjm_zij_image() {Init(); }
 mjm_zij_image(const StrTy & sin,const IdxTy flags) {Init(sin,flags); }
 mjm_zij_image(const Ragged & r,const IdxTy start, const IdxTy first,const IdxTy flags ) {Init(r,start,first,flags);}
 
+void message(const StrTy & sin,const IdxTy flags=0) {Message(sin,flags); }
 void load(const StrTy & sin,const IdxTy flags) {Init(sin,flags); }
 void load(const Ragged & r,const IdxTy start, const IdxTy first,const IdxTy flags ) {Init(r,start,first,flags);}
 
@@ -208,16 +209,26 @@ D x=m_x0+i*m_dx;
 MM_ILOOP(j,(m_ny-1))
 {
 D y=m_y0+j*m_dy;
-PointEntry  p0(x,y,vi(i,j),r,g,b);
-PointEntry  p1(x+m_dx,y,vi(i+1,j),r,g,b);
-PointEntry  p2(x+m_dx,y+m_dy,vi(i+1,j+1),r,g,b);
-PointEntry  p3(x,y+m_dy,vi(i,j+1),r,g,b);
+//MM_ERR(MMPR3(i,j,vi(i,j)))
+ColorScheme(r,g,b,vi(i,j)); PointEntry  p0(x,y,vi(i,j),r,g,b);
+ColorScheme(r,g,b,vi(i+1,j)); PointEntry  p1(x+m_dx,y,vi(i+1,j),r,g,b);
+ColorScheme(r,g,b,vi(i+1,j+1)); PointEntry  p2(x+m_dx,y+m_dy,vi(i+1,j+1),r,g,b);
+ColorScheme(r,g,b,vi(i,j+1)); PointEntry  p3(x,y+m_dy,vi(i,j+1),r,g,b);
 v.draw_4gon(p0,p1,p2,p3);
 
 } // j 
 } // i
 return 0; 
 } // DrawPoints
+void Clip(D& x) const  { if (x<0) x=0; else if (x>1) x=1; } 
+//void Clip(D& x) const  {if (x>1) x=1.0-x;  if (x<0) x=0;  } 
+void ColorScheme(D&r, D&g, D&b, const D&_v) const 
+{
+D v=(_v-m_hue_offset)*m_hue_scale;
+b=v*3; Clip(b);
+g=(v-.33)*3; Clip(g);
+r=(v-.66)*3; Clip(r);
+} // ColorScheme
 void Append(const Myt & that, const IdxTy flags)
 {
 
@@ -284,7 +295,7 @@ const D v=atof(l[j].c_str());
 m_images[j](ix,iy)=v; 
 
 }
-++ix; if (ix==m_nx) { ++iy; ix=9; }
+++ix; if (ix==m_nx) { ++iy; ix=0; }
 }  // i 
 
 MM_ERR(MMPR4(ix,iy,m_nx,m_ny)) 
@@ -318,12 +329,20 @@ m_dx=.01;
 m_dy=.01;
 m_nx=0;
 m_ny=0;
+m_hue_offset=0;
+m_hue_scale=1;
 } // Init
 // only remove data 
 void Clear() { //Init();
 m_images.clear(); // keep other vars the same. 
  }
+void Message(const StrTy  & sin,const IdxTy flags =0  )
+{
+BaseParams kvp(sin);
+kvp.get(m_hue_scale,"huescale");
+kvp.get(m_hue_offset,"hueoffset");
 
+} // Message
 
 // MEMBERS
 //ChartMap m_map;
@@ -331,6 +350,7 @@ m_images.clear(); // keep other vars the same.
 IdxTy m_nx, m_ny,m_size;
 //IdxTy m_groups;
 D m_x0,m_x1,m_y0,m_y1,m_dx,m_dy;
+D m_hue_offset,m_hue_scale;
 //Parameters m_params,m_etc;
 Images m_images;
 ImageStats m_stats;

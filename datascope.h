@@ -413,6 +413,7 @@ GlutScope & x=m_glut;
 if (cmd=="dump") { auto wtf=(x.dump()) ; MM_ERR(wtf) }
 if (cmd=="saver") {x.set_saver(&m_saver);  }
 if (cmd=="sig") {x.signal(s,flags);  }
+if (cmd=="msg") {x.message(s,flags);  }
 if (cmd=="nsaver") {x.set_saver(0);  }
 if (cmd=="bounds") {x.bound_box(CC(2),CC(3),CC(4),CC(5),0);  }
 if (cmd=="spr") {Sp sp(s); x.set_saver_params(sp);  }

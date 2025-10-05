@@ -395,6 +395,7 @@ SeeRedisplay();
 ExitSerial(0);
 return x;
 } // signal
+IdxTy  message(const StrTy&s, const IdxTy  flags=0) { return Message(s,flags); } 
 IdxTy  bound_box(const D & xmin, const D & xmax, const D & ymin, const D & ymax, const IdxTy flags=0 )
 { 
 MM_ERR(MMPR4(xmin,xmax,ymin,ymax))
@@ -1277,8 +1278,8 @@ case '|':  { Capture(4); break; }  // Stop
 
 //  case 'Y': { ZoomY(1.1); break; } 
 //  case 'y': { ZoomY(0.9); break; } 
-  case 'z': { ZoomZ(0.9); break; } 
-  case 'Z': { ZoomZ(1.1); break; } 
+  case 'Z': { ZoomZ(m_zoom_in_f); break; } 
+  case 'z': { ZoomZ(m_zoom_out_f); break; } 
 //////////////////////////////////
   case 's': { Snap(); break; }
 case 'S': { Unsnap(); break; } 
@@ -1308,8 +1309,6 @@ FOREACHA(
 IdxTy n=act->nmodels();
 MM_ILOOP(i,n) { act->amodel(i).clear_data(); } 
 //act->amodel().clear_data(); 
-
-
 //v.reset(); 
 /// holding a lock doh... 
 //MM_ERR(MMPR2(__FUNCTION__,v.dump())) 
@@ -1317,6 +1316,18 @@ MM_ILOOP(i,n) { act->amodel(i).clear_data(); }
 ExitSerial(0);
 return 1; 
 } // ClearData 
+IdxTy  Message(const StrTy&s, const IdxTy  flags=0)
+{
+EnterSerial(0);
+FOREACHA( 
+IdxTy n=act->nmodels();
+MM_ILOOP(i,n) { act->amodel(i).message(s); } 
+)
+ExitSerial(0);
+SeeRedisplay(); 
+return 1; 
+} // ClearData 
+
 
 
 IdxTy  ResetView(const IdxTy flags)

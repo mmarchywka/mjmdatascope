@@ -126,6 +126,14 @@ IdxTy i=0;
 IdxTy p=0;
 while ((p=idx(i,i))<sz) { m_ptr[p]=v;++i; } 
 } // diag
+D prod() 
+{
+D p=1;
+if (m_sizes.size()==0) return p; 
+const IdxTy sz=m_sizes[0];
+MM_ILOOP(i,sz) {  p=p*m_ptr[i]; }
+return p;
+} // prod
 // should just exclude one but more general to define a plane 
 //void rotation(const IdxTy exax, const D & theta )
 void rotation(const IdxTy ex1,const IdxTy ex2, const D & theta )
@@ -698,7 +706,9 @@ d(r)+=(*this)(r,c)*that(r);
 }
 // 2024-04 added operator no idea why not before
 Myt operator*(const Myt & that)const  { return times(that); } 
-Myt times(const Myt & that) const 
+template <class Tdt> 
+//Myt times(const Myt & that) const 
+Myt times(const mjm_block_matrix<Tdt> & that) const 
 {
 const IdxTy dims=m_top+1;
 const IdxTy tdims=that.m_top+1;
@@ -724,7 +734,9 @@ D sum=0;
 for(IdxTy k=0; k<cx; ++k)
 {
 //MM_ERR(MMPR4(i,k,j,(*this)(i,k))<<MMPR(that(k,j)))
- sum+=(*this)(i,k)*that(k,j);
+ //sum+=(*this)(i,k)*that(k,j);
+// 2025-10-04
+ sum+=(*this)(i,k)*D(that(k,j));
 }
 x(i,j)=sum;
 } // j 

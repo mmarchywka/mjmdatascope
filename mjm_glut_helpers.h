@@ -283,8 +283,8 @@ color(p3); posv(p3);
 glEnd();
 } // draw_4gon
 
-template <class Tp> void color (const Tp & p) { glColor3f(p.r(),p.g(),p.b()); } 
-template <class Tp> void posv (const Tp & p) 
+template <class Tp> void color(const Tp & p) { glColor3f(p.r(),p.g(),p.b()); } 
+template <class Tp> void posv(const Tp & p) 
 { doglutpos(glVertex3f,p.x(),p.y(),p.z()); } 
 
 
@@ -305,12 +305,25 @@ m_scale[0]*=fx;
 m_scale[1]*=fy;
 m_scale[2]*=fz;
 }
-
+//MM_ERR(MMPR3(m_scale[0],m_scale[1],m_scale[2]))
 auto & m=m_mat;
 //m.diag(1);
+// operate on model not view coords... 
+if (!false)
+{
 MM_ILOOP(i,3) {m(i,0)*=fx; }
 MM_ILOOP(i,3) {m(i,1)*=fy; }
 MM_ILOOP(i,3) {m(i,2)*=fz; }
+}
+else
+{
+MM_ILOOP(i,3) {m(0,i)*=fx; }
+MM_ILOOP(i,3) {m(1,i)*=fy; }
+MM_ILOOP(i,3) {m(2,i)*=fz; }
+
+
+}
+
 // need to do this only when needed.. 
 m_imat=m.invert3x3();
 
@@ -448,7 +461,8 @@ static void pluseq(Matrix& x, const _triple & y)
 {  MM_ILOOP(i,3){  x[i]+=y[i]; }  }  
 static void minuseq(Matrix& x, const _triple & y)
 {  MM_ILOOP(i,3){  x[i]-=y[i]; }  }  
-
+//////////////////////////////////////////////////
+#if 0
 
 
 // doh, this needs the location of the button down
@@ -458,7 +472,7 @@ static void minuseq(Matrix& x, const _triple & y)
 // it somwere... 
 // the axis of evil needs to be defined at the initail click and
 //mainttained as the mosue moes. 
-void tilt(const D & x,const D & _xl, const D & y, const D & _yl,const IdxTy evct)
+void oldtilt(const D & x,const D & _xl, const D & y, const D & _yl,const IdxTy evct)
 {
 D xw,yw,zw;
 D xwl,ywl,zwl;
@@ -538,6 +552,73 @@ m_tgt[2]=m_act.tgt[1]-dtgt[1];
 m_tgt[2]=m_act.tgt[2]-dtgt[2];
 // this is dumb it has to operate on xformed coords... 
 //m_mat=m_mat*R;
+m_mat=R*m_act.mat;
+m_imat=m_mat.invert3x3();
+Matrix aia=m_mat*m_imat;
+MM_ERR(MMPR(aia.dump()))
+
+
+} // oldtilt
+#endif
+
+
+
+// doh, this needs the location of the button down
+// and maintain the origin during roatation not change
+// on each move ... doh 
+// note too that this requires backing out the origin or saving
+// it somwere... 
+// the axis of evil needs to be defined at the initail click and
+//mainttained as the mosue moes. 
+void tilt(const D & x,const D & _xl, const D & y, const D & _yl,const IdxTy evct)
+{
+D xw,yw,zw;
+D xwl,ywl,zwl;
+Matrix in;
+if (m_action==evct)
+{
+in=m_act.in;
+}
+else
+{
+m_action=evct;
+m_act.xzed=_xl;
+m_act.yzed=_yl;
+m_act.mat=m_mat;
+m_act.imat=m_imat;
+m_act.tgt=m_tgt;
+
+unproject( xw,yw,zw,x,y);
+unproject( xwl,ywl,zwl,_xl,_yl);
+if (m_squash!=0) { zw=zw/m_squash; zwl=zwl/m_squash; }
+in=Matrix(3,1); in[0]=xw; in[1]=yw; in[2]=zw;
+m_act.in=in;
+
+} 
+D xl=m_act.xzed;
+D yl=m_act.yzed;
+
+//const D dp=atan2(-y+yl,x-xl);
+const D dp=atan2(-y+yl,-x+xl);
+const D dt=M_PI*.001*sqrt((x-xl)*(x-xl)+(y-yl)*(y-yl));
+MM_ERR(MMPR4(x,y,dp,dt))
+const D ct=cos(dt);
+const D cp=cos(dp);
+const D sp=sin(dp);
+const D st=sin(dt);
+Matrix B=Matrix(3,3);
+B.rotation(0,1,dp);
+Matrix C=Matrix(3,3);
+C.rotation(0,2,dt);
+Matrix R=C*B;
+// then this needs to unrotate the xy plane... doh 
+B.rotation(0,1,-dp);
+R=B*R;
+Matrix Ri=R.invert3x3();
+Matrix dtgt=m_act.imat*in - Ri*m_act.imat*in;
+MM_ERR(MMPR3(in.dump(),dtgt.dump(),R.dump())<<MMPR2(m_mat.dump(),m_tgt.dump()))
+//m_tgt[0]=m_act.tgt[0]-dtgt[0]; m_tgt[1]=m_act.tgt[1]-dtgt[1];
+//m_tgt[2]=m_act.tgt[2]-dtgt[2];
 m_mat=R*m_act.mat;
 m_imat=m_mat.invert3x3();
 Matrix aia=m_mat*m_imat;
@@ -634,7 +715,10 @@ x=out[0]; y=out[1];//
 // TODO FIXME this may confuse things like shaders etc.
 // need to figure out something here. 
 //z=0;
-z=out[2]*m_squash;
+//z=out[2]*m_squash;
+// want dtaw order equality takes the first one not the last
+// so stuck with inverse draw order FUK.
+z=out[2]*m_z_buf;
 if ((z>1)||(z< -1))
 {
 static int  n=0;
@@ -709,7 +793,9 @@ ResetA();
 void Init()
 {
 m_vidx=5;
-m_squash= 1e-12;
+// 2025-10--5 wt FUCK 
+m_squash=1; //  1e-12;
+m_z_buf=0; // 1e-6;
 m_scale=1;
 m_tgt=0;
 m_style=0;
@@ -726,6 +812,7 @@ Ss ss;
 ss<<MMPR(m_tgt.dump());
 ss<<MMPR(m_scale.dump());
 ss<<MMPR4(m_action,m_squash,m_vidx,m_style);
+ss<<MMPR(m_z_buf);
 ss<<MMPR(m_layer);
 ss<<MMPR(m_set_by);
 ss<<MMPR(m_mat.dump());
@@ -739,7 +826,7 @@ return ss.str();
 GeoState   m_tgt,m_scale;
 mutable Matrix m_mat,m_imat;
 IdxTy m_vidx,m_style,m_set_by;
-D m_squash;
+D m_squash,m_z_buf;
 action_t m_act;
 IdxTy m_action;
 int m_layer;
@@ -1167,6 +1254,15 @@ m_segs.clear();
 m_ornate_points.clear();
 
 }
+void message(const StrTy & s)
+{
+MM_ERR(" messag `"<<MMPR(s))
+//m_strip.clear();
+//m_oscope.clear();
+m_zij.message(s);
+//m_points.clear();
+//m_ornate_points.clear();
+} // message
 
 void clear_data()
 {

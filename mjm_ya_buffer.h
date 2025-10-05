@@ -134,6 +134,7 @@ void save(const StrTy & fn,const StrTy &s) {Save(fn,s); }
 StrTy xxx_test(const StrTy & sin, const IdxTy flags) 
 { return XXX_test(sin,flags); } 
 ~mjm_ya_buffer() {if (m_dump_on_exit) { MM_ERR(MMPR(dump())) } delete[] m_tgt; }
+void no_dump_on_exit() { m_dump_on_exit=false; } 
 StrTy dump(const IdxTy flags=0)const  { return Dump(flags); }
 IdxTy size() const { return m_sz; }
 void size(const IdxTy sz  )  { 
@@ -179,7 +180,7 @@ is->read(m_tgt+m_wr_ptr,s);
 IdxTy n=is->gcount();
 m_wr_ptr=(m_wr_ptr+n) % m_sz; 
 if (n) if (m_wr_ptr==m_rd_ptr) m_full=true;
-MM_ERR(MMPR(m_full))
+//MM_ERR(MMPR(m_full))
 return is->eof();
 } // get_from_stream;
 

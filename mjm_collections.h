@@ -668,8 +668,10 @@ const bool debug=((flags&8)!=0);
 const bool csv=((flags&16)!=0);
 const bool pdftext=((flags&32)!=0);
 const bool ignore_2delims=((flags&64)!=0);
+const bool no_show_msg=((flags&(1<<16))!=0);
 //MM_ERR(" cmd_read_ragged from "<<fn<<" to "<<name<<" flags "<<flags)
-MM_ERR(MMPR(__FUNCTION__)<<MMPR4(cmd,fn,name,flags)<<MMPR4(debug,csv,pdftext,ignore_2delims)<<MMPR4(load_string, load_parsed,tabsep,ignore_hash))
+if ( ! no_show_msg) { MM_ERR(MMPR2(__FUNCTION__,no_show_msg)<<MMPR4(cmd,fn,name,flags)<<MMPR4(debug,csv,pdftext,ignore_2delims)<<MMPR4(load_string, load_parsed,tabsep,ignore_hash))
+}
 
 Myt & r=*this; // rm[name];
 //Ragged & r=rm[name];
@@ -712,7 +714,7 @@ ya.read(s,n,1);
 IdxTy nused=n;
 IdxTy rc=bc.add(l,s,nused,eof?1:0);
 delete [] s;
-if (n<nused) { ya.take(n);  MM_ERR(" fucker "<<MMPR2(n,nused)) break; } 
+if (n<nused) { ya.take(n);  MM_ERR(" fcker "<<MMPR2(n,nused)) break; } 
 ya.take(nused);
 MM_ERR(MMPR4(size(),rc,nused,ya.available()))
 // if rc==0, rhw linw ia o abd readly to add
@@ -720,8 +722,6 @@ if (rc==0) { add(l); l.clear(); continue; }
 // if eof have to eave crap there
 if (eof ) break; 
 // otherwie continue to get stuff;
-
-
 } // ya
 if (eof) break;
 if (ya.available()==0) if (is->fail()) { MM_ERR("bad ") break; }
@@ -841,7 +841,7 @@ if (f>first) ss<<l[first];
 for(IdxTy k=(first+1); k<f; ++k) ss<<sep<<l[k];
 return ss.str();
 } // sum
-
+//Myt& operator<<(const D & x) { Ss ss; ss<<x; (*this)<<ss.str(); } 
 Myt& operator<<(const StrTy & word) 
 {
 
