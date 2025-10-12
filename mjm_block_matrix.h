@@ -704,6 +704,17 @@ d(r)+=(*this)(r,c)*that(r);
 } // itor 
 
 }
+void identity()
+{
+if (m_dims.size()==1) { zero(); if(dim(0)>0) (*this)(0,0)=1; return; }
+if (m_dims.size()==0) {  return; }
+zero();
+const IdxTy rd=dim(0);
+const IdxTy cx=dim(1);
+MM_ILOOP(i,((rd<cx)?rd:cx)) (*this)(i,i)=1;
+
+}
+
 // 2024-04 added operator no idea why not before
 Myt operator*(const Myt & that)const  { return times(that); } 
 template <class Tdt> 

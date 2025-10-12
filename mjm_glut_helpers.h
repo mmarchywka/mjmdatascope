@@ -598,9 +598,18 @@ m_act.in=in;
 D xl=m_act.xzed;
 D yl=m_act.yzed;
 
-//const D dp=atan2(-y+yl,x-xl);
-const D dp=atan2(-y+yl,-x+xl);
-const D dt=M_PI*.001*sqrt((x-xl)*(x-xl)+(y-yl)*(y-yl));
+const D dp=atan2(-y+yl,x-xl);
+// when "x" changes sign the angle
+// changes by pi and the image is viewed from behind lol. 
+// but otherwise tracks well 
+//D dx= -x+xl;
+//D dp=(dx<0)?(-atan2(y-yl,-dx)):atan2(-y+yl,dx);
+
+D dt=M_PI*.001*sqrt((x-xl)*(x-xl)+(y-yl)*(y-yl));
+//if (x<xl) dt=-dt;
+//const D dp=atan2(-y+yl,-x+xl); //const D dp=atan2(-y+yl,-x+xl);
+//const D dp=M_PI*.001*(x-xl);
+//const D dt=M_PI*.001*(y-yl);
 MM_ERR(MMPR4(x,y,dp,dt))
 const D ct=cos(dt);
 const D cp=cos(dp);
