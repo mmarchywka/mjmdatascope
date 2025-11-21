@@ -214,6 +214,14 @@ Myt & operator=(const Myt & that)
 MM_ERR(" assigning dscope_interface not define "<<MMPR(__FUNCTION__))
 return *this;
 }
+Line make_line( const D & x, const StrTy & n, const D & y)
+{ 
+Line l; 
+{ Ss ss; ss<<x; l.push_back(ss.str()); }
+l.push_back(n);
+{ Ss ss; ss<<y; l.push_back(ss.str()); }
+return l;
+}
 void load_fifo() { load(m_default_load,0); } 
 void load(const StrTy & sin,const IdxTy flags) {Init(sin,flags); }
 void load(const Ragged & r,const IdxTy start, const IdxTy first,const IdxTy flags ) {Init(r,start,first,flags);}

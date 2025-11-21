@@ -241,7 +241,17 @@ if (invert) {  m_imat=m.invert3x3(); }
 void wide_line_fuk( TFUK(_wl), TFUK(x0),TFUK(y0),TFUK(z0),TFUK(x1),TFUK(y1),
 TFUK(z1) , TFUK(r0),TFUK(g0),TFUK(b0) , TFUK(r1),TFUK(g1),TFUK(b1))
 {
+// this should work lol 
+if (_wl==1) { 
+glLineWidth(Gf(1.0));
+    glBegin(GL_LINE_STRIP); //starts drawing of points
+doglutpos(glVertex3f,x0,y0,z0);
+  glColor3f(r1,g1,b1);     // Green
+doglutpos(glVertex3f,x1,y1,z1);
 
+glEnd();
+return;
+} 
 GLint w_shit=glutGet(GLUT_WINDOW_WIDTH);
 GLint h_shit=glutGet(GLUT_WINDOW_HEIGHT);
 //const auto & pj=p[j];

@@ -1265,6 +1265,13 @@ ss<<c;
 return x; 
 }  
 
+void save_ssv(const StrTy & fn, const IdxTy  flags=0)  const
+{
+std::ofstream ofs(fn);
+ofs<<dump_ssv();
+}
+
+
 // TODO FIXME add a latex output option 
 // should have a sg to dump to a srream 
 StrTy dump_ssv( ) const { return dump(1+2+128+1024," "); } 

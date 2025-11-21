@@ -138,12 +138,20 @@ cc[len]=0;
 IdxTy pc=0;
 //IdxTy kz=0;
 IdxTy vz=0;
+bool quote=false;
+bool esc=false;
 typename Trag::Line l;
 while (pc<len)
 {
 do
 {
 char c=cc[pc];
+if (esc) { esc=false; break; } 
+// quote is left in the string for better or worse... 
+if (c=='"') { quote=!quote;  break; } 
+// esc is left in too lol 
+if (c=='\\') { esc=true;  break; } 
+if (quote) { break; }
 //if (c=='=') { cc[pc]=0; vz=pc+1; break; } 
 if (c==' ') { cc[pc]=0;l.push_back(StrTy(cc+vz));  vz=pc+1;  break; } 
 //if (c==';') { cc[pc]=0; m[StrTy(cc+kz)]+=StrTy(cc+vz); kz=pc+1;  break; } 
@@ -165,6 +173,16 @@ IdxTy Parse(Map & m, const StrTy & s, const IdxTy flags=0)
 Vector v;
 return Parse(v,m,s,flags); 
 }
+IdxTy Keep(Vector & _v,Map & m, const char * k, const char * v)
+{
+StrTy kk=(k==0)?"":StrTy(k);
+StrTy vv=StrTy(v);
+//m[StrTy(cc+kz)]+=StrTy(cc+vz); 
+m[kk]+=StrTy(vv); 
+_v.push_back(Pair(kk,vv));
+return 0; 
+} // Keep 
+
 IdxTy Parse(Vector & _v,Map & m, const StrTy & s, const IdxTy flags=0)
 {
 const bool do_dump=Bit(flags,0);
@@ -173,46 +191,66 @@ StrTy k="";
 StrTy v="";
 const IdxTy len=s.length();
 char cc[len+1];
+char temp[len+1];
 memcpy(cc,s.c_str(),len);
 cc[len]=0;
 IdxTy pc=0;
 IdxTy kz=0;
 IdxTy vz=0;
+IdxTy tpos=0;
 while (pc<len)
 {
 do
 {
 char c=cc[pc];
-if (c=='=') { cc[pc]=0; vz=pc+1; break; } 
+if (c=='=') { cc[pc]=0; vz=pc+1; tpos=0; break; } 
 if (c==';') { cc[pc]=0; 
+temp[tpos]=0; tpos=0;
+//Keep(_v,m,cc+kz,cc+vz);
+Keep(_v,m,cc+kz,temp);
+/*
 StrTy kk=StrTy(cc+kz);
 StrTy vv=StrTy(cc+vz);
 //m[StrTy(cc+kz)]+=StrTy(cc+vz); 
 m[kk]+=StrTy(vv); 
 _v.push_back(Pair(kk,vv));
+*/
 kz=pc+1;  break; } 
+temp[tpos]=c; ++tpos;
 } while (false) ; 
 
 ++pc;
 } // pc 
 if (vz!=pc) { 
+temp[tpos]=0; tpos=0;
+//Keep(_v,m,cc+kz,cc+vz);
+Keep(_v,m,cc+kz,temp);
+/*
 //m[StrTy(cc+kz)]+=StrTy(cc+vz);
 StrTy kk=StrTy(cc+kz);
 StrTy vv=StrTy(cc+vz);
 //m[StrTy(cc+kz)]+=StrTy(cc+vz); 
 m[kk]+=StrTy(vv); 
 _v.push_back(Pair(kk,vv));
+*/
 } 
 if (vz<=kz) { 
+temp[tpos]=0;
+//Keep(_v,m,0,cc+vz);
+Keep(_v,m,0,temp);
 //m[StrTy("")]+=StrTy(cc+vz);
-StrTy kk=StrTy("");
+/* StrTy kk=StrTy("");
 StrTy vv=StrTy(cc+vz);
 m[kk]+=StrTy(vv); 
 _v.push_back(Pair(kk,vv));
+*/
 } 
 if ( do_dump) { MM_LOOP(ii,m) { MM_ERR(MMPR2((*ii).first,(*ii).second))}}// ii 
 return rc; 
 } // Parse
+
+
+
 
 ///////////////////////////////
 // MEMBERS

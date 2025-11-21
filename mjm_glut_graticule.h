@@ -180,6 +180,7 @@ IdxTy Draw( Fck  & fuk, ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
 { 
 // WHUY THE ASCK DOE ANY GRAPHICS PAADF MAKE YIOU WRITE RSHIT CODE
 // LIKE THIS FRE FUCJ
+MM_ERR(MMPR3(m_lw,fuk.m_x1,fuk.m_x2))
 v.wide_line_fuk(m_lw,fuk.m_x1,fuk.m_y1,fuk.m_z1,m_x0,m_y0,m_z0,m_r,m_g,m_b,
 
 m_r,m_g,m_b);
@@ -202,6 +203,7 @@ IdxTy Draw(ModelInfo & m, ViewInfo & v, DrawInfo * sdp)
 //MM_ERR(MMPR3(m_r,m_g,m_b));
 //MM_ERR(MMPR3(m_x0,m_y0,m_z0));
 //MM_ERR(MMPR3(m_x1,m_y1,m_z1));
+//MM_ERR(MMPR3(m_lw,m_x0,m_x1))
 v.wide_line_fuk(m_lw,m_x0,m_y0,m_z0,m_x1,m_y1,m_z1,m_r,m_g,m_b,
 m_r,m_g,m_b);
 
