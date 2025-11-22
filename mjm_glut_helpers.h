@@ -1111,9 +1111,11 @@ MM_ILOOP(i,r.size())
 {
 const Line & l=r[i];
 const IdxTy len=l.size();
+if (len<2) continue;
 if (l[0]=="#")
 {
-if (len<2) continue;
+// 2025 wtf happened here? 
+//if (len<2) continue;
 const StrTy & cmd=l[1];
 if (cmd=="params"){   add_params(l,2, len); continue; }
 //mi.add_params(l,2,len);
