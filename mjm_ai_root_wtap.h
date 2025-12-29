@@ -177,6 +177,7 @@ kvp.get(test,"test");
 if (test=="gemini") Gemini(sin,flags); 
 if (test=="delay") DelayHarmonic(sin,flags); 
 if (test=="sdelay") SPlaneDelayHarmonic(sin,flags); 
+if (test=="sdelay2") SPlaneDelayHarmonic2(sin,flags); 
 if (test=="load") LoadRag(sin,flags); 
 return sout;
 } // XXX_test
@@ -219,6 +220,50 @@ return 1-(an&1)?0:2;
 }
 return d1-d2;
 }
+// two delays which may be integrated
+// s^n + omega^n(exp(sT1)-exp(sT2)) = v
+StrTy SPlaneDelayHarmonic2(const StrTy & sin, const IdxTy flags) 
+{
+AllParams ap(sin,flags);
+m_etc="clear 1";
+StrTy params;
+Ss ss;
+const D omegan=::pow(ap.omega(),ap.n());
+//MM_ILOOP(i,IdxTy(ap.ni()))
+for(int i=-int(ap.ni()); i<int(ap.ni()); ++i)
+{
+const D x=i*ap.dx();
+// x= r cos theta
+const D pf1=omegan*exp(x*ap.T1());
+const D pf2=omegan*exp(x*ap.T2());
+for(int j=-int(ap.nj()); j<int(ap.nj()); ++j)
+//MM_ILOOP(j,IdxTy(ap.nj()))
+{
+const D y=j*ap.dy();
+const D r=sqrt(x*x+y*y);
+const D rn=::pow(r,ap.n());
+const D theta=::atan2(y,x);
+//const D ctheta=x/r;
+//const D stheta=y/r;
+const D r1=rn*::cos(theta*ap.n())+pf1*::cos(y*ap.T1())-pf2*::cos(y*ap.T2());
+const D i1=rn*::sin(theta*ap.n())+pf1*::sin(y*ap.T1())-pf2*::sin(y*ap.T2());
+//const D rv=sqrt(r1*r1+i1*i1);
+D rv=atan2(i1,r1);
+while ( rv<0){ rv+=2*M_PI;}
+IdxTy xc=rv*255/2/M_PI; // /ap.scale();
+//IdxTy xc=rv/ap.scale();
+//MM_ERR(MMPR2(rv,xc))
+if (xc>255)  xc=255;
+//MM_ERR("assfuck"<<MMPR2(rv,xc))
+IdxTy color=(xc<<8)|xc |(xc<<16); // |xc;
+ m_points.push_back(Point(x,y,0,color)); 
+m_points.back().sz(ap.ptsz());
+} // j 
+} // i 
+{Ss rr; rr<<"T1 "<<ap.T1()<<" T2 "<<ap.T2(); params=rr.str(); }
+SendPoints(params);
+return ss.str();
+} // SPlaneDelayHarmonic2
 StrTy SPlaneDelayHarmonic(const StrTy & sin, const IdxTy flags) 
 {
 AllParams ap(sin,flags);
@@ -246,6 +291,7 @@ m_points.back().sz(ap.ptsz());
 SendPoints();
 return ss.str();
 } // SPlaneDelayHarmonic
+
 
 StrTy DelayHarmonic(const StrTy & sin, const IdxTy flags) 
 {
@@ -793,7 +839,7 @@ Ragged r;
 //StrTy params="";
 const StrTy ty="ornate-points";
 const StrTy sid="orbit_test";
-m_dscope.setup(r,sid,ty,params);
+m_dscope.setup(r,sid,ty,params,m_etc);
 // orbit
 //const D sz=.05;
 // r-theta aurve 
@@ -822,7 +868,16 @@ usleep(1000);
 return true;
 } // send_points
 
+bool SendZijPoints(const Ragged & r, const IdxTy nx, const StrTy & params=StrTy())
+{
+//  wait on full i s the send guard thing in interface
+m_dscope.wait_full(100,1000);
+const StrTy src="wtap";
+m_dscope.send_zij(r,nx,src,params,0,m_etc);
+m_dscope.wait_done(100,1000);
 
+return true;
+} // SendZijPoints
 
 
 void Init(const Ragged & r, const IdxTy start=0, const IdxTy first=0, const IdxTy flags=0  )
