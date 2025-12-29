@@ -221,7 +221,7 @@ Line l;
 l.push_back(n);
 { Ss ss; ss<<y; l.push_back(ss.str()); }
 return l;
-}
+} 
 void load_fifo() { load(m_default_load,0); } 
 void load(const StrTy & sin,const IdxTy flags) {Init(sin,flags); }
 void load(const Ragged & r,const IdxTy start, const IdxTy first,const IdxTy flags ) {Init(r,start,first,flags);}
