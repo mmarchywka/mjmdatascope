@@ -748,8 +748,7 @@ for ( int i=0; i<lim; ++i)
 {
 
 int j=0;
-for(; j<ncs; ++j) 
- if ( s[i+j]!=cs[j]) { break; }
+for(; j<ncs; ++j) if ( s[i+j]!=cs[j]) { break; }
 if ( j==ncs) return i; 
 }
 return -1;

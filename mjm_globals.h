@@ -192,6 +192,7 @@ std::string MJM_BLANK(double d) { std::stringstream ss; if (d!=0) ss<<d; return 
 //#define MM_ILOOP(v,n)  for( IdxTy v=0; v<(n) ; ++v) { 
 #define MM_ILOOP(v,n)  for( IdxTy v=0; v<(n) ; ++v)  
 #define MM_LOOP(v,obj)  for( auto v=obj.begin(); v!=obj.end(); ++v)  
+#define MM_RLOOP(v,obj)  for( auto v=obj.rbegin(); v!=obj.rend(); ++v)  
 #define MM_SZ_LOOP(v,obj,sz)  const IdxTy sz= obj.size();  for( IdxTy v=0; v<sz;  ++v)  
 #define MM_NCSZ_LOOP(v,obj,sz)  IdxTy sz= obj.size();  for( IdxTy v=0; v<sz;  ++v)  
 
