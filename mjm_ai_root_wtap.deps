@@ -34,4 +34,4 @@
  ../../mjm/hlib/mjm_str_2_num.h ../../mjm/hlib/mjm_worm_blob.h \
  ../../mjm/hlib/mjm_canned_methods.h \
  ../../mjm/hlib/mjm_generic_iterators.h \
- ../datascope/mjm_dohscope_trigger.h mjm_uni_params.h
+ ../datascope/mjm_dohscope_trigger.h ../euvnoise/mjm_uni_params.h

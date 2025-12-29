@@ -22,7 +22,8 @@
  /home/documents/cpp/mjm/hlib/mjm_block_matrix.h \
  /home/documents/cpp/mjm/hlib/mjm_logic_base.h \
  /home/documents/cpp/mjm/hlib/mjm_strings.h \
- /home/documents/cpp/proj/freefem/mjm_worm_blob.h \
+../../mjm/hlib/mjm_worm_blob.h \ 
+/home/documents/cpp/proj/freefem/mjm_worm_blob.h \
  /home/documents/cpp/mjm/hlib/mjm_collections.h \
  /home/documents/cpp/mjm/hlib/mjm_canned_methods.h \
  /home/documents/cpp/mjm/hlib/mjm_char_mat.h \
@@ -48,7 +49,7 @@
  /home/documents/cpp/mjm/hlib/mjm_logic_base.h \
  /home/documents/cpp/proj/datascope/mjm_dscope_pktfifo.h \
  /home/documents/cpp/proj/datascope/mjm_pthread_que.h \
- /home/documents/cpp/proj/freefem/mjm_so_loader.h \
+../../mjm/hlib/mjm_so_loader.h \
  /home/documents/cpp/proj/datascope/mjm_dscope_serial.h \
  /home/documents/cpp/proj/datascope/mjm_dscope_dgram.h \
  /home/documents/cpp/proj/datascope/mjm_buffer_alloc.h \
