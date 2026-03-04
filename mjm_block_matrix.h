@@ -219,6 +219,14 @@ void assign_column(const Myt & data, const IdxTy col)
 const IdxTy sz=data.size();
 for (IdxTy i=0; i<sz; ++i ) (*this)(i,col)=data(i);
 }
+
+void ge_row(const IdxTy rowd, const IdxTy rows,const D & c)
+{
+for (IdxTy i=0; i<nx(); ++i ) (*this)(rowd,i)+= (*this)(rows,i)*c;
+}
+
+
+// note that "D" is the data type NOT double doh 
 void axby_column(const Myt & data, const IdxTy col,const D & c1, const D & c2)
 {
 const IdxTy sz=data.size();
@@ -712,8 +720,17 @@ zero();
 const IdxTy rd=dim(0);
 const IdxTy cx=dim(1);
 MM_ILOOP(i,((rd<cx)?rd:cx)) (*this)(i,i)=1;
-
 }
+
+// 2026 for lu etc 
+void add_identity(const D & v=1)
+{
+const IdxTy rd=dim(0);
+const IdxTy cx=dim(1);
+MM_ILOOP(i,((rd<cx)?rd:cx)) (*this)(i,i)+=v;
+}
+
+
 
 // 2024-04 added operator no idea why not before
 Myt operator*(const Myt & that)const  { return times(that); } 
@@ -721,8 +738,9 @@ template <class Tdt>
 //Myt times(const Myt & that) const 
 Myt times(const mjm_block_matrix<Tdt> & that) const 
 {
-const IdxTy dims=m_top+1;
-const IdxTy tdims=that.m_top+1;
+// 2026 unused? 
+//const IdxTy dims=m_top+1;
+//const IdxTy tdims=that.m_top+1;
 
 const IdxTy rd=dim(0);
 const IdxTy cd=that.dim(1);

@@ -200,8 +200,11 @@ StrTy date_default(const StrTy & dates) { return DatesDefault(dates); }
 // echo $(( $( date -d `date -d "0 days ago "  +%Y-%m-%d` +%s) /86400 )) 
 StrTy fgen(const StrTy & t=StrTy()) //const
 {
-char c[1+((L_tmpnam+1)|255)] ; 
-const StrTy fin=tmpnam(c)+m_ext;
+char c[1+int((L_tmpnam+1)|255)] ; 
+//MM_ERR(MMPR2(L_tmpnam,((L_tmpnam+1)|255)))
+//const StrTy fin=tmpnam(c)+m_ext;
+const StrTy fin=StrTy(tmpnam(c))+m_ext;
+//MM_ERR(MMPR(fin))
 m_files.push_back(fin);
 return fin;
 } // fgen 
@@ -255,6 +258,7 @@ const bool always=true; // Bit(flags,0);
 const bool file= Bit(flags,1);
 const bool notrailingcrlf= Bit(flags,2); // 4 
 const bool dfile= Bit(flags,3); /// 8
+const bool add_err_to_cout= Bit(flags,4); /// 16 
 Blob d,err,cout;
 StrTy _cmd;
 //if (file) { _cmd="cat \""+s+"\" |"+cmd; }
@@ -263,6 +267,11 @@ else { d=s; _cmd=cmd; }
 //IdxTy rc=out.hand().fileio(cout,err,d,_cmd,3);
 IdxTy rc=fileio(cout,err,d,_cmd,3);
 if (always||(rc!=0)) { MM_ERR(MMPR3(dest,s,dfile)<< MMPR4(file,notrailingcrlf,flags,rc)<<MMPR4(cmd,StrTy(cout),StrTy(err),StrTy(d))) }
+if (add_err_to_cout)
+{
+MM_ERR(" new feature 2026 02 ")
+cout.append(err);
+} 
 if (notrailingcrlf) {
 IdxTy ncrlf= cout.no_trailing_crlf();
 if (always) { MM_ERR(MMPR(ncrlf)) }

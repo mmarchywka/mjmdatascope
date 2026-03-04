@@ -23,7 +23,6 @@
  /home/documents/cpp/mjm/hlib/mjm_logic_base.h \
  /home/documents/cpp/mjm/hlib/mjm_strings.h \
 ../../mjm/hlib/mjm_worm_blob.h \ 
-/home/documents/cpp/proj/freefem/mjm_worm_blob.h \
  /home/documents/cpp/mjm/hlib/mjm_collections.h \
  /home/documents/cpp/mjm/hlib/mjm_canned_methods.h \
  /home/documents/cpp/mjm/hlib/mjm_char_mat.h \

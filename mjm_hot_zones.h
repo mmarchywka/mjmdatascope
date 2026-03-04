@@ -19,7 +19,8 @@
 #include "mjm_generic_iterators.h"
 
 // TODO move this to hlib 
-#include "../freefem/mjm_affine_mesh_hood.h"
+//#include "../freefem/mjm_affine_mesh_hood.h"
+#include "freefem/mjm_affine_mesh_hood.h"
 
 
 #include <map> 

@@ -222,6 +222,18 @@ l.push_back(n);
 { Ss ss; ss<<y; l.push_back(ss.str()); }
 return l;
 } 
+Line make_line( const D & x, const StrTy & n, const D & y, const StrTy & color)
+{ 
+Line l; 
+{ Ss ss; ss<<x; l.push_back(ss.str()); }
+l.push_back(n);
+{ Ss ss; ss<<y; l.push_back(ss.str()); }
+if (color.length()) l.push_back(color);
+return l;
+} 
+
+
+
 void load_fifo() { load(m_default_load,0); } 
 void load(const StrTy & sin,const IdxTy flags) {Init(sin,flags); }
 void load(const Ragged & r,const IdxTy start, const IdxTy first,const IdxTy flags ) {Init(r,start,first,flags);}
@@ -547,7 +559,7 @@ bool  SendStripChart( const Ragged & r, const StrTy& src, const StrTy & params, 
 {
 if (SendGuard(flags)) return false;
 //MM_ERR(MMPR3(data.nx(),data.ny(),pload.size()))
-MM_ERR(MMPR2(params,etc))
+if (false) MM_ERR(MMPR2(params,etc))
 Ragged h;
 
 setup(h, src, "strip-chart",params,etc );

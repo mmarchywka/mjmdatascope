@@ -32,7 +32,7 @@
 #include "mjm_worm_blob.h"
 #include "mjm_block_matrix.h"
 
-#include "mjm_ff_mesh.h"
+#include "freefem/mjm_ff_mesh.h"
 
 #include <map> 
 #include <vector> 

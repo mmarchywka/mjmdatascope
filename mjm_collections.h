@@ -551,17 +551,22 @@ typedef std::map<StrTy, LocVec> line_index_map;
 
 typedef std::vector<IdxTy> sort_order;
 mjm_ragged_table()
-: m_hdrs(0),m_min_words(1),m_max_words(0),m_sep(" "),m_splitter(1),m_ignore_hash(false),m_lip(0) {}
+: m_hdrs(0),m_min_words(1),m_max_words(0),m_sep(" "),m_splitter(1),m_ignore_hash(false),m_lip(0),m_args(0) {}
 
 mjm_ragged_table(const IdxTy lines, const IdxTy words)
-: m_hdrs(0),m_min_words(1),m_max_words(0),m_sep(" "),m_splitter(1),m_ignore_hash(false),m_lip(0) {
+: m_hdrs(0),m_min_words(1),m_max_words(0),m_sep(" "),m_splitter(1),m_ignore_hash(false),m_lip(0),m_args(0) {
 
  m_lines=Lines(lines);
 const Line v= Line(words);
 MM_LOOP(ii,m_lines) (*ii)=v;
 }
 
-~mjm_ragged_table() { delete m_lip; m_lip=0;  } 
+~mjm_ragged_table() { delete m_lip; m_lip=0;  delete [] m_args; } 
+ int& argc() const  {m_argc=0; MM_LOOP(ii,(*this)) { m_argc+=(*ii).size(); } return m_argc; } 
+const  char** & args() const { delete [] m_args; m_args=new const char*[argc()];
+int n=0; MM_LOOP(ii,(*this)) { MM_LOOP(jj,(*ii)) { m_args[n]=(*jj).c_str(); ++n;  }} return m_args; } 
+// survives ragged deletion owned by user 
+void immortal_args() const  { m_args=0; }
 LiCItor begin() const { return m_lines.begin(); } 
 LiCItor end() const { return m_lines.end(); } 
 LiItor begin()  { return m_lines.begin(); } 
@@ -1951,6 +1956,8 @@ StrTy m_eol;
 IdxTy m_splitter;
 bool m_ignore_hash;
 CommandInterpretter* m_lip;
+mutable const char ** m_args;
+mutable int m_argc;
 // one property tacked in... 
 StrTy m_name;
 

@@ -1,6 +1,13 @@
 #ifndef MJM_GLOBALS_H__
 #define MJM_GLOBALS_H__
 
+#define QFUDDBOOST(x) #x
+#define QUOTE(x) QFUDDBOOST(x)
+
+#ifndef __MYAPPNAME__
+#define __MYAPPNAME__ 
+#endif
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -51,6 +58,7 @@ mm_err_enable=x;
 
 namespace mjm_global_credits
 {
+std::string app_name=std::string(QUOTE(__MYAPPNAME__));
 std::map<std::string, int> mm_credited;
 std::vector<std::string> mm_credit_vector;
 std::string credits()
@@ -159,8 +167,6 @@ void global_io_unlock_mutex() {  pthread_mutex_unlock(mutex()); }
 
 //http://stackoverflow.com/questions/6671698/adding-quotes-to-argument-in-c-preprocessor
 
-#define QFUDDBOOST(x) #x
-#define QUOTE(x) QFUDDBOOST(x)
 #define MM_STR_LOC StrTy( __FILE__)+StrTy(QUOTE(__LINE__))
 #define MM_STR_TIMESTAMP StrTy( __DATE__)+StrTy(QUOTE(__TIME__))
 //#include QUOTE(FILE_ARG)

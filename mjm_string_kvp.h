@@ -22,6 +22,7 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <complex>
 
 
 // Wed Feb 15 08:35:42 EST 2023
@@ -408,6 +409,23 @@ else d=myatoi((*ii).second.c_str());
 if ((m_flags&1)!=0) {MM_ERR(MMPR3(rc,d,n)) } 
 return rc;
 }
+typedef std::complex<double> Cmplx;
+const  Cmplx  get(Cmplx  & d,const StrTy & n ) const { 
+IdxTy rc=1;
+const auto  ii=(m_map.find(n)); 
+if (ii==m_map.end()) { rc=0; }//  return 0;
+// want to allow hex etc too myatoi
+//d=atoi((*ii).second.c_str());
+else {
+Ss ss; ss<<((*ii).second.c_str());
+// d=myatoi((*ii).second.c_str());
+ss>>d;
+}
+if ((m_flags&1)!=0) {MM_ERR(MMPR3(rc,d,n)) } 
+return rc;
+}
+
+
 const IdxTy  get(bool  & d,const StrTy & n ) const { 
 IdxTy rc=1;
 const auto  ii=(m_map.find(n)); 

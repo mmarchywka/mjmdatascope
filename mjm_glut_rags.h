@@ -14,7 +14,7 @@
 #include "mjm_so_loader.h"
 #include "mjm_glut_elements.h"
 #include "mjm_glut_helpers.h"
-#include "mjm_ff_mesh.h"
+#include "freefem/mjm_ff_mesh.h"
 #include "mjm_worm_blob.h"
 
 #include <freeglut.h>

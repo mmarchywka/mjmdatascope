@@ -480,6 +480,11 @@ AddUnitCircle(npts);
 return ss.str();
 } // Gemini
 
+// 2026-02 trying to search for "zeroes of the form"
+// but I guess I said "equation of interest" combining
+// delay and erivatives in feedback. 
+// motivation was noting that \Gamma(z+1)=z\Gamma(z)
+// but also derivatives, d\Gamma(z+1)/dz= same thing lol. 
 /*
 
 not analytic but  a speciliazed search.

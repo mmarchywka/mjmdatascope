@@ -165,6 +165,18 @@ memcpy(m_data,s.c_str(),slen+1);
 m_sz=slen;
 return 0; 
 }
+void append(const Myt & that)
+{
+const IdxTy sz2=size()+that.size();
+Tdata * p = new Tdata[sz2];
+memcpy(p,ptr(),size());
+memcpy(p+size(),that.ptr(),that.size());
+Release();
+m_data=p;
+m_sz=sz2;
+
+
+} // append
 
 IdxTy size( ) const { return m_sz; }  
 Tdata* ptr() { return m_data;}

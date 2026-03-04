@@ -469,6 +469,11 @@ auto jj=m_params.find("color");
 bool have_colorp=(jj!=m_params.end());
 auto ii=m_etc.find("color");
 bool have_color=(ii!=m_etc.end());
+{
+auto ii=m_etc.find("clear");
+bool have_clear=(ii!=m_etc.end());
+if (have_clear) if ((*ii).second =="1") clear();
+}
 Info def;
 bool rainbow=false;
 if (have_color||have_colorp)
@@ -485,7 +490,8 @@ const Line & l=r[i];
 const IdxTy len=l.size();
 if (len==0)  continue;
 if (l[0].c_str()[0]=='#') continue;
-if (len!=3) { MM_ERR(" ignoring line "<<MMPR2(i,l[0])) continue; }
+//if (len!=3) { MM_ERR(" ignoring line "<<MMPR2(i,l[0])) continue; }
+if (len<3) { MM_ERR(" ignoring line "<<MMPR2(i,l[0])) continue; }
 // FIXME this is incredibly slow per-point need a differnet format...
 const IdxTy chart=m_st(l[1]);
 const D x=atof(l[0].c_str());
@@ -501,12 +507,16 @@ if (hits[chart]==1) (*pp).next_group();
 MM_ERR(MMPR2((*pp).groups(),(*pp).size()))
 }
 if (rainbow) def.color((*pp).groups());
+if (len>3) { Info cpp; cpp.color(l[3]); 
+(*pp).load(x,y,0,cpp.r(),cpp.g(),cpp.b(),0);
+}
+else { 
 //MM_ERR(MMPR2((*pp).groups(),def.dump()))
 const auto & ci=have_color?def:(*pi); // m_info[chart];
 //MM_ERR(MMPR2(have_color,ci.dump()))
 //m_map[chart].load(x,y,0,ci.r(),ci.g(),ci.b(),0);
 (*pp).load(x,y,0,ci.r(),ci.g(),ci.b(),0);
-
+} 
 Bounds(x,y);
 ++m_size;
 }  // i 
