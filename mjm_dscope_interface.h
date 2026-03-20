@@ -271,6 +271,11 @@ IdxTy  send_oscope(const Tp & _x, const Tp & _y,  const StrTy& src, const IdxTy 
 {return  SendOscope( _x,  _y,  src, line, idn, etc, params,  _ty,flags,scope_name); } 
 
 
+template <class Tp,class Tf> 
+IdxTy xy_plot(Tp * obj, Tf  fptr, const StrTy & sin, const IdxTy flags)
+{ return XyPlot(obj,fptr,sin,flags); }  
+
+
 bool send_decorations( const Ragged & r,  const StrTy & src,const StrTy & params, const IdxTy flags)
 { return SendDecorations(r,src,params,flags); } 
 bool send_molecule( const Ragged & r,  const StrTy & src,const StrTy & params, const IdxTy flags)
@@ -662,6 +667,43 @@ m_sender.m_rawfifo.send(h,r);
 return true; 
 }  // SendMolecule
 
+template <class Tp,class Tf> 
+IdxTy XyPlot(Tp * obj, Tf  fptr, const StrTy & sin, const IdxTy flags)
+{ 
+BaseParams kvp(sin);
+bool display_params=true;
+int wait1=100;
+int wait2=10000;
+StrTy nm="contin";
+StrTy src="src";
+
+StrTy color="red";
+D deltar=.01;
+D rmax=10;
+D rmin=1e-5;
+
+StrTy params="";
+kvp.get(deltar,"deltar");
+kvp.get(rmax,"rmax");
+kvp.get(rmin,"rmin");
+kvp.get(color,"color");
+StrTy etc="color "+color;
+kvp.get(wait1,"wait1");
+kvp.get(wait2,"wait2");
+if (display_params) 
+{ MM_ERR(MMPR4(__FUNCTION__,color,rmin,deltar)<<MMPR4(rmax,wait1,wait2,nm)) } 
+Ragged rag;
+for(D r=rmin; r<=rmax; r+=deltar)
+{
+rag.push_back(make_line(r,nm,(obj->*fptr)(r))); 
+} // r 
+// is x,name,y lines 
+send_strip_chart(  rag, src, params, 0,etc);
+wait_done(wait1,wait2);
+
+return 0; 
+
+} // XyPlot  
 
 
 void Init(const Ragged & r, const IdxTy start=0, const IdxTy first=0, const IdxTy flags=0  )
